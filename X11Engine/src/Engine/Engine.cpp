@@ -38,6 +38,7 @@ void Engine::run() {
         "E:\\repos\\X11Engine\\X11Engine\\src\\Data\\Input\\Config.json",
         GameInputContext::get());
 
+    last_elapsed = clock.now();
     start = clock.now();
     while (should_exit == false) {
         auto elapsed = clock.now();
