@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <tracy/Tracy.hpp>
+#include <type_traits>
 #include <unordered_map>
 
 #include "ComponentPool.h"
@@ -22,24 +23,27 @@ class ComponentRegistry {
 
     template <typename ComponentType>
     void set(EntityId entity, ComponentType&& component) {
-        ComponentPool<ComponentType>* pool = getOrCreatePool<ComponentType>();
+        ComponentPool<std::remove_cvref_t<ComponentType>>* pool =
+            getOrCreatePool<std::remove_cvref_t<ComponentType>>();
 
         pool->set(entity, std::forward<ComponentType>(component));
-
-        size_t type_id = TypeIdHelper::getTypeId<ComponentType>();
     }
 
     template <typename ComponentType>
     void set(ComponentId id, ComponentType&& component) {
-        ComponentPool<ComponentType>* pool = getOrCreatePool<ComponentType>();
+        using Type = std::remove_cvref_t<ComponentType>;
+
+        ComponentPool<Type>* pool = getOrCreatePool<Type>();
 
         pool->set(id, std::forward<ComponentType>(component));
     }
 
     template <typename ComponentType>
-    ComponentType* get(EntityId entity) {
+    std::remove_cvref_t<ComponentType>* get(EntityId entity) {
+        using Type = std::remove_cvref_t<ComponentType>;
+
         ZoneScoped;
-        ComponentPool<ComponentType>* pool = getPool<ComponentType>();
+        ComponentPool<Type>* pool = getPool<Type>();
 
         if (pool == nullptr) return nullptr;
 
@@ -47,9 +51,11 @@ class ComponentRegistry {
     }
 
     template <typename ComponentType>
-    const ComponentType* get(EntityId entity) const {
+    const std::remove_cvref_t<ComponentType>* get(EntityId entity) const {
+        using Type = std::remove_cvref_t<ComponentType>;
+
         ZoneScoped;
-        ComponentPool<ComponentType>* pool = getPool<ComponentType>();
+        ComponentPool<Type>* pool = getPool<Type>();
 
         if (pool == nullptr) return nullptr;
 
@@ -57,7 +63,9 @@ class ComponentRegistry {
     }
 
     template <typename ComponentType>
-    ComponentType* get(ComponentId component_id) {
+    std::remove_cvref_t<ComponentType>* get(ComponentId component_id) {
+        using Type = std::remove_cvref_t<ComponentType>;
+
         ZoneScoped;
         ComponentPool<ComponentType>* pool = getPool<ComponentType>();
 

@@ -5,6 +5,7 @@
 #include <cstddef>
 #include <deque>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 #include "EntityId.h"
@@ -45,20 +46,14 @@ class ComponentPool : public IComponentPool {
         return component;
     }
 
-    // ComponentId set(EntityId entity, const ComponentType& component) {
-    //     ComponentId id = add(entity);
-
-    //     size_t index = component_ids[id.id];
-    //     components[index] = component;
-
-    //     return id;
-    // }
-
-    ComponentId set(EntityId entity, ComponentType&& component) {
+    template <typename... ARGS>
+    ComponentId set(EntityId entity, ARGS&&... args) {
         ComponentId id = add(entity);
 
         size_t index = component_ids[id.id];
-        components[index] = std::forward<ComponentType>(component);
+        auto component_it = components.begin() + index;
+
+        components[index] = ComponentType(std::forward<ARGS>(args)...);
 
         return id;
     }
