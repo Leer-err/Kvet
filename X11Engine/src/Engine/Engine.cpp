@@ -4,22 +4,17 @@
 #include <tracy/Tracy.hpp>
 
 #include "GameInputConfigReader.h"
-#include "GraphicsConfig.h"
 #include "Overlay.h"
 #include "PhysicalInput.h"
 #include "ScriptLoader.h"
 #include "ScriptSandbox.h"
-#include "World.h"
 
 namespace Engine {
 
 Engine::Engine() : should_exit(false) {}
 
 bool Engine::init() {
-    Config::Graphics config;
-    config.render_height = 600;
-    config.render_width = 800;
-    Renderer::get().initializeResources(config);
+    Renderer::get().initializeResources();
 
     Scene::get();
     ::Engine::Script::ScriptLoader().loadFromDirectory(

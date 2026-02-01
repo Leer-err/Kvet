@@ -13,7 +13,11 @@ set(TARGET_NAME "X11Engine_lib")
 
 add_library(${TARGET_NAME} STATIC)
 
-target_link_libraries(${TARGET_NAME} PUBLIC TracyClient Config)
+target_link_libraries(${TARGET_NAME} PUBLIC 
+	TracyClient 
+	Config
+	Logger	
+)
 
 target_include_directories(${TARGET_NAME} PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
@@ -32,7 +36,6 @@ add_subdirectory(FileReader)
 add_subdirectory(Graphics)
 add_subdirectory(Window)
 add_subdirectory(Engine)
-add_subdirectory(Logger)
 add_subdirectory(Types)
 add_subdirectory(Camera)
 add_subdirectory(ECS)
@@ -45,3 +48,4 @@ add_subdirectory(Script)
 add_subdirectory(Config)
 add_subdirectory(Scene)
 add_subdirectory(Overlay)
+add_subdirectory(Core)

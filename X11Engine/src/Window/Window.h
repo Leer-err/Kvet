@@ -2,19 +2,6 @@
 
 #include <Windows.h>
 
-#include <atomic>
-#include <memory>
-
-#include "WindowConfig.h"
-
-using std::atomic;
-using std::make_unique;
-using std::unique_ptr;
-
-namespace Config {
-struct Window;
-};
-
 class Window {
    public:
     static Window& get() {
@@ -22,7 +9,7 @@ class Window {
         return window;
     }
 
-    void init(const Config::Window& config);
+    void init();
 
     bool processMessages();
 

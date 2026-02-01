@@ -5,6 +5,7 @@
 #include <backends/imgui_impl_win32.h>
 #include <winuser.h>
 
+#include "AppConfig.h"
 #include "PhysicalInput.h"
 #include "WindowConfig.h"
 
@@ -254,8 +255,10 @@ RECT Window::createWindowRect(DWORD style) {
     return rect;
 }
 
-void Window::init(const Config::Window& config) {
+void Window::init() {
     constexpr auto WINDOW_STYLE = WS_OVERLAPPEDWINDOW;
+
+    auto config = Config::App::get().getWindowConfig();
 
     width = config.width;
     height = config.height;

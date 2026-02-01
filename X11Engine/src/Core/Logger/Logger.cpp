@@ -37,3 +37,11 @@ void Logger::setLevel(LogLevel level) {
 
     logger->set_level(spdlog_level);
 }
+
+void Logger::logInfo(const std::string& line) { logger->info(line); }
+
+void Logger::logWarning(const std::string& line) { logger->warn(line); }
+
+void Logger::logError(const std::string& line) { logger->error(line); }
+
+void Logger::logDebug(const std::string& line) { logger->debug(line); }

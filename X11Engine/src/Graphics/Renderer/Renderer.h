@@ -1,9 +1,7 @@
 #pragma once
 
 #include "DepthStencil.h"
-#include "GraphicsConfig.h"
 #include "RenderTarget.h"
-#include "RenderTarget/RenderTarget.h"
 #include "SwapChain.h"
 
 class Renderer {
@@ -13,7 +11,7 @@ class Renderer {
         return instance;
     }
 
-    void initializeResources(const Config::Graphics& config);
+    void initializeResources();
 
     void beginFrame();
     void endFrame();

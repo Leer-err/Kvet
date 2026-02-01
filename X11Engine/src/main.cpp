@@ -11,11 +11,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine,
     Logger main_logger = LoggerFactory::getLogger("Main");
     main_logger.info("Starting");
 
-    Config::Window config = {};
-    config.width = 1800;
-    config.height = 1000;
-
-    Window::get().init(config);
+    Window::get().init();
 
     Engine::Engine::get().init();
 

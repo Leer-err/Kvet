@@ -30,6 +30,6 @@ void Entity::addScript(std::unique_ptr<IScript>&& script) {
         set<Scripts>(Scripts{std::move(scripts_vector)});
     } else {
         scripts->scripts.emplace_back(
-            std::move<std::unique_ptr<IScript>>(script));
+            std::forward<std::unique_ptr<IScript>>(script));
     }
 }
