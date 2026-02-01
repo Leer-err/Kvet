@@ -23,12 +23,12 @@ Result<VertexShader, ShaderError> VertexShaderBuilder::create() {
         error.GetAddressOf());
 
     if (FAILED(result)) {
-        logger.warning("Failed to compile pixel shader {}: {}", filename,
+        logger.warning("Failed to compile vertex shader {}: {}", filename,
                        (char*)error->GetBufferPointer());
         return ShaderError::CompileError;
     }
 
-    logger.debug("Compiled pixel shader {}", filename);
+    logger.debug("Compiled vertex shader {}", filename);
     auto device = APIResources::get().getDevice();
 
     Microsoft::WRL::ComPtr<ID3D11VertexShader> shader;
