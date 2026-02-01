@@ -1,8 +1,12 @@
 #include "Vector3.h"
 
 #include <DirectXMath.h>
+#include <foundation/PxVec3.h>
 
 #include "Quaternion.h"
+
+Vector3::Vector3(const physx::PxVec3& vector)
+    : Vector3(vector.x, vector.y, vector.z) {}
 
 Vector3 Vector3::lerp(const Vector3& a, const Vector3& b, float factor) {
     DirectX::XMVECTOR a_loaded = DirectX::XMLoadFloat3(&a.vec);
@@ -46,6 +50,8 @@ float Vector3::length() const {
     DirectX::XMStoreFloat(&result, result_loaded);
     return result;
 }
+
+Vector3::operator physx::PxVec3() const { return physx::PxVec3(x, y, z); }
 
 inline Vector3 operator+(const Vector3& a, const Vector3& b) {
     DirectX::XMVECTOR a_loaded = DirectX::XMLoadFloat3(&a.vec);
