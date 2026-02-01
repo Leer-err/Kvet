@@ -29,12 +29,14 @@ target_link_libraries(${TARGET_NAME} PUBLIC
 
 #PhysX
 
+set(PHYSX_BUILD_TYPE $<IF:$<CONFIG:Debug>,debug,checked>)
+
 target_include_directories(${TARGET_NAME} PUBLIC
 	${CMAKE_CURRENT_SOURCE_DIR}/PhysX/physx/include
 )
 
 target_link_directories(${TARGET_NAME} PUBLIC
-	${CMAKE_CURRENT_SOURCE_DIR}/PhysX/physx/bin/win.x86_64.vc143.mt/debug
+	${CMAKE_CURRENT_SOURCE_DIR}/PhysX/physx/bin/win.x86_64.vc143.mt/${PHYSX_BUILD_TYPE}
 )
 
 target_link_libraries(${TARGET_NAME} PRIVATE
@@ -51,11 +53,11 @@ add_custom_command(
 		${CMAKE_BINARY_DIR}/bin/PhysXFoundation_64.dll
 		${CMAKE_BINARY_DIR}/bin/PhysXCommon_64.dll
     COMMAND 
-		${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/PhysX/physx/bin/win.x86_64.vc143.mt/debug/PhysX_64.dll ${CMAKE_BINARY_DIR}/bin
+		${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/PhysX/physx/bin/win.x86_64.vc143.mt/${PHYSX_BUILD_TYPE}/PhysX_64.dll ${CMAKE_BINARY_DIR}/bin
 	COMMAND
-		${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/PhysX/physx/bin/win.x86_64.vc143.mt/debug/PhysXFoundation_64.dll ${CMAKE_BINARY_DIR}/bin
+		${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/PhysX/physx/bin/win.x86_64.vc143.mt/${PHYSX_BUILD_TYPE}/PhysXFoundation_64.dll ${CMAKE_BINARY_DIR}/bin
 	COMMAND
-		${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/PhysX/physx/bin/win.x86_64.vc143.mt/debug/PhysXCommon_64.dll ${CMAKE_BINARY_DIR}/bin
+		${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/PhysX/physx/bin/win.x86_64.vc143.mt/${PHYSX_BUILD_TYPE}/PhysXCommon_64.dll ${CMAKE_BINARY_DIR}/bin
     DEPENDS ${EXECUTABLE_NAME}
 )
 add_custom_target(copy_physx_libs ALL

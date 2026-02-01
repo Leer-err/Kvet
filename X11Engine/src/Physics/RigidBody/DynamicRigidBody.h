@@ -2,7 +2,9 @@
 #define DYNAMIC_RIGID_BODY_H
 
 #include "Actor.h"
+#include "PxActor.h"
 #include "Quaternion.h"
+#include "Transform.h"
 #include "Vector3.h"
 
 namespace physx {
@@ -24,7 +26,7 @@ class DynamicRigidBody : public Actor {
     };
 
     DynamicRigidBody();
-    DynamicRigidBody(physx::PxRigidDynamic* body);
+    DynamicRigidBody(const Transform& transform);
     ~DynamicRigidBody();
 
     Vector3 getPosition() const;

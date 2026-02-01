@@ -2,6 +2,7 @@
 
 #include <PxPhysicsAPI.h>
 
+#include "Actor.h"
 #include "Resources.h"
 
 namespace Physics {
@@ -9,18 +10,20 @@ namespace Physics {
 Scene::Scene() {
     auto physics = Resources::getPhysics();
 
-    auto dispatcher = physx::PxDefaultCpuDispatcherCreate(2);
+    dispatcher = physx::PxDefaultCpuDispatcherCreate(2);
 
     physx::PxSceneDesc desc(physics->getTolerancesScale());
     desc.gravity = physx::PxVec3(0.0f, -9.81f, 0.0f);
     desc.cpuDispatcher = dispatcher;
     desc.filterShader = physx::PxDefaultSimulationFilterShader;
     scene = physics->createScene(desc);
-
-    dispatcher->release();
 }
 
-void Scene::addActor(const Actor& actor) {}
+Scene::~Scene() { dispatcher->release(); }
+
+void Scene::addActor(physx::PxActor* actor) {
+    bool result = scene->addActor(*actor);
+}
 
 void Scene::simulate(float delta_time) {
     scene->simulate(delta_time);

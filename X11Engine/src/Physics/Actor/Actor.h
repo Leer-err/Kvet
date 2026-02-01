@@ -2,6 +2,10 @@
 
 #include "Shape.h"
 
+namespace physx {
+class PxActor;
+};
+
 namespace Physics {
 
 class Actor {

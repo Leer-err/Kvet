@@ -1,33 +1,44 @@
 #include "StaticRigidBody.h"
 
-#include <utility>
+#include <PxActor.h>
+#include <PxPhysics.h>
+#include <PxRigidStatic.h>
+#include <foundation/PxQuat.h>
+#include <foundation/PxTransform.h>
 
-#include "PxRigidStatic.h"
+#include "PhysicsScene.h"
+#include "Resources.h"
+#include "Transform.h"
 #include "Vector3.h"
-#include "foundation/PxQuat.h"
-#include "foundation/PxTransform.h"
 
 namespace Physics {
 
-StaticRigidBody::StaticRigidBody(physx::PxRigidStatic* body) : body(body) {}
+StaticRigidBody::StaticRigidBody() : body(nullptr) {}
+
+StaticRigidBody::StaticRigidBody(const Transform& transform) {
+    auto physics = Resources::getPhysics();
+
+    body = physics->createRigidStatic(transform);
+    Scene::get().addActor(body);
+}
 
 StaticRigidBody::~StaticRigidBody() {
     if (body == nullptr) return;
 
-    body->release();
+    // body->release();
+}
+
+void StaticRigidBody::setTransform(const Transform& transform) {
+    body->setGlobalPose(transform);
 }
 
 void StaticRigidBody::setTransform(const Vector3& position,
-                                   const Quaternion& quaternion) {
-    physx::PxVec3 px_position = {position.x, position.y, position.z};
-    physx::PxQuat px_rotation = {quaternion.x, quaternion.y, quaternion.z,
-                                 quaternion.w};
-
-    body->setGlobalPose(physx::PxTransform(px_position, px_rotation));
+                                   const Quaternion& orientation) {
+    setTransform(Transform(position, orientation));
 }
 
 void StaticRigidBody::addShape(const Shape& shape) {
-    body->attachShape(*shape.get());
+    bool success = body->attachShape(*shape.get());
 }
 
 physx::PxRigidStatic* StaticRigidBody::get() const { return body; }

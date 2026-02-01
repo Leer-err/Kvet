@@ -1,20 +1,31 @@
 #include "DynamicRigidBody.h"
 
+#include <PxActor.h>
+#include <PxPhysics.h>
+#include <PxPhysicsAPI.h>
 #include <PxRigidDynamic.h>
 #include <foundation/PxTransform.h>
 
+#include "PhysicsScene.h"
 #include "Quaternion.h"
+#include "Resources.h"
+#include "foundation/PxVec3.h"
 
 namespace Physics {
 
 DynamicRigidBody::DynamicRigidBody() : body(nullptr) {}
 
-DynamicRigidBody::DynamicRigidBody(physx::PxRigidDynamic* body) : body(body) {}
+DynamicRigidBody::DynamicRigidBody(const Transform& transform) {
+    auto physics = Resources::getPhysics();
+
+    body = physics->createRigidDynamic(transform);
+    Scene::get().addActor(body);
+}
 
 DynamicRigidBody::~DynamicRigidBody() {
     if (body == nullptr) return;
 
-    body->release();
+    // body->release();
 }
 
 Vector3 DynamicRigidBody::getPosition() const {
@@ -81,6 +92,7 @@ void DynamicRigidBody::lock(Lock lock) {
 
 void DynamicRigidBody::addShape(const Shape& shape) {
     body->attachShape(*shape.get());
+    physx::PxRigidBodyExt::updateMassAndInertia(*body, 1.0f);
 }
 
 physx::PxRigidDynamic* DynamicRigidBody::get() const { return body; }

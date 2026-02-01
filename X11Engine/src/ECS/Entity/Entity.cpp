@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <utility>
+#include <vector>
 
 #include "Children.h"
 #include "IScript.h"
@@ -23,10 +24,12 @@ void Entity::addScript(std::unique_ptr<IScript>&& script) {
     auto scripts = get<Scripts>();
     if (scripts == nullptr) {
         std::vector<std::unique_ptr<IScript>> scripts_vector;
-        scripts_vector.emplace_back(std::move(script));
+        scripts_vector.emplace_back(
+            std::forward<std::unique_ptr<IScript>>(script));
 
-        set<Scripts>({std::move(scripts_vector)});
+        set<Scripts>(Scripts{std::move(scripts_vector)});
     } else {
-        scripts->scripts.emplace_back(std::move(script));
+        scripts->scripts.emplace_back(
+            std::move<std::unique_ptr<IScript>>(script));
     }
 }

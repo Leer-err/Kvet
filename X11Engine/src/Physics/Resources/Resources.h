@@ -3,6 +3,7 @@
 namespace physx {
 class PxFoundation;
 class PxPhysics;
+class PxPvd;
 }  // namespace physx
 
 namespace Physics {
@@ -18,6 +19,7 @@ class Resources {
 
     physx::PxFoundation* foundation;
     physx::PxPhysics* physics;
+    physx::PxPvd* pvd;
 };
 
 };  // namespace Physics

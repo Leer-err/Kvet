@@ -14,7 +14,7 @@ Shape Shape::sphere(float radius) {
     return Shape(geometry);
 }
 
-Shape Shape::box(Vector3 half_extents) {
+Shape Shape::box(const Vector3& half_extents) {
     auto geometry =
         physx::PxBoxGeometry(half_extents.x, half_extents.y, half_extents.z);
     return Shape(geometry);
@@ -52,19 +52,8 @@ Shape::~Shape() {
     shape->release();
 }
 
-void Shape::setTransform(Transform transform) {
-    auto orientation = transform.getOrientation();
-    auto native_orientation = physx::PxQuat(orientation.x, orientation.y,
-                                            orientation.z, orientation.w);
-
-    auto position = transform.getPosition();
-    auto native_position =
-        physx::PxVec3T<float>(position.x, position.y, position.z);
-
-    auto native_transform =
-        physx::PxTransform(native_position, native_orientation);
-
-    shape->setLocalPose(native_transform);
+void Shape::setTransform(const Transform& transform) {
+    shape->setLocalPose(transform);
 }
 
 void Shape::isPhysical() {

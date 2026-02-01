@@ -3,23 +3,27 @@
 
 #include "Actor.h"
 #include "Quaternion.h"
+#include "Transform.h"
 
 namespace physx {
 class PxRigidStatic;
-}
+class PxActor;
+}  // namespace physx
 
 namespace Physics {
 
 class StaticRigidBody : public Actor {
    public:
-    StaticRigidBody(physx::PxRigidStatic* body);
+    StaticRigidBody();
+    StaticRigidBody(const Transform& transform);
     ~StaticRigidBody();
 
-    physx::PxRigidStatic* get() const;
-
-    void setTransform(const Vector3& position, const Quaternion& quaternion);
+    void setTransform(const Vector3& position, const Quaternion& orientation);
+    void setTransform(const Transform& transform);
 
     void addShape(const Shape& shape) override;
+
+    physx::PxRigidStatic* get() const;
 
    private:
     physx::PxRigidStatic* body;

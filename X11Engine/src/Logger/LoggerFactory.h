@@ -5,7 +5,18 @@
 
 class LoggerFactory {
    public:
-    static Logger getLogger(const char* name, LogLevel level = LogLevel::Info);
+    static Logger getLogger(const char* name);
+    static Logger getLogger(const char* name, LogLevel level);
+
+   private:
+    static LoggerFactory get() {
+        static LoggerFactory instance;
+        return instance;
+    }
+
+    LoggerFactory();
+
+    std::vector<spdlog::sink_ptr> sinks;
 };
 
 #endif  // LOGGER_FACTORY_H

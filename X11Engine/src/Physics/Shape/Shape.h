@@ -22,14 +22,14 @@ class Shape {
     ~Shape();
 
     static Shape sphere(float radius);
-    static Shape box(Vector3 half_extents);
+    static Shape box(const Vector3& half_extents);
     static Shape capsule(float radius, float half_height);
     static Shape plane();
 
     void isTrigger();
     void isPhysical();
 
-    void setTransform(Transform transform);
+    void setTransform(const Transform& transform);
 
    protected:
     physx::PxShape* get() const;

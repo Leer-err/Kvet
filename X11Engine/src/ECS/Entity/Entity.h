@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <tracy/Tracy.hpp>
+#include <type_traits>
 
 #include "ComponentRegistry.h"
 #include "EntityId.h"
@@ -49,13 +50,15 @@ class Entity {
     }
 
     template <typename ComponentType>
-    const ComponentType* get() const {
-        return component_registry->get<ComponentType>(id);
+    const std::remove_reference_t<ComponentType>* get() const {
+        return component_registry->get<std::remove_reference_t<ComponentType>>(
+            id);
     }
 
     template <typename ComponentType>
-    ComponentType* get() {
-        return component_registry->get<ComponentType>(id);
+    std::remove_reference_t<ComponentType>* get() {
+        return component_registry->get<std::remove_reference_t<ComponentType>>(
+            id);
     }
 
     template <typename ComponentType>
