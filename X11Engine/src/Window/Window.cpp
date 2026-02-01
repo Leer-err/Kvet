@@ -254,7 +254,7 @@ RECT Window::createWindowRect(DWORD style) {
     return rect;
 }
 
-void Window::init(const WindowConfig& config) {
+void Window::init(const Config::Window& config) {
     constexpr auto WINDOW_STYLE = WS_OVERLAPPEDWINDOW;
 
     width = config.width;

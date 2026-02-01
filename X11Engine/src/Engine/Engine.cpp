@@ -16,10 +16,9 @@ namespace Engine {
 Engine::Engine() : should_exit(false) {}
 
 bool Engine::init() {
-    GraphicsConfig config;
+    Config::Graphics config;
     config.render_height = 600;
     config.render_width = 800;
-    config.window_state = WindowState::Windowed;
     Renderer::get().initializeResources(config);
 
     Scene::get();

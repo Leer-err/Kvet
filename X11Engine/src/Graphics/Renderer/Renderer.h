@@ -13,7 +13,7 @@ class Renderer {
         return instance;
     }
 
-    void initializeResources(const GraphicsConfig& config);
+    void initializeResources(const Config::Graphics& config);
 
     void beginFrame();
     void endFrame();

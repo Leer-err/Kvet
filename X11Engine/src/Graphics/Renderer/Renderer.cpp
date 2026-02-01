@@ -43,7 +43,7 @@ void Renderer::endFrame() {
     swap_chain.present();
 }
 
-void Renderer::initializeResources(const GraphicsConfig& config) {
+void Renderer::initializeResources(const Config::Graphics& config) {
     width = config.render_width;
     height = config.render_height;
 

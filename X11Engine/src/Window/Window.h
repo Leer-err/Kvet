@@ -5,11 +5,15 @@
 #include <atomic>
 #include <memory>
 
+#include "WindowConfig.h"
+
 using std::atomic;
 using std::make_unique;
 using std::unique_ptr;
 
-struct WindowConfig;
+namespace Config {
+struct Window;
+};
 
 class Window {
    public:
@@ -18,7 +22,7 @@ class Window {
         return window;
     }
 
-    void init(const WindowConfig& config);
+    void init(const Config::Window& config);
 
     bool processMessages();
 
