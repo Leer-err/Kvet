@@ -1,30 +1,22 @@
 #ifndef PHYSICS_SYSTEM_H
 #define PHYSICS_SYSTEM_H
 
-#include <memory>
-
 #include "ISystem.h"
-#include "PhysicsFactory.h"
 #include "World.h"
 
 class PhysicsSystem : public ISystem {
    public:
-    PhysicsSystem(std::shared_ptr<PhysicsFactory> factory, World& world,
-                  float step);
+    PhysicsSystem(float fixed_step);
     ~PhysicsSystem();
 
-    bool prepare(World& world);
-
-    void update(World& world, float delta_time);
+    void simulate(World& world, float delta_time) override;
 
    private:
-    void updateDirtyDynamics(World& world);
-    void updateDirtyStatics(World& world);
+    // void updateDirtyDynamics(World& world);
+    // void updateDirtyStatics(World& world);
 
     float fixed_step;
     float accumulated_time;
-
-    std::shared_ptr<PhysicsFactory> factory;
 };
 
 #endif  // PHYSICS_SYSTEM_H

@@ -34,7 +34,7 @@ class SystemDispatcher {
     SystemDispatcher& operator=(SystemDispatcher&&) = delete;
 
     void preSimulate(World& world);
-    void simulate(World& world);
+    void simulate(World& world, float delta_time);
     void preUpdate(World& world);
     void update(World& world, float delta_time);
     void preRender(World& world);

@@ -6,7 +6,7 @@ class World;
 class ISystem {
    public:
     virtual void preSimulate(World& world) {}
-    virtual void simulate(World& world) {}
+    virtual void simulate(World& world, float delta_time) {}
     virtual void preUpdate(World& world) {}
     virtual void update(World& world, float delta_time) {}
     virtual void preRender(World& world) {}

@@ -2,12 +2,11 @@
 
 #include <tracy/Tracy.hpp>
 
-
 void SystemDispatcher::progress(World& world, float delta_time) {
     ZoneScoped;
 
     preSimulate(world);
-    simulate(world);
+    simulate(world, delta_time);
     preUpdate(world);
     update(world, delta_time);
     preRender(world);
@@ -19,9 +18,9 @@ void SystemDispatcher::preSimulate(World& world) {
     for (const auto& system : systems) system->preSimulate(world);
 }
 
-void SystemDispatcher::simulate(World& world) {
+void SystemDispatcher::simulate(World& world, float delta_time) {
     ZoneScoped;
-    for (const auto& system : systems) system->simulate(world);
+    for (const auto& system : systems) system->simulate(world, delta_time);
 }
 
 void SystemDispatcher::preUpdate(World& world) {
