@@ -2,6 +2,8 @@
 
 #include <d3d11.h>
 
+#include <optional>
+
 #include "APIResources.h"
 
 constexpr std::optional<DXGI_FORMAT> imageFormatToDXGIFormat(
