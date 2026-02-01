@@ -1,4 +1,4 @@
-#pragma once
+#include "AppConfig.h"
 
 #include "WindowConfig.h"
 
