@@ -15,8 +15,7 @@ add_library(${TARGET_NAME} STATIC)
 
 target_link_libraries(${TARGET_NAME} PUBLIC 
 	TracyClient 
-	Config
-	Logger	
+	Core
 )
 
 target_include_directories(${TARGET_NAME} PUBLIC
@@ -34,7 +33,6 @@ add_subdirectory(Input)
 add_subdirectory(Event)
 add_subdirectory(FileReader)
 add_subdirectory(Graphics)
-add_subdirectory(Window)
 add_subdirectory(Engine)
 add_subdirectory(Types)
 add_subdirectory(Camera)
