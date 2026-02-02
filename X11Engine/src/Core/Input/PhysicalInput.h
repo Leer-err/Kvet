@@ -3,6 +3,8 @@
 
 #include <array>
 
+namespace Input {
+
 enum Button {
     MOUSE_LB,
     MOUSE_RB,
@@ -87,5 +89,7 @@ class PhysicalInput {
     std::array<ButtonState, KEY_COUNT> new_key_states;
     std::array<float, AXES_COUNT> new_axis_states;
 };
+
+};  // namespace Input
 
 #endif  // PHYSICAL_INPUT_H

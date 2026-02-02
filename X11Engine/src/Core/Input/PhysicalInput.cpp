@@ -1,5 +1,7 @@
 #include "PhysicalInput.h"
 
+namespace Input {
+
 PhysicalInput::PhysicalInput()
     : current_axis_states(),
       current_key_states(),
@@ -95,3 +97,5 @@ float PhysicalInput::getAxisState(Axis axis) const {
 void PhysicalInput::setMouseMode(MouseMode mode) { mouse_mode = mode; }
 
 MouseMode PhysicalInput::getMouseMode() const { return mouse_mode; }
+
+};  // namespace Input
