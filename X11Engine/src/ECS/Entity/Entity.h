@@ -31,6 +31,11 @@ class Entity {
             id, std::forward<ComponentType>(component));
     }
 
+    template <typename ComponentType, typename... ARGS>
+    void set(ARGS&&... args) {
+        component_registry->set<ComponentType>(id, std::forward<ARGS>(args)...);
+    }
+
     template <typename ComponentType>
     bool has() const {
         return component_registry->has<ComponentType>(id);

@@ -36,13 +36,24 @@ class World {
     }
 
     template <typename ComponentType>
-    void set(Entity entity, const ComponentType& component) {
+    void set(Entity entity, ComponentType&& component) {
         component_registry.set<ComponentType>(entity, component);
     }
 
     template <typename ComponentType>
-    void set(ComponentId id, const ComponentType& component) {
+    void set(ComponentId id, ComponentType&& component) {
         component_registry.set<ComponentType>(id, component);
+    }
+
+    template <typename ComponentType, typename... ARGS>
+    void set(Entity entity, ARGS&&... args) {
+        component_registry.set<ComponentType>(entity,
+                                              std::forward<ARGS>(args)...);
+    }
+
+    template <typename ComponentType, typename... ARGS>
+    void set(ComponentId id, ARGS&&... args) {
+        component_registry.set<ComponentType>(id, std::forward<ARGS>(args)...);
     }
 
     template <typename ComponentType>

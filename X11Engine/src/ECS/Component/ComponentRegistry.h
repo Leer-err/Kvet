@@ -14,17 +14,20 @@ class ComponentRegistry {
    public:
     template <typename ComponentType>
     void add(EntityId entity) {
-        ComponentPool<ComponentType>* pool = getOrCreatePool<ComponentType>();
+        using Type = std::remove_cvref_t<ComponentType>;
+
+        ComponentPool<Type>* pool = getOrCreatePool<Type>();
 
         pool->add(entity);
 
-        size_t type_id = TypeIdHelper::getTypeId<ComponentType>();
+        size_t type_id = TypeIdHelper::getTypeId<Type>();
     }
 
     template <typename ComponentType>
     void set(EntityId entity, ComponentType&& component) {
-        ComponentPool<std::remove_cvref_t<ComponentType>>* pool =
-            getOrCreatePool<std::remove_cvref_t<ComponentType>>();
+        using Type = std::remove_cvref_t<ComponentType>;
+
+        ComponentPool<Type>* pool = getOrCreatePool<Type>();
 
         pool->set(entity, std::forward<ComponentType>(component));
     }
@@ -36,6 +39,24 @@ class ComponentRegistry {
         ComponentPool<Type>* pool = getOrCreatePool<Type>();
 
         pool->set(id, std::forward<ComponentType>(component));
+    }
+
+    template <typename ComponentType, typename... ARGS>
+    void set(EntityId entity, ARGS&&... args) {
+        using Type = std::remove_cvref_t<ComponentType>;
+
+        ComponentPool<Type>* pool = getOrCreatePool<Type>();
+
+        pool->set(entity, std::forward<ARGS>(args)...);
+    }
+
+    template <typename ComponentType, typename... ARGS>
+    void set(ComponentId id, ARGS&&... args) {
+        using Type = std::remove_cvref_t<ComponentType>;
+
+        ComponentPool<Type>* pool = getOrCreatePool<Type>();
+
+        pool->set(id, std::forward<ARGS>(args)...);
     }
 
     template <typename ComponentType>
@@ -67,7 +88,7 @@ class ComponentRegistry {
         using Type = std::remove_cvref_t<ComponentType>;
 
         ZoneScoped;
-        ComponentPool<ComponentType>* pool = getPool<ComponentType>();
+        ComponentPool<Type>* pool = getPool<Type>();
 
         if (pool == nullptr) return nullptr;
 
@@ -76,7 +97,9 @@ class ComponentRegistry {
 
     template <typename ComponentType>
     ComponentId getComponentId(EntityId entity) const {
-        const ComponentPool<ComponentType>* pool = getPool<ComponentType>();
+        using Type = std::remove_cvref_t<ComponentType>;
+
+        const ComponentPool<Type>* pool = getPool<Type>();
 
         if (pool == nullptr) return INVALID_COMPONENT_ID;
 
@@ -116,7 +139,9 @@ class ComponentRegistry {
 
     template <typename ComponentType>
     bool has(EntityId entity) const {
-        ComponentPool<ComponentType>* pool = getPool<ComponentType>();
+        using Type = std::remove_cvref_t<ComponentType>;
+
+        ComponentPool<Type>* pool = getPool<Type>();
 
         if (pool == nullptr) return false;
 

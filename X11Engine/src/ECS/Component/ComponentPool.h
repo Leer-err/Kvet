@@ -58,13 +58,14 @@ class ComponentPool : public IComponentPool {
         return id;
     }
 
-    void set(ComponentId id, const ComponentType& component) {
+    template <typename... ARGS>
+    void set(ComponentId id, ARGS&&... args) {
         auto it = component_ids.find(id.id);
 
         if (it == component_ids.end()) return;
 
         size_t index = component_ids[id.id];
-        components[index] = component;
+        components[index] = ComponentType(std::forward<ARGS>(args)...);
     }
 
     void remove(EntityId entity) override {
