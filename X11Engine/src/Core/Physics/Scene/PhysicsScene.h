@@ -1,9 +1,9 @@
 #pragma once
 
-#include "extensions/PxDefaultCpuDispatcher.h"
 namespace physx {
 class PxScene;
 class PxActor;
+class PxDefaultCpuDispatcher;
 }  // namespace physx
 
 namespace Physics {

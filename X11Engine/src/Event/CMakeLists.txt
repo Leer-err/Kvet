@@ -1,5 +1,3 @@
-
-
 target_sources(${TARGET_NAME} PRIVATE
     EventBus.cpp
     EventListener.cpp

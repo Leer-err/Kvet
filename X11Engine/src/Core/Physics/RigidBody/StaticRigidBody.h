@@ -1,18 +1,16 @@
 #ifndef STATIC_RIGID_BODY_H
 #define STATIC_RIGID_BODY_H
 
-#include "Actor.h"
 #include "Quaternion.h"
 #include "Transform.h"
 
 namespace physx {
 class PxRigidStatic;
-class PxActor;
 }  // namespace physx
 
 namespace Physics {
 
-class StaticRigidBody : public Actor {
+class StaticRigidBody {
    public:
     StaticRigidBody();
     StaticRigidBody(const Transform& transform);

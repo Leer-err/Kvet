@@ -2,7 +2,6 @@
 
 #include <PxPhysicsAPI.h>
 
-#include "Actor.h"
 #include "Resources.h"
 
 namespace Physics {

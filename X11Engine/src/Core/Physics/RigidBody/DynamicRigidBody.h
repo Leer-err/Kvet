@@ -1,8 +1,6 @@
 #ifndef DYNAMIC_RIGID_BODY_H
 #define DYNAMIC_RIGID_BODY_H
 
-#include "Actor.h"
-#include "PxActor.h"
 #include "Quaternion.h"
 #include "Transform.h"
 #include "Vector3.h"
@@ -13,7 +11,7 @@ class PxRigidDynamic;
 
 namespace Physics {
 
-class DynamicRigidBody : public Actor {
+class DynamicRigidBody {
    public:
     enum class Lock {
         LockRotationX,
