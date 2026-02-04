@@ -34,7 +34,7 @@ class DynamicRigidBody {
 
     void setVelocity(const Vector3& velocity);
     void setTransform(const Vector3& position, const Quaternion& quaternion);
-    void setGravity(bool gravity);
+    void enableGravity(bool gravity);
     void setCCD(bool ccd);
     void lock(Lock lock);
 

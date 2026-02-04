@@ -5,7 +5,7 @@
 
 namespace Script::Bindings {
 
-void initTypeBindings() {
+static inline void initVector3() {
     auto state = Resources::get().getState();
 
     auto vector3_type = state.new_usertype<Vector3>(
@@ -25,6 +25,10 @@ void initTypeBindings() {
     vector3_type["x"] = &Vector3::x;
     vector3_type["y"] = &Vector3::y;
     vector3_type["z"] = &Vector3::z;
+}
+
+static inline void initQuaternion() {
+    auto state = Resources::get().getState();
 
     auto quaternion_type = state.new_usertype<Quaternion>(
         "Quaternion",
@@ -42,6 +46,10 @@ void initTypeBindings() {
     quaternion_type["y"] = &Quaternion::y;
     quaternion_type["z"] = &Quaternion::z;
     quaternion_type["w"] = &Quaternion::w;
+}
+
+static inline void initTransform() {
+    auto state = Resources::get().getState();
 
     auto transform_type = state.new_usertype<Transform>(
         "Transform",
@@ -49,12 +57,21 @@ void initTypeBindings() {
                           Transform(const Vector3&, const Quaternion&,
                                     const Vector3&),
                           Transform(const Vector3&, const Quaternion&)>());
-    quaternion_type["position"] =
+    transform_type["getForward"] = &Quaternion::getForward;
+    transform_type["getRight"] = &Quaternion::getRight;
+    transform_type["getUp"] = &Quaternion::getUp;
+    transform_type["position"] =
         sol::property(&Transform::getPosition, &Transform::setPosition);
-    quaternion_type["orientation"] =
+    transform_type["orientation"] =
         sol::property(&Transform::getOrientation, &Transform::setOrientation);
-    quaternion_type["scale"] =
+    transform_type["scale"] =
         sol::property(&Transform::getScale, &Transform::setScale);
+}
+
+void initTypeBindings() {
+    initVector3();
+    initQuaternion();
+    initTransform();
 }
 
 }  // namespace Script::Bindings

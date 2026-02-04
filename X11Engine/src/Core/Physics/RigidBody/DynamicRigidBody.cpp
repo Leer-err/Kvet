@@ -66,7 +66,7 @@ void DynamicRigidBody::setCCD(bool ccd) {
     body->setRigidBodyFlag(physx::PxRigidBodyFlag::eENABLE_CCD, true);
 }
 
-void DynamicRigidBody::setGravity(bool gravity) {
+void DynamicRigidBody::enableGravity(bool gravity) {
     body->setActorFlag(physx::PxActorFlag::eDISABLE_GRAVITY, !gravity);
 }
 
