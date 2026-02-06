@@ -1,8 +1,6 @@
 #ifndef QUATERNION_H
 #define QUATERNION_H
 
-#include <DirectXMath.h>
-
 namespace physx {
 
 template <typename T>
@@ -15,7 +13,6 @@ struct Vector3;
 
 struct Quaternion {
     union {
-        DirectX::XMFLOAT4 quat;
         struct {
             float x, y, z, w;
         };

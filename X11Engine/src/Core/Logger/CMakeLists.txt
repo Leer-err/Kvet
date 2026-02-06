@@ -18,14 +18,15 @@ target_sources(Logger PRIVATE
     LoggerFactory.cpp
 )
 
+set_target_properties(Logger PROPERTIES
+    CXX_STANDARD 20
+	CXX_STANDARD_REQUIRED ON
+	CXX_EXTENSIONS OFF
+)
+
 target_include_directories(Logger 
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}
     PRIVATE
         ${spdlog_SOURCE_DIR}/include
-)
-
-set_target_properties(Logger PROPERTIES
-    CXX_STANDARD 20
-    CXX_STANDARD_REQUIRED true
 )

@@ -1,8 +1,6 @@
 #ifndef EVENT_BUS_H
 #define EVENT_BUS_H
 
-#include <vcruntime_typeinfo.h>
-
 #include <memory>
 #include <mutex>
 #include <vector>

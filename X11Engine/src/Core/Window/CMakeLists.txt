@@ -7,3 +7,12 @@ target_sources(Window PRIVATE
 target_include_directories(Window PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
 )
+
+target_link_libraries(Window 
+    PUBLIC
+        Logger
+        Config
+        Input
+    PRIVATE 
+        SDL3::SDL3
+)

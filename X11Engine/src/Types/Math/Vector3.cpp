@@ -1,103 +1,61 @@
 #include "Vector3.h"
 
-#include <DirectXMath.h>
 #include <foundation/PxVec3.h>
 
+#include <glm/glm.hpp>
+#include <glm/gtc/quaternion.hpp>
+
 #include "Quaternion.h"
+#include "glm/fwd.hpp"
+#include "glm/geometric.hpp"
+
+using namespace glm;
+
+static const vec3& get(const Vector3& vec) {
+    return reinterpret_cast<const vec3&>(vec);
+}
+static vec3& get(Vector3& vec) { return reinterpret_cast<vec3&>(vec); }
 
 Vector3::Vector3(const physx::PxVec3& vector)
     : Vector3(vector.x, vector.y, vector.z) {}
 
 Vector3 Vector3::lerp(const Vector3& a, const Vector3& b, float factor) {
-    DirectX::XMVECTOR a_loaded = DirectX::XMLoadFloat3(&a.vec);
-    DirectX::XMVECTOR b_loaded = DirectX::XMLoadFloat3(&b.vec);
+    auto result = glm::mix(get(a), get(b), factor);
 
-    DirectX::XMVECTOR result_loaded =
-        DirectX::XMVectorLerp(a_loaded, b_loaded, factor);
-
-    Vector3 result;
-    DirectX::XMStoreFloat3(&result.vec, result_loaded);
     return Vector3(result.x, result.y, result.z);
 }
 
 Vector3 Vector3::normalized() const {
-    DirectX::XMVECTOR vec_loaded = DirectX::XMLoadFloat3(&vec);
-
-    DirectX::XMVECTOR result_loaded = DirectX::XMVector3Normalize(vec_loaded);
-
-    Vector3 result;
-    DirectX::XMStoreFloat3(&result.vec, result_loaded);
-    return result;
+    auto result = glm::normalize(get(*this));
+    return Vector3(result.x, result.y, result.z);
 }
 
-Vector3 Vector3::rotate(Quaternion quat) const {
-    DirectX::XMVECTOR vec_loaded = DirectX::XMLoadFloat3(&vec);
-    DirectX::XMVECTOR quat_loaded = DirectX::XMLoadFloat4(&quat.quat);
-
-    DirectX::XMVECTOR result_loaded =
-        DirectX::XMVector3Rotate(vec_loaded, quat_loaded);
-
-    Vector3 result;
-    DirectX::XMStoreFloat3(&result.vec, result_loaded);
-    return result;
+Vector3 Vector3::rotate(const Quaternion& rotation) const {
+    auto& q = reinterpret_cast<const glm::quat&>(rotation);
+    auto result = q * get(*this);
+    return Vector3(result.x, result.y, result.z);
 }
 
-float Vector3::length() const {
-    DirectX::XMVECTOR vec_loaded = DirectX::XMLoadFloat3(&vec);
-    DirectX::XMVECTOR result_loaded = DirectX::XMVector3Length(vec_loaded);
-
-    float result;
-    DirectX::XMStoreFloat(&result, result_loaded);
-    return result;
-}
+float Vector3::length() const { return glm::length(get(*this)); }
 
 Vector3::operator physx::PxVec3() const { return physx::PxVec3(x, y, z); }
 
 inline Vector3 operator+(const Vector3& a, const Vector3& b) {
-    DirectX::XMVECTOR a_loaded = DirectX::XMLoadFloat3(&a.vec);
-    DirectX::XMVECTOR b_loaded = DirectX::XMLoadFloat3(&b.vec);
-
-    DirectX::XMVECTOR result_loaded = DirectX::XMVectorAdd(a_loaded, b_loaded);
-
-    Vector3 result;
-    DirectX::XMStoreFloat3(&result.vec, result_loaded);
-    return result;
+    auto result = get(a) + get(b);
+    return Vector3(result.x, result.y, result.z);
 }
 
 inline Vector3 operator-(const Vector3& a, const Vector3& b) {
-    DirectX::XMVECTOR a_loaded = DirectX::XMLoadFloat3(&a.vec);
-    DirectX::XMVECTOR b_loaded = DirectX::XMLoadFloat3(&b.vec);
-
-    DirectX::XMVECTOR result_loaded =
-        DirectX::XMVectorSubtract(a_loaded, b_loaded);
-
-    Vector3 result;
-    DirectX::XMStoreFloat3(&result.vec, result_loaded);
-    return result;
+    auto result = get(a) - get(b);
+    return Vector3(result.x, result.y, result.z);
 }
 
 inline Vector3 operator*(const Vector3& a, float b) {
-    DirectX::XMVECTOR a_loaded = DirectX::XMLoadFloat3(&a.vec);
-
-    DirectX::XMVECTOR b_loaded = DirectX::XMVectorSet(b, b, b, b);
-
-    DirectX::XMVECTOR result_loaded =
-        DirectX::XMVectorMultiply(a_loaded, b_loaded);
-
-    Vector3 result;
-    DirectX::XMStoreFloat3(&result.vec, result_loaded);
-    return result;
+    auto result = get(a) * b;
+    return Vector3(result.x, result.y, result.z);
 }
 
 inline Vector3 operator/(const Vector3& a, float b) {
-    DirectX::XMVECTOR a_loaded = DirectX::XMLoadFloat3(&a.vec);
-
-    DirectX::XMVECTOR b_loaded = DirectX::XMVectorSet(b, b, b, b);
-
-    DirectX::XMVECTOR result_loaded =
-        DirectX::XMVectorDivide(a_loaded, b_loaded);
-
-    Vector3 result;
-    DirectX::XMStoreFloat3(&result.vec, result_loaded);
-    return result;
+    auto result = get(a) / b;
+    return Vector3(result.x, result.y, result.z);
 }

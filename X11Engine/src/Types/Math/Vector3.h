@@ -1,8 +1,6 @@
 #ifndef VECTOR_3_H
 #define VECTOR_3_H
 
-#include <DirectXMath.h>
-
 namespace physx {
 template <typename T>
 class PxVec3T;
@@ -23,16 +21,11 @@ struct Vector3 {
 
     Vector3 normalized() const;
 
-    Vector3 rotate(Quaternion quat) const;
+    Vector3 rotate(const Quaternion& quat) const;
 
     float length() const;
 
-    union {
-        struct {
-            float x, y, z;
-        };
-        DirectX::XMFLOAT3 vec;
-    };
+    float x, y, z;
 };
 
 Vector3 operator+(const Vector3& a, const Vector3& b);

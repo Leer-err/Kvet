@@ -1,25 +1,27 @@
 #include "Quaternion.h"
 
-#include <DirectXMath.h>
 #include <foundation/PxTransform.h>
+
+#include <glm/glm.hpp>
+#include <glm/gtc/quaternion.hpp>
 
 #include "Vector3.h"
 
-Quaternion::Quaternion() {
-    DirectX::XMStoreFloat4(&quat, DirectX::XMQuaternionIdentity());
+using namespace glm;
+
+static const quat& get(const Quaternion& vec) {
+    return reinterpret_cast<const quat&>(vec);
 }
+static quat& get(Quaternion& vec) { return reinterpret_cast<quat&>(vec); }
+
+Quaternion::Quaternion() : Quaternion(1, 0, 0, 0) {}
 
 Quaternion::Quaternion(const Vector3& axis, float angle) {
-    auto axis_loaded = DirectX::XMLoadFloat3(&axis.vec);
-    auto result_loaded = DirectX::XMQuaternionRotationAxis(axis_loaded, angle);
-
-    DirectX::XMStoreFloat4(&this->quat, result_loaded);
+    get(*this) = quat(angle, reinterpret_cast<const vec3&>(axis));
 }
 
-Quaternion::Quaternion(float pitch, float yaw, float roll) {
-    DirectX::XMStoreFloat4(
-        &quat, DirectX::XMQuaternionRotationRollPitchYaw(pitch, yaw, roll));
-}
+Quaternion::Quaternion(float pitch, float yaw, float roll)
+    : Quaternion(Vector3{pitch, yaw, roll}) {}
 
 Quaternion::Quaternion(const physx::PxQuat& vec)
     : Quaternion(vec.w, vec.x, vec.y, vec.z) {}
@@ -31,46 +33,34 @@ Quaternion::Quaternion(float w, float x, float y, float z) {
     this->w = w;
 }
 
-Quaternion::Quaternion(const Vector3& vec) : Quaternion(vec.x, vec.y, vec.z) {}
+Quaternion::Quaternion(const Vector3& angles) {
+    get(*this) = quat(reinterpret_cast<const vec3&>(angles));
+}
 
 Quaternion Quaternion::slerp(const Quaternion& a, const Quaternion& b,
                              float factor) {
-    DirectX::XMVECTOR a_loaded = DirectX::XMLoadFloat4(&a.quat);
-    DirectX::XMVECTOR b_loaded = DirectX::XMLoadFloat4(&b.quat);
+    Quaternion result;
+    get(result) = mix(get(a), get(b), factor);
 
-    DirectX::XMVECTOR result_loaded =
-        DirectX::XMQuaternionSlerp(a_loaded, b_loaded, factor);
-
-    DirectX::XMFLOAT4 result;
-    DirectX::XMStoreFloat4(&result, result_loaded);
-    return Quaternion(result.w, result.x, result.y, result.z);
+    return result;
 }
 
 Quaternion Quaternion::inverse() const {
-    DirectX::XMVECTOR loaded = DirectX::XMLoadFloat4(&quat);
+    Quaternion result;
+    get(result) = glm::inverse(get(*this));
 
-    DirectX::XMVECTOR result_loaded = DirectX::XMQuaternionInverse(loaded);
-
-    DirectX::XMFLOAT4 result;
-    DirectX::XMStoreFloat4(&result, result_loaded);
-    return Quaternion(result.w, result.x, result.y, result.z);
+    return result;
 }
 
 bool Quaternion::operator==(const Quaternion& b) const {
-    DirectX::XMVECTOR a_loaded = DirectX::XMLoadFloat4(&quat);
-    DirectX::XMVECTOR b_loaded = DirectX::XMLoadFloat4(&b.quat);
-    return DirectX::XMQuaternionEqual(a_loaded, b_loaded);
+    return get(*this) == get(b);
 }
 
 Quaternion operator*(const Quaternion& a, const Quaternion& b) {
-    DirectX::XMVECTOR a_loaded = DirectX::XMLoadFloat4(&a.quat);
-    DirectX::XMVECTOR b_loaded = DirectX::XMLoadFloat4(&b.quat);
-    Quaternion quat;
+    Quaternion result;
+    get(result) = get(a) * get(b);
 
-    DirectX::XMStoreFloat4(&quat.quat,
-                           DirectX::XMQuaternionMultiply(a_loaded, b_loaded));
-
-    return quat;
+    return result;
 }
 
 Quaternion::operator physx::PxQuat() const { return physx::PxQuat(x, y, z, w); }

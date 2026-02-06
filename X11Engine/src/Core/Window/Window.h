@@ -1,6 +1,9 @@
 #pragma once
 
-#include <Windows.h>
+#include "Logger.h"
+
+class SDL_Window;
+union SDL_Event;
 
 class Window {
    public:
@@ -13,12 +16,18 @@ class Window {
 
     bool processMessages();
 
-    inline HWND getHandle() const { return handle; }
     inline int getWidth() const { return width; }
     inline int getHeight() const { return height; }
 
    private:
     Window();
+    ~Window();
+
+    void processKeyDown(const SDL_Event* event);
+    void processKeyUp(const SDL_Event* event);
+    void processMouseButtonDown(const SDL_Event* event);
+    void processMouseButtonUp(const SDL_Event* event);
+    void processMouseMove(const SDL_Event* event);
 
     Window(const Window&) = delete;
     Window& operator=(const Window&) = delete;
@@ -26,14 +35,10 @@ class Window {
     Window(Window&&) = delete;
     Window& operator=(Window&&) = delete;
 
-    static LRESULT WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
-
-    void registerWindowClass();
-    RECT createWindowRect(DWORD style);
-
-    void centerCursor();
-
-    HWND handle;
     int width;
     int height;
+
+    SDL_Window* handle;
+
+    Logger logger;
 };

@@ -25,23 +25,26 @@ target_include_directories(${TARGET_NAME} PUBLIC
 set_target_properties(${TARGET_NAME} PROPERTIES
 	CXX_STANDARD 20
 	CXX_STANDARD_REQUIRED true
+	CXX_EXTENSIONS OFF
+
+	
 )
 
 add_subdirectory(Dependencies)
 
-add_subdirectory(Input)
-add_subdirectory(Event)
-add_subdirectory(FileReader)
-add_subdirectory(Graphics)
-add_subdirectory(Engine)
+# add_subdirectory(Input)
+# add_subdirectory(Event)
+# add_subdirectory(FileReader)
+# add_subdirectory(Graphics)
+# add_subdirectory(Engine)
 add_subdirectory(Types)
-add_subdirectory(Camera)
-add_subdirectory(ECS)
-add_subdirectory(Systems)
-add_subdirectory(Components)
+# add_subdirectory(Camera)
+# add_subdirectory(ECS)
+# add_subdirectory(Systems)
+# add_subdirectory(Components)
 add_subdirectory(Utility)
-add_subdirectory(Assets)
-add_subdirectory(Script)
-add_subdirectory(Scene)
-add_subdirectory(Overlay)
+# add_subdirectory(Assets)
+# add_subdirectory(Script)
+# add_subdirectory(Scene)
+# add_subdirectory(Overlay)
 add_subdirectory(Core)

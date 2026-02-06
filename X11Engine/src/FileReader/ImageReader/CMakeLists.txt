@@ -2,7 +2,6 @@
 
 target_sources(${TARGET_NAME} PRIVATE
     ImageReaderFactory.cpp
-    WICImageReader.cpp
 )
 
 target_include_directories(${TARGET_NAME} PUBLIC

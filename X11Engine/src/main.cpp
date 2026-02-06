@@ -1,30 +1,7 @@
-#include <Windows.h>
-
-#include "Engine.h"
-#include "Logger.h"
-#include "LoggerFactory.h"
+#include "Core.h"
 #include "Window.h"
-#include "WindowConfig.h"
 
-int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine,
-            int nCmdShow) {
-    Logger main_logger = LoggerFactory::getLogger("Main");
-    main_logger.info("Starting");
-
-    Window::get().init();
-
-    Engine::Engine::get().init();
-
-    main_logger.info("Starting main loop");
-    std::thread engine_thread =
-        std::thread(&Engine::Engine::run, &Engine::Engine::get());
-
-    while (Window::get().processMessages()) {
-    }
-
-    main_logger.info("Exiting");
-    Engine::Engine::get().exit();
-
-    engine_thread.join();
-    return 0;
+int main(int argc, char* argv[]) {
+    Core::init();
+    Window::get().processMessages();
 }

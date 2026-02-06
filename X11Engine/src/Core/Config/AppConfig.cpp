@@ -13,7 +13,7 @@ void App::loadDefaults() {
     window.width = 1280;
     window.height = 720;
 
-    window.state = Config::Window::State::Windowed;
+    window.state = Config::Window::State::Borderless;
 }
 
 Graphics App::getGraphicsConfig() { return graphics; }

@@ -1,11 +1,11 @@
 
 
-target_sources(${TARGET_NAME} PRIVATE
-)
+# target_sources(${TARGET_NAME} PRIVATE
+# )
 
-target_include_directories(${TARGET_NAME} PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}
-)
+# target_include_directories(${TARGET_NAME} PUBLIC
+#     ${CMAKE_CURRENT_SOURCE_DIR}
+# )
 
-add_subdirectory(Image)
-add_subdirectory(Renderer)
+# add_subdirectory(Image)
+# add_subdirectory(Renderer)

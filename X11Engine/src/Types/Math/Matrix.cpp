@@ -1,156 +1,133 @@
 #include "Matrix.h"
 
-Matrix Matrix::identity() {
-    DirectX::XMMATRIX mat = DirectX::XMMatrixIdentity();
+#define GLM_ENABLE_EXPERIMENTAL
 
-    Matrix result = {};
-    DirectX::XMStoreFloat4x4(&result.matrix, mat);
+#include <glm/ext/matrix_clip_space.hpp>
+#include <glm/ext/matrix_transform.hpp>
+#include <glm/glm.hpp>
+#include <glm/gtc/quaternion.hpp>
+#include <glm/gtx/matrix_decompose.hpp>
+#include <glm/matrix.hpp>
+
+#include "Quaternion.h"
+#include "Vector3.h"
+
+using namespace glm;
+
+static const mat4& get(const Matrix& mat) {
+    return reinterpret_cast<const mat4&>(mat);
+}
+static mat4& get(Matrix& mat) { return reinterpret_cast<mat4&>(mat); }
+
+static const quat& get(const Quaternion& vec) {
+    return reinterpret_cast<const quat&>(vec);
+}
+static quat& get(Quaternion& vec) { return reinterpret_cast<quat&>(vec); }
+
+static const vec3& get(const Vector3& vec) {
+    return reinterpret_cast<const vec3&>(vec);
+}
+static vec3& get(Vector3& vec) { return reinterpret_cast<vec3&>(vec); }
+
+Matrix Matrix::identity() {
+    Matrix result;
+    get(result) = glm::identity<mat4>();
     return result;
 }
 
 Matrix Matrix::projection(float fov, float aspect_ratio, float far,
                           float near) {
-    DirectX::XMMATRIX mat =
-        DirectX::XMMatrixPerspectiveFovLH(1.04, aspect_ratio, near, far);
-
-    Matrix result = {};
-    DirectX::XMStoreFloat4x4(&result.matrix, mat);
+    Matrix result;
+    get(result) = glm::perspective(fov, aspect_ratio, near, far);
     return result;
 }
 
 Matrix Matrix::translation(const Vector3& pos) {
-    DirectX::XMMATRIX mat = DirectX::XMMatrixTranslation(pos.x, pos.y, pos.z);
-
-    Matrix result = {};
-    DirectX::XMStoreFloat4x4(&result.matrix, mat);
+    Matrix result;
+    get(result) = translate(glm::identity<mat4>(), get(pos));
     return result;
 }
 
 Matrix Matrix::rotation(float roll, float pitch, float yaw) {
-    DirectX::XMMATRIX mat =
-        DirectX::XMMatrixRotationRollPitchYaw(roll, pitch, yaw);
+    auto q = Quaternion(pitch, yaw, roll);
 
-    Matrix result = {};
-    DirectX::XMStoreFloat4x4(&result.matrix, mat);
-    return result;
+    return rotation(q);
 }
 
 Matrix Matrix::rotation(const Quaternion& q) {
-    DirectX::XMVECTOR q_loaded = DirectX::XMLoadFloat4(&q.quat);
-
-    DirectX::XMMATRIX mat = DirectX::XMMatrixRotationQuaternion(q_loaded);
-
-    Matrix result = {};
-    DirectX::XMStoreFloat4x4(&result.matrix, mat);
+    Matrix result;
+    get(result) = glm::mat4_cast(get(q));
     return result;
 }
 
 Matrix Matrix::scale(const Vector3& scale) {
-    DirectX::XMMATRIX mat = DirectX::XMMatrixScaling(scale.x, scale.y, scale.z);
-
-    Matrix result = {};
-    DirectX::XMStoreFloat4x4(&result.matrix, mat);
+    Matrix result;
+    get(result) = glm::scale(glm::identity<mat4>(), get(scale));
     return result;
 }
 
 Matrix Matrix::view(const Vector3& position, const Vector3& forward,
                     const Vector3& up) {
-    DirectX::XMVECTOR position_loaded = DirectX::XMLoadFloat3(&position.vec);
-    DirectX::XMVECTOR forward_loaded = DirectX::XMLoadFloat3(&forward.vec);
-    DirectX::XMVECTOR up_loaded = DirectX::XMLoadFloat3(&up.vec);
+    Matrix result;
 
-    DirectX::XMMATRIX mat =
-        DirectX::XMMatrixLookToLH(position_loaded, forward_loaded, up_loaded);
-
-    Matrix result = {};
-    DirectX::XMStoreFloat4x4(&result.matrix, mat);
+    auto look_point = position + forward;
+    get(result) = lookAt(get(position), get(look_point), get(up));
     return result;
 }
 
 Matrix Matrix::transpose() const {
-    DirectX::XMMATRIX mat = DirectX::XMLoadFloat4x4(&matrix);
-
-    mat = DirectX::XMMatrixTranspose(mat);
-    Matrix result = {};
-    DirectX::XMStoreFloat4x4(&result.matrix, mat);
+    Matrix result;
+    get(result) = glm::transpose(get(*this));
     return result;
 }
 
 Matrix Matrix::inverse() const {
-    DirectX::XMVECTOR determinant = {};
-    DirectX::XMMATRIX mat = DirectX::XMLoadFloat4x4(&matrix);
-
-    mat = DirectX::XMMatrixInverse(&determinant, mat);
-    Matrix result = {};
-    DirectX::XMStoreFloat4x4(&result.matrix, mat);
+    Matrix result;
+    get(result) = glm::inverse(get(*this));
     return result;
 }
 
 Vector3 Matrix::getTranslation() const {
-    DirectX::XMVECTOR translation_vector = {};
-    DirectX::XMVECTOR rotation_vector = {};
-    DirectX::XMVECTOR scale_vector = {};
-    DirectX::XMMATRIX mat = DirectX::XMLoadFloat4x4(&matrix);
+    Vector3 position;
+    Vector3 scale;
+    Quaternion orientation;
 
-    DirectX::XMMatrixDecompose(&scale_vector, &rotation_vector,
-                               &translation_vector, mat);
+    decompose(position, scale, orientation);
 
-    DirectX::XMFLOAT3 translation;
-    DirectX::XMStoreFloat3(&translation, translation_vector);
-
-    return {translation.x, translation.y, translation.z};
+    return position;
 }
 
 Quaternion Matrix::getRotation() const {
-    DirectX::XMVECTOR translation_vector = {};
-    DirectX::XMVECTOR rotation_vector = {};
-    DirectX::XMVECTOR scale_vector = {};
-    DirectX::XMMATRIX mat = DirectX::XMLoadFloat4x4(&matrix);
+    Vector3 position;
+    Vector3 scale;
+    Quaternion orientation;
 
-    DirectX::XMMatrixDecompose(&scale_vector, &rotation_vector,
-                               &translation_vector, mat);
+    decompose(position, scale, orientation);
 
-    DirectX::XMFLOAT4 rotation;
-    DirectX::XMStoreFloat4(&rotation, rotation_vector);
-
-    return {rotation.w, rotation.x, rotation.y, rotation.z};
+    return orientation;
 }
 
 Vector3 Matrix::getScale() const {
-    DirectX::XMVECTOR translation_vector = {};
-    DirectX::XMVECTOR rotation_vector = {};
-    DirectX::XMVECTOR scale_vector = {};
-    DirectX::XMMATRIX mat = DirectX::XMLoadFloat4x4(&matrix);
+    Vector3 position;
+    Vector3 scale;
+    Quaternion orientation;
 
-    DirectX::XMMatrixDecompose(&scale_vector, &rotation_vector,
-                               &translation_vector, mat);
+    decompose(position, scale, orientation);
 
-    DirectX::XMFLOAT3 scale;
-    DirectX::XMStoreFloat3(&scale, scale_vector);
-
-    return {scale.x, scale.y, scale.z};
+    return scale;
 }
 
 void Matrix::decompose(Vector3& position, Vector3& scale,
                        Quaternion& orientation) const {
-    DirectX::XMVECTOR translation_vector = {};
-    DirectX::XMVECTOR rotation_vector = {};
-    DirectX::XMVECTOR scale_vector = {};
-    DirectX::XMMATRIX mat = DirectX::XMLoadFloat4x4(&matrix);
+    glm::vec3 skew;
+    glm::vec4 perspective;
 
-    DirectX::XMMatrixDecompose(&scale_vector, &rotation_vector,
-                               &translation_vector, mat);
+    bool decomposed = glm::decompose(get(*this), get(scale), get(orientation),
+                                     get(position), skew, perspective);
+}
 
-    DirectX::XMFLOAT3 offloaded_scale;
-    DirectX::XMFLOAT3 offloaded_position;
-    DirectX::XMFLOAT4 offloaded_orientation;
-    DirectX::XMStoreFloat3(&offloaded_scale, scale_vector);
-    DirectX::XMStoreFloat3(&offloaded_position, translation_vector);
-    DirectX::XMStoreFloat4(&offloaded_orientation, rotation_vector);
-
-    scale = {offloaded_scale.x, offloaded_scale.y, offloaded_scale.z};
-    position = {offloaded_position.x, offloaded_position.y,
-                offloaded_position.z};
-    orientation = {offloaded_orientation.w, offloaded_orientation.x,
-                   offloaded_orientation.y, offloaded_orientation.z};
+Matrix operator*(const Matrix& a, const Matrix& b) {
+    Matrix result;
+    get(result) = get(a) * get(b);
+    return result;
 }
