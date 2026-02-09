@@ -50,10 +50,17 @@ void Window::init() {
     height = config.height;
 
     SDL_WindowFlags flags = SDL_WINDOW_VULKAN;
-    if (config.state == Config::Window::State::Borderless)
-        flags |= SDL_WINDOW_BORDERLESS;
-    if (config.state == Config::Window::State::Fullscreen)
-        flags |= SDL_WINDOW_FULLSCREEN;
+
+    switch (config.state) {
+        case Config::Window::State::Windowed:
+            break;
+        case Config::Window::State::Fullscreen:
+            flags |= SDL_WINDOW_FULLSCREEN;
+            break;
+        case Config::Window::State::Borderless:
+            flags |= SDL_WINDOW_BORDERLESS;
+            break;
+    }
 
     handle = SDL_CreateWindow("SDL3 Project", width, height, flags);
     SDL_SetWindowRelativeMouseMode(handle, true);
@@ -174,6 +181,9 @@ void Window::processMouseMove(const SDL_Event* event) {
     logger.debug("Mouse relative x: {}, y: {}", event->motion.xrel,
                  event->motion.yrel);
 
-    PhysicalInput::get().axisUpdated(Axis::MOUSE_X, event->motion.xrel);
-    PhysicalInput::get().axisUpdated(Axis::MOUSE_Y, event->motion.yrel);
+    float screen_space_x = event->motion.xrel / width;
+    float screen_space_y = event->motion.yrel / height;
+
+    PhysicalInput::get().axisUpdated(Axis::MOUSE_X, screen_space_x);
+    PhysicalInput::get().axisUpdated(Axis::MOUSE_Y, screen_space_y);
 }
