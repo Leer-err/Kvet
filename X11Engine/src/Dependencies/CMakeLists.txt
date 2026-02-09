@@ -41,12 +41,23 @@ target_link_directories(${TARGET_NAME} PUBLIC
 )
 
 target_link_libraries(${TARGET_NAME} PRIVATE
-    PhysX_static_64
-	PhysXCommon_static_64
-	PhysXFoundation_static_64
 	PhysXExtensions_static_64
 	PhysXPvdSDK_static_64
 )
+
+if (WIN32)
+ 	target_link_libraries(${TARGET_NAME} PRIVATE
+    	PhysX_64
+		PhysXCommon_64
+		PhysXFoundation_64
+ 	)
+else()
+  	target_link_libraries(${TARGET_NAME} PRIVATE
+    	PhysX_static_64
+		PhysXCommon_static_64
+		PhysXFoundation_static_64
+	)
+endif()
 
 # add_custom_command(
 # 	OUTPUT
@@ -68,19 +79,14 @@ target_link_libraries(${TARGET_NAME} PRIVATE
 
 #Assimp
 
-target_include_directories(${TARGET_NAME} PUBLIC
-	${CMAKE_CURRENT_SOURCE_DIR}/assimp/include
-)
+# target_include_directories(${TARGET_NAME} PUBLIC
+# 	${CMAKE_CURRENT_SOURCE_DIR}/assimp/include
+# )
 
-target_link_directories(${TARGET_NAME} PUBLIC
-	${CMAKE_CURRENT_SOURCE_DIR}/assimp/lib/Debug
-	${CMAKE_CURRENT_SOURCE_DIR}/assimp/bin
-)
-
-target_link_libraries(${TARGET_NAME} PUBLIC
-    assimp
-    # assimp-vc143-mtd
-)
+# target_link_directories(${TARGET_NAME} PUBLIC
+# 	${CMAKE_CURRENT_SOURCE_DIR}/assimp/lib/Debug
+# 	${CMAKE_CURRENT_SOURCE_DIR}/assimp/bin
+# )
 
 # add_custom_command(
 # 	OUTPUT
@@ -156,4 +162,19 @@ target_link_libraries(${TARGET_NAME} PRIVATE glm::glm)
 # SDL3
 
 add_subdirectory(sdl EXCLUDE_FROM_ALL)
-target_link_libraries(${TARGET_NAME} PRIVATE SDL3::SDL3)
+
+# vk-bootstrap
+
+add_subdirectory(vk-bootstrap)
+
+# Vulkan
+
+add_library(vulkan-interface INTERFACE)
+
+target_include_directories(vulkan-interface INTERFACE
+	${VULKAN_PATH}/include
+)
+target_link_directories(vulkan-interface INTERFACE
+	${VULKAN_PATH}/Lib
+)
+target_link_libraries(vulkan-interface INTERFACE vulkan-1)

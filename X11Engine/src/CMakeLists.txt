@@ -2,7 +2,7 @@ cmake_minimum_required (VERSION 3.21)
 
 set(EXECUTABLE_NAME "X11Engine")
 
-add_executable(${EXECUTABLE_NAME} WIN32 main.cpp)
+add_executable(${EXECUTABLE_NAME} main.cpp)
 target_link_libraries(${EXECUTABLE_NAME} PRIVATE X11Engine_lib)
 set_target_properties(${EXECUTABLE_NAME} PROPERTIES
 	CXX_STANDARD 20
@@ -26,8 +26,6 @@ set_target_properties(${TARGET_NAME} PROPERTIES
 	CXX_STANDARD 20
 	CXX_STANDARD_REQUIRED true
 	CXX_EXTENSIONS OFF
-
-	
 )
 
 add_subdirectory(Dependencies)

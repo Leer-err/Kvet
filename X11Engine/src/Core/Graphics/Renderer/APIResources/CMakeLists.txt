@@ -1,5 +1,5 @@
 target_sources(Graphics PRIVATE
-    APIResources.cpp
+    GraphicsResources.cpp
 )
 
 target_include_directories(Graphics PRIVATE

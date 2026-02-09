@@ -2,7 +2,7 @@
 
 #include "Logger.h"
 
-class SDL_Window;
+typedef struct SDL_Window SDL_Window;
 union SDL_Event;
 
 class Window {
@@ -18,6 +18,8 @@ class Window {
 
     inline int getWidth() const { return width; }
     inline int getHeight() const { return height; }
+
+    SDL_Window* getHandle() const;
 
    private:
     Window();

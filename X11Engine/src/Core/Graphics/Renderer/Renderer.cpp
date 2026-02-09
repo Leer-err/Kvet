@@ -6,30 +6,34 @@
 
 #include <tracy/Tracy.hpp>
 
-#include "APIResources.h"
+// #include "AppConfig.h"
+// #include "Context.h"
+// #include "Format.h"
+#include "GraphicsResources.h"
+// #include "SwapChainBuilder.h"
+// #include "TextureBuilder.h"
 #include "AppConfig.h"
-#include "Context.h"
-#include "Format.h"
-#include "SwapChainBuilder.h"
-#include "TextureBuilder.h"
 
-Renderer::Renderer() {}
+namespace Graphics {
+
+Renderer::Renderer() { Resources::get(); }
 
 void Renderer::beginFrame() {
     ZoneScoped;
-    auto context = Context();
 
-    context.clean(default_render_target);
+    // auto context = Context();
+
+    // context.clean(default_render_target);
 }
 
 void Renderer::endFrame() {
     ZoneScoped;
-    auto context = Context();
+    // auto context = Context();
 
-    auto backbuffer = swap_chain.getBackbuffer();
-    context.copy(render_target_texture, backbuffer);
+    // auto backbuffer = swap_chain.getBackbuffer();
+    // context.copy(render_target_texture, backbuffer);
 
-    swap_chain.present();
+    // swap_chain.present();
 }
 
 void Renderer::initializeResources() {
@@ -38,39 +42,42 @@ void Renderer::initializeResources() {
     width = config.render_width;
     height = config.render_height;
 
-    swap_chain = SwapChainBuilder(config.render_width, config.render_height)
-                     .windowed()
-                     .create();
+    // swap_chain = SwapChainBuilder(config.render_width, config.render_height)
+    //                  .windowed()
+    //                  .create();
 
-    render_target_texture =
-        TextureBuilder(ImageFormat::RGBA_32BPP, config.render_width,
-                       config.render_height)
-            .isGPUWritable()
-            .isRenderTarget()
-            .create()
-            .getResult();
+    // render_target_texture =
+    //     TextureBuilder(ImageFormat::RGBA_32BPP, config.render_width,
+    //                    config.render_height)
+    //         .isGPUWritable()
+    //         .isRenderTarget()
+    //         .create()
+    //         .getResult();
 
-    default_render_target = RenderTarget(render_target_texture);
+    // default_render_target = RenderTarget(render_target_texture);
 
-    auto context = APIResources::get().getContext();
-    auto device = APIResources::get().getDevice();
+    // auto context = APIResources::get().getContext();
+    // auto device = APIResources::get().getDevice();
 
-    D3D11_BLEND_DESC1 desc = {};
-    desc.RenderTarget[0].BlendEnable = TRUE;
-    desc.RenderTarget[0].SrcBlend = D3D11_BLEND_ONE;
-    desc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
-    desc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
-    desc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
-    desc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_INV_SRC_ALPHA;
-    desc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
-    desc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+    // D3D11_BLEND_DESC1 desc = {};
+    // desc.RenderTarget[0].BlendEnable = TRUE;
+    // desc.RenderTarget[0].SrcBlend = D3D11_BLEND_ONE;
+    // desc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
+    // desc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+    // desc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
+    // desc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_INV_SRC_ALPHA;
+    // desc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+    // desc.RenderTarget[0].RenderTargetWriteMask =
+    // D3D11_COLOR_WRITE_ENABLE_ALL;
 
-    Microsoft::WRL::ComPtr<ID3D11BlendState1> blend_state;
-    device->CreateBlendState1(&desc, &blend_state);
+    // Microsoft::WRL::ComPtr<ID3D11BlendState1> blend_state;
+    // device->CreateBlendState1(&desc, &blend_state);
 
-    context->OMSetBlendState(blend_state.Get(), nullptr, 0xffffffff);
+    // context->OMSetBlendState(blend_state.Get(), nullptr, 0xffffffff);
 }
 
 uint32_t Renderer::getWidth() const { return width; }
 
 uint32_t Renderer::getHeight() const { return height; }
+
+}  // namespace Graphics

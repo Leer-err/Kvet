@@ -1,12 +1,15 @@
 #include "Core.h"
 
-#include <stdio.h>
-
-#include "LoggerFactory.h"
+#include "Renderer.h"
 #include "Window.h"
 
 namespace Core {
 
-void init() { Window::get().init(); }
+void init() {
+    Window::get().init();
+    Graphics::Renderer::get();
+
+    Window::get().processMessages();
+}
 
 }  // namespace Core

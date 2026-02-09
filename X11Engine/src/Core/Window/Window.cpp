@@ -187,3 +187,5 @@ void Window::processMouseMove(const SDL_Event* event) {
     PhysicalInput::get().axisUpdated(Axis::MOUSE_X, screen_space_x);
     PhysicalInput::get().axisUpdated(Axis::MOUSE_Y, screen_space_y);
 }
+
+SDL_Window* Window::getHandle() const { return handle; }

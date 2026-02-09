@@ -6,10 +6,6 @@ target_include_directories(Graphics PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-target_link_libraries(Graphics PRIVATE
-    Logger
-)
-
 add_subdirectory(APIResources)
 # add_subdirectory(Context)
 # add_subdirectory(SwapChain)

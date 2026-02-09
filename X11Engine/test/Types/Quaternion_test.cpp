@@ -4,28 +4,15 @@
 #include <gtest/gtest.h>
 
 TEST(QuaternionTest, FromEuler0) {
-    Quaternion identity;
-    // identity.w = 1.;
-    // identity.x = 0.;
-    // identity.y = 0.;
-    // identity.z = 0.;
+    Quaternion identity(1, 0, 0, 0);
 
-    ASSERT_EQ(Quaternion(0.f, 0.f, 0.f), identity);
+    ASSERT_EQ(Quaternion(), identity);
 }
 
 TEST(QuaternionTest, FromRoll) {
-    Quaternion roll;
-    // roll.w = 0.;
-    // roll.x = 1.;
-    // roll.y = 0.;
-    // roll.z = 0.;
+    Quaternion roll(0., 1, 0, 0);
 
-    auto test = Quaternion(3.14f, 0.f, 0.f);
-
-    // ASSERT_NEAR(roll.w, test.w, 0.001);
-    // ASSERT_NEAR(roll.x, test.x, 0.001);
-    // ASSERT_NEAR(roll.y, test.y, 0.001);
-    // ASSERT_NEAR(roll.z, test.z, 0.001);
+    ASSERT_EQ(Quaternion(3.14f, 0.f, 0.f), roll);
 }
 
 TEST(QuaternionTest, ToMatrix) {

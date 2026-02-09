@@ -1,7 +1,6 @@
 #pragma once
 
-#include <dxgi1_4.h>
-#include <wrl/client.h>
+#include <VkBootstrap.h>
 
 class Texture;
 
@@ -16,8 +15,8 @@ class SwapChain {
     Texture getBackbuffer();
 
    protected:
-    SwapChain(const Microsoft::WRL::ComPtr<IDXGISwapChain1>& swap_chain);
+    SwapChain(vkb::Swapchain swap_chain);
 
    private:
-    Microsoft::WRL::ComPtr<IDXGISwapChain1> swap_chain;
+    vkb::Swapchain swap_chain;
 };
