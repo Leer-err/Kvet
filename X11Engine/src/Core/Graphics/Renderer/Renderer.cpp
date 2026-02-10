@@ -1,9 +1,5 @@
 #include "Renderer.h"
 
-#include <d3d11.h>
-#include <d3d11_1.h>
-#include <wrl/client.h>
-
 #include <tracy/Tracy.hpp>
 
 // #include "AppConfig.h"

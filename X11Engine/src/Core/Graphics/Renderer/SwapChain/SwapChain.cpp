@@ -6,8 +6,7 @@
 #include "Texture.h"
 #include "dxgi1_4.h"
 
-SwapChain::SwapChain(const Microsoft::WRL::ComPtr<IDXGISwapChain1>& swap_chain)
-    : swap_chain(swap_chain) {}
+SwapChain::SwapChain(vkb::Swapchain swap_chain) : swap_chain(swap_chain) {}
 
 void SwapChain::present() { swap_chain->Present(0, 0); }
 

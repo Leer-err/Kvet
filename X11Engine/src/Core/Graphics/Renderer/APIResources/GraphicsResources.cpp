@@ -12,9 +12,9 @@
 namespace Graphics {
 
 Resources::Resources() : logger(LoggerFactory::getLogger("Graphics")) {
-    auto graphics_queue_ret = device.get_queue(vkb::QueueType::graphics);
-    if (!graphics_queue_ret) logger.error("Failure requesting graphics queue");
-    VkQueue graphics_queue = graphics_queue_ret.value();
+    createInstance();
+    createDevice();
+    getQueue();
 }
 
 void Resources::createInstance() {
@@ -67,6 +67,12 @@ void Resources::createDevice() {
     vkGetPhysicalDeviceProperties(phys_ret->physical_device,
                                   &device_properties);
     logger.info("Using device {}", device_properties.deviceName);
+}
+
+void Resources::getQueue() {
+    auto graphics_queue_ret = device.get_queue(vkb::QueueType::graphics);
+    if (!graphics_queue_ret) logger.error("Failure requesting graphics queue");
+    VkQueue graphics_queue = graphics_queue_ret.value();
 }
 
 vkb::Device Resources::getDevice() const { return device; }

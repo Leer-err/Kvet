@@ -29,7 +29,7 @@ target_link_libraries(${TARGET_NAME} PUBLIC
 
 #PhysX
 
-set(PHYSX_BUILD_TYPE $<IF:$<CONFIG:Debug>,debug,checked>)
+set(PHYSX_BUILD_TYPE $<IF:$<CONFIG:Debug>,checked,profile>)
 
 target_include_directories(${TARGET_NAME} PUBLIC
 	${CMAKE_CURRENT_SOURCE_DIR}/PhysX/physx/include
@@ -171,10 +171,15 @@ add_subdirectory(vk-bootstrap)
 
 add_library(vulkan-interface INTERFACE)
 
-target_include_directories(vulkan-interface INTERFACE
-	${VULKAN_PATH}/include
-)
-target_link_directories(vulkan-interface INTERFACE
-	${VULKAN_PATH}/Lib
-)
-target_link_libraries(vulkan-interface INTERFACE vulkan-1)
+if (WIN32)
+ 	target_include_directories(vulkan-interface INTERFACE
+		${VULKAN_PATH}/include
+	)
+	target_link_directories(vulkan-interface INTERFACE
+		${VULKAN_PATH}/Lib
+	)
+	target_link_libraries(vulkan-interface INTERFACE vulkan-1)
+else()
+	find_package(Vulkan REQUIRED)
+  	target_link_libraries(vulkan-interface INTERFACE Vulkan::Vulkan)
+endif()
