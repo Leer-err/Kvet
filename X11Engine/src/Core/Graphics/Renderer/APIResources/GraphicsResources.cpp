@@ -69,12 +69,14 @@ void Resources::createDevice() {
     logger.info("Using device {}", device_properties.deviceName);
 }
 
-void Resources::getQueue() {
+void Resources::createQueue() {
     auto graphics_queue_ret = device.get_queue(vkb::QueueType::graphics);
     if (!graphics_queue_ret) logger.error("Failure requesting graphics queue");
-    VkQueue graphics_queue = graphics_queue_ret.value();
+    queue = graphics_queue_ret.value();
 }
 
 vkb::Device Resources::getDevice() const { return device; }
+
+VkQueue Resources::getQueue() const { return queue; }
 
 }  // namespace Graphics

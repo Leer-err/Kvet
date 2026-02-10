@@ -15,6 +15,7 @@ class Resources {
     }
 
     vkb::Device getDevice() const;
+    VkQueue getQueue() const;
 
    private:
     Resources();
@@ -25,7 +26,7 @@ class Resources {
 
     void createInstance();
     void createDevice();
-    void getQueue();
+    void createQueue();
 
     vkb::Instance instance;
     vkb::Device device;
