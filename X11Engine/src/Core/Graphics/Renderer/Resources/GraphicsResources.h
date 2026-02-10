@@ -1,9 +1,10 @@
 #pragma once
 
+#include <VkBootstrap.h>
+#include <vk_mem_alloc.h>
 #include <vulkan/vulkan_core.h>
 
 #include "Logger.h"
-#include "VkBootstrap.h"
 
 namespace Graphics {
 
@@ -14,8 +15,9 @@ class Resources {
         return instance;
     }
 
-    vkb::Device getDevice() const;
+    VkDevice getDevice() const;
     VkQueue getQueue() const;
+    VmaAllocator getAllocator() const;
 
    private:
     Resources();
@@ -28,9 +30,12 @@ class Resources {
     void createDevice();
     void createQueue();
 
+    void createAllocator();
+
     vkb::Instance instance;
     vkb::Device device;
     VkQueue queue;
+    VmaAllocator allocator;
 
     Logger logger;
 };

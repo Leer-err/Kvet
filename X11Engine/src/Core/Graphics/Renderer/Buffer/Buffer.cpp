@@ -1,13 +1,16 @@
 #include "Buffer.h"
 
-Buffer::Buffer(Microsoft::WRL::ComPtr<ID3D11Buffer> buffer, size_t size,
-               size_t stride, size_t offset)
-    : buffer(buffer), size(size), stride(stride), offset(offset) {}
+#include "InternalBuffer.h"
 
-Microsoft::WRL::ComPtr<ID3D11Buffer> Buffer::get() const { return buffer; }
+namespace Graphics {
 
-size_t Buffer::getOffset() const { return offset; }
+Buffer::Buffer() { buffer = std::make_unique<Internal::Buffer>(); }
 
-size_t Buffer::getStride() const { return stride; }
+Buffer::Buffer(std::unique_ptr<Internal::Buffer>&& buffer)
+    : buffer(std::move(buffer)) {}
 
-size_t Buffer::getSize() const { return size; }
+Internal::Buffer* Buffer::getInternal() const { return buffer.get(); }
+
+size_t Buffer::getSize() const { return buffer->size; }
+
+}  // namespace Graphics

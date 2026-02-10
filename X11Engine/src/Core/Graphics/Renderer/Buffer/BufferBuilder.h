@@ -5,6 +5,8 @@
 #include "Buffer.h"
 #include "Result.h"
 
+namespace Graphics {
+
 enum class BufferError { NoDataForImmutableResource, WriteFromGPUAndCPU };
 
 class BufferBuilder {
@@ -34,3 +36,5 @@ class BufferBuilder {
     bool cpu_writable;
     bool gpu_writable;
 };
+
+}  // namespace Graphics

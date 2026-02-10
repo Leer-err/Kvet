@@ -183,3 +183,19 @@ else()
 	find_package(Vulkan REQUIRED)
   	target_link_libraries(vulkan-interface INTERFACE Vulkan::Vulkan)
 endif()
+
+# Vulkan Memory Allocator
+
+add_subdirectory(VulkanMemoryAllocator)
+
+add_library(vulkan-allocator STATIC)
+target_sources(vulkan-allocator 
+	PRIVATE
+		VMAUsage.cpp
+)
+target_link_libraries(vulkan-allocator 
+	PUBLIC 
+		GPUOpen::VulkanMemoryAllocator
+	PRIVATE
+		vulkan-interface
+)

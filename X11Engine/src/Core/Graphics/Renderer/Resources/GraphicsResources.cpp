@@ -14,7 +14,8 @@ namespace Graphics {
 Resources::Resources() : logger(LoggerFactory::getLogger("Graphics")) {
     createInstance();
     createDevice();
-    getQueue();
+    createQueue();
+    createAllocator();
 }
 
 void Resources::createInstance() {
@@ -75,8 +76,22 @@ void Resources::createQueue() {
     queue = graphics_queue_ret.value();
 }
 
-vkb::Device Resources::getDevice() const { return device; }
+void Resources::createAllocator() {
+    VmaAllocatorCreateInfo allocatorCreateInfo = {};
+    allocatorCreateInfo.flags = VMA_ALLOCATOR_CREATE_EXT_MEMORY_BUDGET_BIT;
+    allocatorCreateInfo.vulkanApiVersion = VK_API_VERSION_1_1;
+    allocatorCreateInfo.physicalDevice = device.physical_device;
+    allocatorCreateInfo.device = device.device;
+    allocatorCreateInfo.instance = instance.instance;
+
+    VmaAllocator allocator;
+    vmaCreateAllocator(&allocatorCreateInfo, &allocator);
+}
+
+VkDevice Resources::getDevice() const { return device; }
 
 VkQueue Resources::getQueue() const { return queue; }
+
+VmaAllocator Resources::getAllocator() const { return allocator; }
 
 }  // namespace Graphics

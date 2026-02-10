@@ -11,6 +11,7 @@ target_link_libraries(Graphics
         Tracy::TracyClient
         SDL3::SDL3
         vulkan-interface
+        vulkan-allocator
         vk-bootstrap::vk-bootstrap
 )
 

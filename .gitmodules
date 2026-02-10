@@ -19,3 +19,6 @@
 [submodule "X11Engine/src/Dependencies/vk-bootstrap"]
 	path = X11Engine/src/Dependencies/vk-bootstrap
 	url = https://github.com/charles-lunarg/vk-bootstrap.git
+[submodule "X11Engine/src/Dependencies/VulkanMemoryAllocator"]
+	path = X11Engine/src/Dependencies/VulkanMemoryAllocator
+	url = https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator.git

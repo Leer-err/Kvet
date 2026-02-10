@@ -1,9 +1,16 @@
 #include "BufferBuilder.h"
 
-#include <d3d11.h>
+#include <vk_mem_alloc.h>
+#include <vulkan/vulkan_core.h>
 
-#include "APIResources.h"
+#include <memory>
+
 #include "Buffer.h"
+#include "GraphicsResources.h"
+#include "InternalBuffer.h"
+#include "Resources.h"
+
+namespace Graphics {
 
 BufferBuilder::BufferBuilder(size_t size)
     : size(size),
@@ -61,34 +68,32 @@ Result<Buffer, BufferError> BufferBuilder::create() {
     if (data == nullptr && !gpu_writable && !cpu_writable)
         return BufferError::NoDataForImmutableResource;
 
-    D3D11_BUFFER_DESC desc = {};
-    desc.ByteWidth = size;
-    if (shader_resource) desc.BindFlags |= D3D11_BIND_SHADER_RESOURCE;
-    if (constant_buffer) desc.BindFlags |= D3D11_BIND_CONSTANT_BUFFER;
-    if (vertex_buffer) desc.BindFlags |= D3D11_BIND_VERTEX_BUFFER;
-    if (index_buffer) desc.BindFlags |= D3D11_BIND_INDEX_BUFFER;
-    if (gpu_writable) desc.BindFlags |= D3D11_BIND_UNORDERED_ACCESS;
+    VkBufferCreateInfo buffer_info = {VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO};
+    buffer_info.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+    buffer_info.size = size;
+    if (shader_resource)
+        buffer_info.usage |= VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
+    if (constant_buffer)
+        buffer_info.usage |= VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
+    if (vertex_buffer) buffer_info.usage |= VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+    if (index_buffer) buffer_info.usage |= VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
+    if (gpu_writable) buffer_info.usage |= VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
 
-    if (!cpu_writable && !gpu_writable)
-        desc.Usage = D3D11_USAGE_IMMUTABLE;
-    else if (cpu_writable)
-        desc.Usage = D3D11_USAGE_DYNAMIC;
-    else if (gpu_writable)
-        desc.Usage = D3D11_USAGE_DEFAULT;
+    VmaAllocationCreateInfo alloc_info = {};
+    alloc_info.usage = VMA_MEMORY_USAGE_AUTO;
+    if (cpu_writable)
+        alloc_info.flags |= VMA_ALLOCATION_CREATE_HOST_ACCESS_RANDOM_BIT;
 
-    if (cpu_writable) desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+    VkBuffer buffer;
+    VmaAllocation allocation;
+    vmaCreateBuffer(Resources::get().getAllocator(), &buffer_info, &alloc_info,
+                    &buffer, &allocation, nullptr);
 
-    D3D11_SUBRESOURCE_DATA* initial_data = nullptr;
+    auto internal = std::make_unique<Internal::Buffer>();
+    internal->buffer = buffer;
+    internal->size = size;
 
-    D3D11_SUBRESOURCE_DATA res = {};
-    res.pSysMem = data;
-    if (data != nullptr) initial_data = &res;
-
-    auto device = APIResources::get().getDevice();
-
-    Microsoft::WRL::ComPtr<ID3D11Buffer> buf;
-    auto result = device->CreateBuffer(&desc, initial_data, buf.GetAddressOf());
-    if (FAILED(result)) throw;
-
-    return Buffer(buf, size, stride, offset);
+    return Buffer(std::move(internal));
 }
+
+}  // namespace Graphics
