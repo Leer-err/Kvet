@@ -8,7 +8,6 @@
 #include "Buffer.h"
 #include "GraphicsResources.h"
 #include "InternalBuffer.h"
-#include "Resources.h"
 
 namespace Graphics {
 
@@ -21,13 +20,8 @@ BufferBuilder::BufferBuilder(size_t size)
       index_buffer(false),
       constant_buffer(false),
       cpu_writable(false),
-      gpu_writable(false),
-      data(nullptr) {}
-
-BufferBuilder& BufferBuilder::withData(const void* data) {
-    this->data = data;
-    return *this;
-}
+      copy_source(false),
+      copy_target(false) {}
 
 BufferBuilder& BufferBuilder::isShaderResource() {
     shader_resource = true;
@@ -57,17 +51,17 @@ BufferBuilder& BufferBuilder::isCPUWritable() {
     return *this;
 }
 
-BufferBuilder& BufferBuilder::isGPUWritable() {
-    gpu_writable = true;
+BufferBuilder& BufferBuilder::isCopySource() {
+    copy_source = true;
+    return *this;
+}
+
+BufferBuilder& BufferBuilder::isCopyDestination() {
+    copy_target = true;
     return *this;
 }
 
 Result<Buffer, BufferError> BufferBuilder::create() {
-    // Validation
-    if (cpu_writable && gpu_writable) return BufferError::WriteFromGPUAndCPU;
-    if (data == nullptr && !gpu_writable && !cpu_writable)
-        return BufferError::NoDataForImmutableResource;
-
     VkBufferCreateInfo buffer_info = {VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO};
     buffer_info.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
     buffer_info.size = size;
@@ -77,7 +71,8 @@ Result<Buffer, BufferError> BufferBuilder::create() {
         buffer_info.usage |= VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
     if (vertex_buffer) buffer_info.usage |= VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
     if (index_buffer) buffer_info.usage |= VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
-    if (gpu_writable) buffer_info.usage |= VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
+    if (copy_source) buffer_info.usage |= VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
+    if (copy_target) buffer_info.usage |= VK_BUFFER_USAGE_TRANSFER_DST_BIT;
 
     VmaAllocationCreateInfo alloc_info = {};
     alloc_info.usage = VMA_MEMORY_USAGE_AUTO;

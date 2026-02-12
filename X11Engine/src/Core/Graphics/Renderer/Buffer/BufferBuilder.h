@@ -13,18 +13,17 @@ class BufferBuilder {
    public:
     BufferBuilder(size_t size);
 
-    BufferBuilder& withData(const void* data);
     BufferBuilder& isShaderResource();
     BufferBuilder& isVertexBuffer(size_t stride, size_t offset = 0);
     BufferBuilder& isIndexBuffer();
     BufferBuilder& isConstantBuffer();
     BufferBuilder& isCPUWritable();
-    BufferBuilder& isGPUWritable();
+    BufferBuilder& isCopySource();
+    BufferBuilder& isCopyDestination();
 
     Result<Buffer, BufferError> create();
 
    private:
-    const void* data;
     size_t size;
     size_t stride;
     size_t offset;
@@ -34,7 +33,8 @@ class BufferBuilder {
     bool index_buffer;
     bool constant_buffer;
     bool cpu_writable;
-    bool gpu_writable;
+    bool copy_source;
+    bool copy_target;
 };
 
 }  // namespace Graphics
