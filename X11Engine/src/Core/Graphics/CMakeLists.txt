@@ -8,6 +8,7 @@ target_link_libraries(Graphics
     PRIVATE 
         Window
         Logger
+        Types
         Tracy::TracyClient
         SDL3::SDL3
         vulkan-interface

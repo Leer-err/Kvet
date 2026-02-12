@@ -29,30 +29,32 @@ target_link_libraries(${TARGET_NAME} PUBLIC
 
 #PhysX
 
+add_library(physx-lib INTERFACE)
+
 set(PHYSX_BUILD_TYPE $<IF:$<CONFIG:Debug>,checked,profile>)
 
-target_include_directories(${TARGET_NAME} PUBLIC
+target_include_directories(physx-lib INTERFACE
 	${CMAKE_CURRENT_SOURCE_DIR}/PhysX/physx/include
 )
 
-target_link_directories(${TARGET_NAME} PUBLIC
+target_link_directories(physx-lib INTERFACE
 	${CMAKE_CURRENT_SOURCE_DIR}/PhysX/physx/bin/win.x86_64.vc143.mt/${PHYSX_BUILD_TYPE}
 	${CMAKE_CURRENT_SOURCE_DIR}/PhysX/physx/bin/linux.x86_64/${PHYSX_BUILD_TYPE}
 )
 
-target_link_libraries(${TARGET_NAME} PRIVATE
+target_link_libraries(physx-lib INTERFACE
 	PhysXExtensions_static_64
 	PhysXPvdSDK_static_64
 )
 
 if (WIN32)
- 	target_link_libraries(${TARGET_NAME} PRIVATE
+ 	target_link_libraries(physx-lib INTERFACE
     	PhysX_64
 		PhysXCommon_64
 		PhysXFoundation_64
  	)
 else()
-  	target_link_libraries(${TARGET_NAME} PRIVATE
+  	target_link_libraries(physx-lib INTERFACE
     	PhysX_static_64
 		PhysXCommon_static_64
 		PhysXFoundation_static_64
@@ -156,8 +158,6 @@ target_link_libraries(${TARGET_NAME} PUBLIC
 # glm
 
 add_subdirectory(glm EXCLUDE_FROM_ALL)
-
-target_link_libraries(${TARGET_NAME} PRIVATE glm::glm)
 
 # SDL3
 

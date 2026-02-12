@@ -6,6 +6,8 @@
 template <typename ResultType, typename ErrorType>
 class Result {
    public:
+    Result(ResultType&& result) : is_error(false), result(std::move(result)) {}
+    Result(ErrorType&& result) : is_error(true), result(std::move(result)) {}
     Result(const ResultType& result) : is_error(false), result(result) {}
     Result(const ErrorType& result) : is_error(true), result(result) {}
 

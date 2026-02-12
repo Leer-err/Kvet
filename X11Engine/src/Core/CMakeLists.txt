@@ -8,17 +8,19 @@ target_include_directories(Core PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-target_link_libraries(Core PRIVATE 
+target_link_libraries(Core PUBLIC 
 	Config
     Input
 	Logger
 	Window
 	Graphics
+	Types
 	# Physics
 	# Script
 )
 
 add_subdirectory(Logger)
+add_subdirectory(Types)
 add_subdirectory(Input)
 add_subdirectory(Config)
 add_subdirectory(Window)
