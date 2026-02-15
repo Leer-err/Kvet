@@ -1,24 +1,13 @@
 #include "TextureBuilder.h"
 
-#include <d3d11.h>
+#include <vulkan/vulkan_core.h>
 
-#include <optional>
+#include "GraphicsResources.h"
+#include "InternalTexture.h"
 
-#include "APIResources.h"
+namespace Graphics {
 
-constexpr std::optional<DXGI_FORMAT> imageFormatToDXGIFormat(
-    ImageFormat format) {
-    switch (format) {
-        case ImageFormat::BGRA_32BPP:
-            return DXGI_FORMAT_R8G8B8A8_UINT;
-        case ImageFormat::RGBA_32BPP:
-            return DXGI_FORMAT_R8G8B8A8_UNORM;
-        default:
-            return std::nullopt;
-    }
-}
-
-TextureBuilder::TextureBuilder(ImageFormat format, uint32_t width,
+TextureBuilder::TextureBuilder(Texture::Format format, uint32_t width,
                                uint32_t height)
     : data(nullptr),
       format(format),
@@ -27,19 +16,7 @@ TextureBuilder::TextureBuilder(ImageFormat format, uint32_t width,
       shader_resource(false),
       render_target(false),
       depth_stencil(false),
-      cpu_writable(false),
-      gpu_writable(false) {}
-
-TextureBuilder TextureBuilder::fromImage(const Image& image) {
-    return TextureBuilder(image.getFormat(), image.getWidth(),
-                          image.getHeight())
-        .withData((char*)image.getData());
-}
-
-TextureBuilder& TextureBuilder::withData(const char* data) {
-    this->data = data;
-    return *this;
-}
+      cpu_writable(false) {}
 
 TextureBuilder& TextureBuilder::isShaderResource() {
     shader_resource = true;
@@ -61,56 +38,55 @@ TextureBuilder& TextureBuilder::isCPUWritable() {
     return *this;
 }
 
-TextureBuilder& TextureBuilder::isGPUWritable() {
-    gpu_writable = true;
+TextureBuilder& TextureBuilder::isCopySource() {
+    is_copy_source = true;
+    return *this;
+}
+
+TextureBuilder& TextureBuilder::isCopyDestination() {
+    is_copy_target = true;
     return *this;
 }
 
 Result<Texture, TextureError> TextureBuilder::create() {
-    if (cpu_writable && gpu_writable) return TextureError::WriteFromGPUAndCPU;
-    if (!cpu_writable && !gpu_writable && !render_target && data == nullptr)
-        return TextureError::NoDataForImmutableResource;
+    VkFormat format = VK_FORMAT_R8G8B8A8_UNORM;
 
-    auto dxgi_format_optional = imageFormatToDXGIFormat(format);
-    if (dxgi_format_optional == std::nullopt)
-        return TextureError::UnsupportedFormat;
-    auto dxgi_format = dxgi_format_optional.value();
+    VkImageCreateInfo image_info = {VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO};
+    image_info.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+    image_info.pNext = nullptr;
+    image_info.extent = {.width = width, .height = height, .depth = 1};
+    image_info.mipLevels = 1;
+    image_info.arrayLayers = 1;
+    image_info.format = format;
+    image_info.tiling = VK_IMAGE_TILING_OPTIMAL;
+    image_info.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    image_info.samples = VK_SAMPLE_COUNT_1_BIT;
+    if (shader_resource)
+        image_info.usage |= VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+    if (render_target) image_info.usage |= VK_IMAGE_USAGE_SAMPLED_BIT;
+    if (depth_stencil)
+        image_info.usage |= VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
+    if (is_copy_target) image_info.usage |= VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
+    if (is_copy_target) image_info.usage |= VK_IMAGE_USAGE_TRANSFER_DST_BIT;
 
-    D3D11_TEXTURE2D_DESC desc = {};
-    desc.Format = dxgi_format;
-    desc.ArraySize = 1;
-    desc.MipLevels = 1;
-    desc.Width = width;
-    desc.Height = height;
-    desc.SampleDesc.Count = 1;
+    VmaAllocationCreateInfo alloc_info = {};
+    alloc_info.usage = VMA_MEMORY_USAGE_AUTO;
+    if (cpu_writable)
+        alloc_info.flags |= VMA_ALLOCATION_CREATE_HOST_ACCESS_RANDOM_BIT;
 
-    if (shader_resource) desc.BindFlags |= D3D11_BIND_SHADER_RESOURCE;
-    if (render_target) desc.BindFlags |= D3D11_BIND_RENDER_TARGET;
-    if (depth_stencil) desc.BindFlags |= D3D11_BIND_DEPTH_STENCIL;
+    VkImage image;
+    VmaAllocation allocation;
+    vmaCreateImage(Resources::get().getAllocator(), &image_info, &alloc_info,
+                   &image, &allocation, nullptr);
 
-    if (!cpu_writable && !gpu_writable)
-        desc.Usage = D3D11_USAGE_IMMUTABLE;
-    else if (cpu_writable)
-        desc.Usage = D3D11_USAGE_DYNAMIC;
-    else if (gpu_writable)
-        desc.Usage = D3D11_USAGE_DEFAULT;
+    auto internal = Internal::Texture{};
+    internal.allocation = allocation;
+    internal.format = format;
+    internal.width = width;
+    internal.height = height;
+    internal.image = image;
 
-    if (cpu_writable) desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-
-    size_t bytes_per_pixel = imageFormatBytesPerPixel(format);
-
-    D3D11_SUBRESOURCE_DATA sub_data = {};
-    sub_data.pSysMem = data;
-    sub_data.SysMemPitch = width * bytes_per_pixel;
-    sub_data.SysMemSlicePitch = width * height * bytes_per_pixel;
-
-    D3D11_SUBRESOURCE_DATA* sub_data_ptr =
-        data == nullptr ? nullptr : &sub_data;
-
-    auto device = APIResources::get().getDevice();
-
-    Microsoft::WRL::ComPtr<ID3D11Texture2D> texture;
-    auto result = device->CreateTexture2D(&desc, sub_data_ptr, &texture);
-
-    return Texture(texture, width, height, dxgi_format);
+    return std::move(Texture(std::move(internal)));
 }
+
+}  // namespace Graphics

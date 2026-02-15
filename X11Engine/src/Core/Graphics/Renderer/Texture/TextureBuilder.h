@@ -1,9 +1,9 @@
 #pragma once
 
-#include "Format.h"
-#include "Image.h"
 #include "Result.h"
 #include "Texture.h"
+
+namespace Graphics {
 
 enum class TextureError {
     UnsupportedFormat,
@@ -13,21 +13,20 @@ enum class TextureError {
 
 class TextureBuilder {
    public:
-    TextureBuilder(ImageFormat format, uint32_t width, uint32_t height);
-    static TextureBuilder fromImage(const Image& image);
+    TextureBuilder(Texture::Format format, uint32_t width, uint32_t height);
 
-    TextureBuilder& withData(const char* data);
     TextureBuilder& isShaderResource();
     TextureBuilder& isRenderTarget();
     TextureBuilder& isDepthStencil();
     TextureBuilder& isCPUWritable();
-    TextureBuilder& isGPUWritable();
+    TextureBuilder& isCopySource();
+    TextureBuilder& isCopyDestination();
 
     Result<Texture, TextureError> create();
 
    private:
     const char* data;
-    ImageFormat format;
+    Texture::Format format;
     uint32_t width;
     uint32_t height;
 
@@ -35,5 +34,8 @@ class TextureBuilder {
     bool render_target;
     bool depth_stencil;
     bool cpu_writable;
-    bool gpu_writable;
+    bool is_copy_source;
+    bool is_copy_target;
 };
+
+}  // namespace Graphics

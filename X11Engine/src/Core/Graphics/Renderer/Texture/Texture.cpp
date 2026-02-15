@@ -1,17 +1,20 @@
 #include "Texture.h"
 
-#include "d3d11_1.h"
+#include "InternalTexture.h"
 
-Texture::Texture() : texture(nullptr) {}
+namespace Graphics {
 
-Texture::Texture(Microsoft::WRL::ComPtr<ID3D11Texture2D> texture,
-                 uint32_t width, uint32_t height, DXGI_FORMAT format)
-    : texture(texture), width(width), height(height), format(format) {}
+Texture::~Texture() = default;
 
-Microsoft::WRL::ComPtr<ID3D11Texture2D> Texture::get() const { return texture; }
+Texture::Texture() : texture(std::make_unique<Internal::Texture>()) {}
 
-uint32_t Texture::getWidth() const { return width; }
+Texture::Texture(Internal::Texture&& texture)
+    : texture(std::make_unique<Internal::Texture>(texture)) {}
 
-uint32_t Texture::getHeight() const { return height; }
+Internal::Texture* Texture::getInternal() const { return texture.get(); }
 
-DXGI_FORMAT Texture::getFormat() const { return format; }
+uint32_t Texture::getWidth() const { return texture->width; }
+
+uint32_t Texture::getHeight() const { return texture->height; }
+
+}  // namespace Graphics

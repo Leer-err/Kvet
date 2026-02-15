@@ -1,11 +1,11 @@
 #pragma once
 
-#include <dxgiformat.h>
-#include <wrl/client.h>
-
 #include <cstdint>
+#include <memory>
 
-#include "d3d11_1.h"
+#include "GraphicsInternalsForward.h"
+
+namespace Graphics {
 
 class Texture {
     friend class TextureBuilder;
@@ -15,24 +15,21 @@ class Texture {
     friend class Context;
 
    public:
+    enum class Format { RGBA8 };
+
     Texture();
+    ~Texture();
 
     uint32_t getWidth() const;
     uint32_t getHeight() const;
 
-    Microsoft::WRL::ComPtr<ID3D11Texture2D> get() const;
-
    protected:
-    Texture(Microsoft::WRL::ComPtr<ID3D11Texture2D> texture, uint32_t width,
-            uint32_t height, DXGI_FORMAT format);
+    Texture(Internal::Texture&& texture);
 
-    DXGI_FORMAT getFormat() const;
+    Internal::Texture* getInternal() const;
 
    private:
-    Microsoft::WRL::ComPtr<ID3D11Texture2D> texture;
-
-    uint32_t width;
-    uint32_t height;
-
-    DXGI_FORMAT format;
+    std::unique_ptr<Internal::Texture> texture;
 };
+
+}  // namespace Graphics
