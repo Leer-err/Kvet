@@ -13,11 +13,12 @@ class Buffer {
 
    public:
     Buffer();
+    ~Buffer();
 
     size_t getSize() const;
 
    protected:
-    Buffer(std::unique_ptr<Internal::Buffer>&& buffer);
+    Buffer(Internal::Buffer&& buffer);
     Internal::Buffer* getInternal() const;
 
    private:

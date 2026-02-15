@@ -3,8 +3,6 @@
 #include <vk_mem_alloc.h>
 #include <vulkan/vulkan_core.h>
 
-#include <memory>
-
 #include "Buffer.h"
 #include "GraphicsResources.h"
 #include "InternalBuffer.h"
@@ -64,6 +62,7 @@ BufferBuilder& BufferBuilder::isCopyDestination() {
 Result<Buffer, BufferError> BufferBuilder::create() {
     VkBufferCreateInfo buffer_info = {VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO};
     buffer_info.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+    buffer_info.pNext = nullptr;
     buffer_info.size = size;
     if (shader_resource)
         buffer_info.usage |= VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
@@ -84,11 +83,11 @@ Result<Buffer, BufferError> BufferBuilder::create() {
     vmaCreateBuffer(Resources::get().getAllocator(), &buffer_info, &alloc_info,
                     &buffer, &allocation, nullptr);
 
-    auto internal = std::make_unique<Internal::Buffer>();
-    internal->buffer = buffer;
-    internal->size = size;
+    auto internal = Internal::Buffer{};
+    internal.buffer = buffer;
+    internal.size = size;
 
-    return Buffer(std::move(internal));
+    return std::move(Buffer(std::move(internal)));
 }
 
 }  // namespace Graphics

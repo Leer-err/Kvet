@@ -1,13 +1,17 @@
 #include "Buffer.h"
 
+#include <memory>
+
 #include "InternalBuffer.h"
 
 namespace Graphics {
 
+Buffer::~Buffer() = default;
+
 Buffer::Buffer() { buffer = std::make_unique<Internal::Buffer>(); }
 
-Buffer::Buffer(std::unique_ptr<Internal::Buffer>&& buffer)
-    : buffer(std::move(buffer)) {}
+Buffer::Buffer(Internal::Buffer&& buffer)
+    : buffer(std::make_unique<Internal::Buffer>(std::move(buffer))) {}
 
 Internal::Buffer* Buffer::getInternal() const { return buffer.get(); }
 
