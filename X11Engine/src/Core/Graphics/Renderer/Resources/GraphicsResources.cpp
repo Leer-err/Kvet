@@ -84,7 +84,6 @@ void Resources::createAllocator() {
     allocatorCreateInfo.device = device.device;
     allocatorCreateInfo.instance = instance.instance;
 
-    VmaAllocator allocator;
     vmaCreateAllocator(&allocatorCreateInfo, &allocator);
 }
 
