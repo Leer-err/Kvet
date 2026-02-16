@@ -3,9 +3,12 @@
 #include <vk_mem_alloc.h>
 #include <vulkan/vulkan_core.h>
 
+#include <utility>
+
 #include "Buffer.h"
 #include "GraphicsResources.h"
 #include "InternalBuffer.h"
+#include "Result.h"
 
 namespace Graphics {
 
@@ -87,7 +90,7 @@ Result<Buffer, BufferError> BufferBuilder::create() {
     internal.buffer = buffer;
     internal.size = size;
 
-    return std::move(Buffer(std::move(internal)));
+    return Buffer(std::move(internal));
 }
 
 }  // namespace Graphics

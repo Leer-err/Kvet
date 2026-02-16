@@ -1,5 +1,6 @@
 #include "TextureBuilder.h"
 
+#include <vk_mem_alloc.h>
 #include <vulkan/vulkan_core.h>
 
 #include "GraphicsResources.h"
@@ -16,7 +17,9 @@ TextureBuilder::TextureBuilder(Texture::Format format, uint32_t width,
       shader_resource(false),
       render_target(false),
       depth_stencil(false),
-      cpu_writable(false) {}
+      cpu_writable(false),
+      is_copy_target(false),
+      is_copy_source(false) {}
 
 TextureBuilder& TextureBuilder::isShaderResource() {
     shader_resource = true;
@@ -51,9 +54,10 @@ TextureBuilder& TextureBuilder::isCopyDestination() {
 Result<Texture, TextureError> TextureBuilder::create() {
     VkFormat format = VK_FORMAT_R8G8B8A8_UNORM;
 
-    VkImageCreateInfo image_info = {VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO};
+    VkImageCreateInfo image_info = {};
     image_info.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
     image_info.pNext = nullptr;
+    image_info.imageType = VK_IMAGE_TYPE_2D;
     image_info.extent = {.width = width, .height = height, .depth = 1};
     image_info.mipLevels = 1;
     image_info.arrayLayers = 1;
@@ -61,18 +65,16 @@ Result<Texture, TextureError> TextureBuilder::create() {
     image_info.tiling = VK_IMAGE_TILING_OPTIMAL;
     image_info.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
     image_info.samples = VK_SAMPLE_COUNT_1_BIT;
-    if (shader_resource)
-        image_info.usage |= VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
-    if (render_target) image_info.usage |= VK_IMAGE_USAGE_SAMPLED_BIT;
+    image_info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+    if (shader_resource) image_info.usage |= VK_IMAGE_USAGE_SAMPLED_BIT;
+    if (render_target) image_info.usage |= VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
     if (depth_stencil)
         image_info.usage |= VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
-    if (is_copy_target) image_info.usage |= VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
+    if (is_copy_source) image_info.usage |= VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
     if (is_copy_target) image_info.usage |= VK_IMAGE_USAGE_TRANSFER_DST_BIT;
 
     VmaAllocationCreateInfo alloc_info = {};
     alloc_info.usage = VMA_MEMORY_USAGE_AUTO;
-    if (cpu_writable)
-        alloc_info.flags |= VMA_ALLOCATION_CREATE_HOST_ACCESS_RANDOM_BIT;
 
     VkImage image;
     VmaAllocation allocation;

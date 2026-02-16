@@ -6,6 +6,10 @@ namespace Graphics {
 
 Texture::~Texture() = default;
 
+Texture::Texture(Texture&&) = default;
+
+Texture& Texture::operator=(Texture&&) = default;
+
 Texture::Texture() : texture(std::make_unique<Internal::Texture>()) {}
 
 Texture::Texture(Internal::Texture&& texture)

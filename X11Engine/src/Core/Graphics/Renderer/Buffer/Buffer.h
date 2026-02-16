@@ -1,6 +1,8 @@
 #pragma once
 
-#include <cstddef>
+#include <stddef.h>
+
+// #include <cstddef>
 #include <memory>
 
 #include "GraphicsInternalsForward.h"
@@ -14,6 +16,9 @@ class Buffer {
    public:
     Buffer();
     ~Buffer();
+
+    Buffer(Buffer&&);
+    Buffer& operator=(Buffer&&);
 
     size_t getSize() const;
 

@@ -20,6 +20,9 @@ class Texture {
     Texture();
     ~Texture();
 
+    Texture(Texture&&);
+    Texture& operator=(Texture&&);
+
     uint32_t getWidth() const;
     uint32_t getHeight() const;
 

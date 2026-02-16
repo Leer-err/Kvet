@@ -8,6 +8,10 @@ namespace Graphics {
 
 Buffer::~Buffer() = default;
 
+Buffer::Buffer(Buffer&&) = default;
+
+Buffer& Buffer::operator=(Buffer&&) = default;
+
 Buffer::Buffer() { buffer = std::make_unique<Internal::Buffer>(); }
 
 Buffer::Buffer(Internal::Buffer&& buffer)

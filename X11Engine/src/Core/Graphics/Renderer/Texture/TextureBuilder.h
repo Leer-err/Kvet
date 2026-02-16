@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstdint>
+
 #include "Result.h"
 #include "Texture.h"
 
