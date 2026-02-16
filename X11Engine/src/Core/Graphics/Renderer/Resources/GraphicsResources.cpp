@@ -3,6 +3,7 @@
 // #include <SDL3/SDL.h>
 #include <SDL3/SDL_vulkan.h>
 #include <VkBootstrap.h>
+#include <vulkan/vk_enum_string_helper.h>
 #include <vulkan/vulkan_core.h>
 
 #include "Logger.h"
@@ -21,6 +22,7 @@ Resources::Resources() : logger(LoggerFactory::getLogger("Graphics")) {
 void Resources::createInstance() {
     vkb::InstanceBuilder builder;
     auto inst_ret = builder.set_app_name("Example Vulkan Application")
+                        .require_api_version(1, 1, 0)
                         .request_validation_layers()
                         .use_default_debug_messenger()
                         .build();
@@ -78,16 +80,18 @@ void Resources::createQueue() {
 
 void Resources::createAllocator() {
     VmaAllocatorCreateInfo allocatorCreateInfo = {};
-    allocatorCreateInfo.flags = VMA_ALLOCATOR_CREATE_EXT_MEMORY_BUDGET_BIT;
     allocatorCreateInfo.vulkanApiVersion = VK_API_VERSION_1_1;
     allocatorCreateInfo.physicalDevice = device.physical_device;
     allocatorCreateInfo.device = device.device;
     allocatorCreateInfo.instance = instance.instance;
 
-    vmaCreateAllocator(&allocatorCreateInfo, &allocator);
+    VkResult result = vmaCreateAllocator(&allocatorCreateInfo, &allocator);
+    if (result != VK_SUCCESS)
+        logger.error("Vulkan allocator was not created with {}",
+                     string_VkResult(result));
 }
 
-VkDevice Resources::getDevice() const { return device; }
+VkDevice Resources::getDevice() const { return device.device; }
 
 VkQueue Resources::getQueue() const { return queue; }
 

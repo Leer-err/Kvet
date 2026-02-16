@@ -7,8 +7,8 @@
 // #include "Format.h"
 #include "GraphicsResources.h"
 // #include "SwapChainBuilder.h"
-// #include "TextureBuilder.h"
 #include "AppConfig.h"
+#include "TextureBuilder.h"
 
 namespace Graphics {
 
@@ -42,13 +42,13 @@ void Renderer::initializeResources() {
     //                  .windowed()
     //                  .create();
 
-    // render_target_texture =
-    //     TextureBuilder(ImageFormat::RGBA_32BPP, config.render_width,
-    //                    config.render_height)
-    //         .isGPUWritable()
-    //         .isRenderTarget()
-    //         .create()
-    //         .getResult();
+    render_target_texture =
+        TextureBuilder(Texture::Format::RGBA8, config.render_width,
+                       config.render_height)
+            .isCopyDestination()
+            .isRenderTarget()
+            .create()
+            .getResult();
 
     // default_render_target = RenderTarget(render_target_texture);
 

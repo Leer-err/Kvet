@@ -6,6 +6,9 @@
 
 #include <cstdint>
 
+#include "Texture.h"
+
+
 namespace Graphics {
 
 class Renderer {
@@ -33,7 +36,7 @@ class Renderer {
    private:
     Renderer();
 
-    // Texture render_target_texture;
+    Texture render_target_texture;
     // RenderTarget default_render_target;
     // DepthStencil default_depth_stencil_buffer;
 
