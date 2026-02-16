@@ -11,26 +11,38 @@ class Result {
     Result(const ResultType& result) : is_error(false), result(result) {}
     Result(const ErrorType& result) : is_error(true), result(result) {}
 
-    ResultType getResult() const {
+    // ResultType getResult() {
+    //     if (is_error) throw std::bad_variant_access();
+
+    //     return std::get<ResultType>(result);
+    // }
+
+    // ResultType getResultOrDefault(const ResultType& default_value) {
+    //     if (is_error) return default_value;
+
+    //     return std::get<ResultType>(result);
+    // }
+
+    // ErrorType getError() {
+    //     if (is_error == false) throw std::bad_variant_access();
+
+    //     return std::get<ErrorType>(result);
+    // }
+
+    ResultType&& getResult() {
         if (is_error) {
             throw std::bad_variant_access();
         }
 
-        return std::get<ResultType>(result);
+        return std::move(std::get<ResultType>(result));
     }
 
-    ResultType getResultOrDefault(const ResultType& default_value) const {
-        if (is_error) return default_value;
-
-        return std::get<ResultType>(result);
-    }
-
-    ErrorType getError() const {
+    ErrorType&& getError() {
         if (is_error == false) {
             throw std::bad_variant_access();
         }
 
-        return std::get<ErrorType>(result);
+        return std::move(std::get<ErrorType>(result));
     }
 
     bool isOk() const { return !is_error; }
