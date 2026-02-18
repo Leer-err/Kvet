@@ -17,3 +17,4 @@ target_link_libraries(Graphics
 )
 
 add_subdirectory(Renderer)
+add_subdirectory(Internal)
