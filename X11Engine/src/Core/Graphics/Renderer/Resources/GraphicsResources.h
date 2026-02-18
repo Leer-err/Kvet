@@ -16,7 +16,8 @@ class Resources {
     }
 
     VkDevice getDevice() const;
-    VkQueue getQueue() const;
+    VkQueue getGraphicsQueue() const;
+    VkQueue getPresentationQueue() const;
     VmaAllocator getAllocator() const;
 
    private:
@@ -28,13 +29,14 @@ class Resources {
 
     void createInstance();
     void createDevice();
-    void createQueue();
+    void createQueues();
 
     void createAllocator();
 
     vkb::Instance instance;
     vkb::Device device;
-    VkQueue queue;
+    VkQueue graphics_queue;
+    VkQueue presentation_queue;
     VmaAllocator allocator;
 
     Logger logger;

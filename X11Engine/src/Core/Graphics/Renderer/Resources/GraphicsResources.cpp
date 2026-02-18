@@ -15,7 +15,7 @@ namespace Graphics {
 Resources::Resources() : logger(LoggerFactory::getLogger("Graphics")) {
     createInstance();
     createDevice();
-    createQueue();
+    createQueues();
     createAllocator();
 }
 
@@ -72,10 +72,15 @@ void Resources::createDevice() {
     logger.info("Using device {}", device_properties.deviceName);
 }
 
-void Resources::createQueue() {
+void Resources::createQueues() {
     auto graphics_queue_ret = device.get_queue(vkb::QueueType::graphics);
     if (!graphics_queue_ret) logger.error("Failure requesting graphics queue");
-    queue = graphics_queue_ret.value();
+    graphics_queue = graphics_queue_ret.value();
+
+    auto presentation_queue_ret = device.get_queue(vkb::QueueType::present);
+    if (!presentation_queue_ret)
+        logger.error("Failure requesting presentation queue");
+    presentation_queue = presentation_queue_ret.value();
 }
 
 void Resources::createAllocator() {
@@ -93,7 +98,9 @@ void Resources::createAllocator() {
 
 VkDevice Resources::getDevice() const { return device.device; }
 
-VkQueue Resources::getQueue() const { return queue; }
+VkQueue Resources::getGraphicsQueue() const { return graphics_queue; }
+
+VkQueue Resources::getPresentationQueue() const { return presentation_queue; }
 
 VmaAllocator Resources::getAllocator() const { return allocator; }
 
