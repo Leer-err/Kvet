@@ -3,3 +3,4 @@ target_include_directories(Graphics PRIVATE
 )
 
 add_subdirectory(Semaphore)
+add_subdirectory(Fence)
