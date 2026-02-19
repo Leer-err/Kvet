@@ -5,7 +5,7 @@
 namespace Graphics::Internal {
 
 struct Fence {
-    Fence();
+    Fence(bool is_signaled = false);
     ~Fence();
 
     VkFence fence;
