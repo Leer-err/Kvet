@@ -1,22 +1,45 @@
 #include "SwapChain.h"
 
-#include <combaseapi.h>
-#include <d3d11.h>
+#include <vulkan/vulkan_core.h>
 
+#include "GraphicsResources.h"
+#include "InternalSwapChain.h"
 #include "Texture.h"
-#include "dxgi1_4.h"
 
-SwapChain::SwapChain(vkb::Swapchain swap_chain) : swap_chain(swap_chain) {}
+namespace Graphics {
 
-void SwapChain::present() { swap_chain->Present(0, 0); }
+SwapChain::~SwapChain() = default;
 
-Texture SwapChain::getBackbuffer() {
-    Microsoft::WRL::ComPtr<ID3D11Texture2D> back_buffer;
-    HRESULT hr = swap_chain->GetBuffer(0, IID_PPV_ARGS(&back_buffer));
-    if (FAILED(hr)) return Texture();
+SwapChain::SwapChain(SwapChain&&) = default;
 
-    D3D11_TEXTURE2D_DESC desc;
-    back_buffer->GetDesc(&desc);
+SwapChain& SwapChain::operator=(SwapChain&&) = default;
 
-    return Texture(back_buffer, desc.Width, desc.Height, desc.Format);
+SwapChain::SwapChain() : swap_chain(std::make_unique<Internal::SwapChain>()) {}
+
+SwapChain::SwapChain(Internal::SwapChain&& swap_chain)
+    : swap_chain(std::make_unique<Internal::SwapChain>(std::move(swap_chain))) {
 }
+
+void SwapChain::present() {
+    VkSwapchainKHR swap_chains[] = {swap_chain->swap_chain};
+    uint32_t image_indices = 0;
+
+    VkPresentInfoKHR info = {};
+    info.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+    info.pNext = nullptr;
+    info.waitSemaphoreCount = 0;
+    info.pWaitSemaphores = nullptr;
+    info.swapchainCount = 1;
+    info.pSwapchains = swap_chains;
+    info.pImageIndices = &image_indices;
+    info.pResults = nullptr;
+
+    auto queue = Resources::get().getPresentationQueue();
+    vkQueuePresentKHR(queue, &info);
+}
+
+Texture SwapChain::getBackbuffer() { return Texture(); }
+
+Internal::SwapChain* SwapChain::getInternal() const { return swap_chain.get(); }
+
+}  // namespace Graphics

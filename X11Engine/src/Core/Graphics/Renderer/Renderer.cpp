@@ -5,9 +5,9 @@
 // #include "AppConfig.h"
 // #include "Context.h"
 // #include "Format.h"
-#include "GraphicsResources.h"
-// #include "SwapChainBuilder.h"
 #include "AppConfig.h"
+#include "GraphicsResources.h"
+#include "SwapChainBuilder.h"
 #include "TextureBuilder.h"
 
 namespace Graphics {
@@ -29,7 +29,7 @@ void Renderer::endFrame() {
     // auto backbuffer = swap_chain.getBackbuffer();
     // context.copy(render_target_texture, backbuffer);
 
-    // swap_chain.present();
+    swap_chain.present();
 }
 
 void Renderer::initializeResources() {
@@ -38,9 +38,8 @@ void Renderer::initializeResources() {
     width = config.render_width;
     height = config.render_height;
 
-    // swap_chain = SwapChainBuilder(config.render_width, config.render_height)
-    //                  .windowed()
-    //                  .create();
+    swap_chain =
+        SwapChainBuilder(config.render_width, config.render_height).create();
 
     render_target_texture =
         TextureBuilder(Texture::Format::RGBA8, config.render_width,

@@ -2,7 +2,8 @@
 
 namespace Graphics::Internal {
 
-class Buffer;
-class Texture;
+struct Buffer;
+struct Texture;
+struct SwapChain;
 
 }  // namespace Graphics::Internal

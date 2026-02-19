@@ -96,6 +96,8 @@ void Resources::createAllocator() {
                      string_VkResult(result));
 }
 
+vkb::Device Resources::getVKBDevice() const { return device; }
+
 VkDevice Resources::getDevice() const { return device.device; }
 
 VkQueue Resources::getGraphicsQueue() const { return graphics_queue; }

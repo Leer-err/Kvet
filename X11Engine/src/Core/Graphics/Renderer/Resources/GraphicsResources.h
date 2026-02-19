@@ -9,6 +9,8 @@
 namespace Graphics {
 
 class Resources {
+    friend class SwapChainBuilder;
+
    public:
     static Resources& get() {
         static Resources instance;
@@ -19,6 +21,9 @@ class Resources {
     VkQueue getGraphicsQueue() const;
     VkQueue getPresentationQueue() const;
     VmaAllocator getAllocator() const;
+
+   protected:
+    vkb::Device getVKBDevice() const;
 
    private:
     Resources();

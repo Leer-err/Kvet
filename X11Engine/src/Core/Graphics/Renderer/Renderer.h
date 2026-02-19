@@ -2,12 +2,10 @@
 
 // #include "DepthStencil.h"
 // #include "RenderTarget.h"
-// #include "SwapChain.h"
-
 #include <cstdint>
 
+#include "SwapChain.h"
 #include "Texture.h"
-
 
 namespace Graphics {
 
@@ -40,7 +38,7 @@ class Renderer {
     // RenderTarget default_render_target;
     // DepthStencil default_depth_stencil_buffer;
 
-    // SwapChain swap_chain;
+    SwapChain swap_chain;
 
     uint32_t width;
     uint32_t height;
