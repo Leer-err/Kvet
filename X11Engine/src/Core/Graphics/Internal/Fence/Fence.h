@@ -8,6 +8,11 @@ struct Fence {
     Fence(bool is_signaled = false);
     ~Fence();
 
+    Fence(Fence&& other);
+    Fence& operator=(Fence&& other);
+
+    void reset();
+
     VkFence fence;
 };
 

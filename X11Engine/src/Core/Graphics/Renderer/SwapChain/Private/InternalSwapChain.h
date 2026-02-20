@@ -9,7 +9,9 @@ namespace Graphics::Internal {
 struct SwapChain {
     vkb::Swapchain swap_chain;
 
-    Fence in_flight_fence;
+    Fence backbuffer_available;
+
+    uint32_t next_frame_index;
 };
 
 }  // namespace Graphics::Internal

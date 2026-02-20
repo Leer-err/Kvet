@@ -17,8 +17,26 @@ Fence::Fence(bool is_signaled) {
 }
 
 Fence::~Fence() {
+    if (fence == VK_NULL_HANDLE) return;
+
     auto device = Resources::get().getDevice();
     vkDestroyFence(device, fence, nullptr);
+}
+
+Fence::Fence(Fence&& other) : fence(other.fence) {
+    other.fence = VK_NULL_HANDLE;
+}
+
+Fence& Fence::operator=(Fence&& other) {
+    this->fence = other.fence;
+    other.fence = VK_NULL_HANDLE;
+
+    return *this;
+}
+
+void Fence::reset() {
+    auto device = Resources::get().getDevice();
+    vkResetFences(device, 1, &fence);
 }
 
 }  // namespace Graphics::Internal

@@ -26,7 +26,7 @@ void Renderer::endFrame() {
     ZoneScoped;
     // auto context = Context();
 
-    // auto backbuffer = swap_chain.getBackbuffer();
+    auto backbuffer = swap_chain.getBackbuffer();
     // context.copy(render_target_texture, backbuffer);
 
     swap_chain.present();
