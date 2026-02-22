@@ -38,8 +38,9 @@ void Renderer::initializeResources() {
     width = config.render_width;
     height = config.render_height;
 
-    swap_chain =
-        SwapChainBuilder(config.render_width, config.render_height).create();
+    swap_chain = SwapChainBuilder(config.render_width, config.render_height,
+                                  config.buffering_mode)
+                     .create();
 
     render_target_texture =
         TextureBuilder(Texture::Format::RGBA8, config.render_width,

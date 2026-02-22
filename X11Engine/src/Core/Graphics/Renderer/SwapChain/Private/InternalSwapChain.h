@@ -2,16 +2,13 @@
 
 #include <VkBootstrap.h>
 
-#include "Fence.h"
-
 namespace Graphics::Internal {
 
 struct SwapChain {
     vkb::Swapchain swap_chain;
 
-    Fence backbuffer_available;
-
-    uint32_t next_frame_index;
+    VkImage images[3];
+    uint32_t image_index;
 };
 
 }  // namespace Graphics::Internal

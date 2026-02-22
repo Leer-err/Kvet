@@ -4,18 +4,42 @@
 #include <vulkan/vulkan_core.h>
 
 #include "Fence.h"
+#include "GraphicsConfig.h"
 #include "GraphicsResources.h"
 #include "InternalSwapChain.h"
+#include "Semaphore.h"
 
 namespace Graphics {
 
-SwapChainBuilder::SwapChainBuilder(uint32_t width, uint32_t height)
-    : width(width), height(height), is_fullscreen(false) {}
+SwapChainBuilder::SwapChainBuilder(uint32_t width, uint32_t height,
+                                   Config::BufferingMode buffering_mode)
+    : width(width), height(height), buffering_mode(buffering_mode) {}
 
 SwapChain SwapChainBuilder::create() {
     auto device = Graphics::Resources::get().getVKBDevice();
 
     vkb::SwapchainBuilder swapchain_builder{device};
+
+    uint32_t queue_size = 2;
+    VkPresentModeKHR mode;
+    switch (buffering_mode) {
+        case Config::BufferingMode::NoBuffering:
+            mode = VK_PRESENT_MODE_IMMEDIATE_KHR;
+            break;
+        case Config::BufferingMode::VSyncNoBuffering:
+            mode = VK_PRESENT_MODE_MAILBOX_KHR;
+            break;
+        case Config::BufferingMode::DoubleBuffering:
+            mode = VK_PRESENT_MODE_FIFO_KHR;
+            break;
+        case Config::BufferingMode::TripleBuffering:
+            mode = VK_PRESENT_MODE_FIFO_KHR;
+            queue_size = 3;
+            break;
+    }
+
+    swapchain_builder.add_fallback_present_mode(mode);
+    swapchain_builder.set_desired_min_image_count(queue_size);
 
     auto swap_ret = swapchain_builder.build();
     if (!swap_ret) {
@@ -23,7 +47,11 @@ SwapChain SwapChainBuilder::create() {
 
     Internal::SwapChain swap_chain = {};
     swap_chain.swap_chain = swap_ret.value();
-    swap_chain.in_flight_fence = Internal::Fence(true);
+
+    auto swap_cahin_images = swap_ret.value().get_images().value();
+    for (int i = 0; i < queue_size; i++) {
+        swap_chain.images[i] = swap_cahin_images[i];
+    }
 
     return SwapChain(std::move(swap_chain));
 }
