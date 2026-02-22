@@ -5,11 +5,8 @@
 namespace Graphics::Internal {
 
 struct Fence {
-    Fence(bool is_signaled = false);
-    ~Fence();
-
-    Fence(Fence&& other);
-    Fence& operator=(Fence&& other);
+    static Fence create(bool is_signaled);
+    static Fence create(VkDevice device, bool is_signaled);
 
     void reset();
 
