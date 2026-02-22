@@ -5,8 +5,8 @@
 namespace Graphics::Internal {
 
 struct Semaphore {
-    Semaphore();
-    ~Semaphore();
+    static Semaphore create();
+    static Semaphore create(VkDevice device);
 
     VkSemaphore semaphore;
 };

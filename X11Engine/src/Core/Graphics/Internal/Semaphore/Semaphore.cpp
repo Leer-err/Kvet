@@ -6,21 +6,22 @@
 
 namespace Graphics::Internal {
 
-Semaphore::Semaphore() {
+Semaphore Semaphore::create() {
+    auto device = Resources::get().getDevice();
+    return create(device);
+}
+
+Semaphore Semaphore::create(VkDevice device) {
+    Semaphore semaphore;
+
     VkSemaphoreCreateInfo info = {};
     info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
     info.pNext = nullptr;
     info.flags = VK_SEMAPHORE_TYPE_BINARY;
 
-    auto device = Resources::get().getDevice();
+    vkCreateSemaphore(device, &info, nullptr, &semaphore.semaphore);
 
-    vkCreateSemaphore(device, &info, nullptr, &semaphore);
-}
-
-Semaphore::~Semaphore() {
-    auto device = Resources::get().getDevice();
-
-    vkDestroySemaphore(device, semaphore, nullptr);
+    return semaphore;
 }
 
 }  // namespace Graphics::Internal
