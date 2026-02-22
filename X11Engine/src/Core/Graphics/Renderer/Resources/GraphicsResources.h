@@ -4,13 +4,21 @@
 #include <vk_mem_alloc.h>
 #include <vulkan/vulkan_core.h>
 
+#include "CommandPool.h"
+#include "Fence.h"
 #include "Logger.h"
+#include "Semaphore.h"
 
 namespace Graphics {
 
-class Resources {
-    friend class SwapChainBuilder;
+struct FrameData {
+    Internal::CommandBuffer buffer;
+    Internal::Semaphore ready_for_render;
+    Internal::Semaphore ready_for_present;
+    Internal::Fence render_finished;
+};
 
+class Resources {
    public:
     static Resources& get() {
         static Resources instance;
@@ -21,9 +29,11 @@ class Resources {
     VkQueue getGraphicsQueue() const;
     VkQueue getPresentationQueue() const;
     VmaAllocator getAllocator() const;
+    FrameData& getFrameInFlight();
 
-   protected:
     vkb::Device getVKBDevice() const;
+
+    void swapFrame();
 
    private:
     Resources();
@@ -35,6 +45,8 @@ class Resources {
     void createInstance();
     void createDevice();
     void createQueues();
+    void createCommandPool();
+    void prepareFrames();
 
     void createAllocator();
 
@@ -43,6 +55,10 @@ class Resources {
     VkQueue graphics_queue;
     VkQueue presentation_queue;
     VmaAllocator allocator;
+
+    Internal::CommandPool pool;
+    FrameData frames[2];
+    uint32_t frame_in_flight_index;
 
     Logger logger;
 };
