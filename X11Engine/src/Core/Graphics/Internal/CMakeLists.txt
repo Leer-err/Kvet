@@ -4,3 +4,5 @@ target_include_directories(Graphics PRIVATE
 
 add_subdirectory(Semaphore)
 add_subdirectory(Fence)
+add_subdirectory(CommandPool)
+add_subdirectory(CommandBuffer)
