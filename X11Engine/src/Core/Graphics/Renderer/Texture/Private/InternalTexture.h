@@ -8,10 +8,8 @@
 namespace Graphics::Internal {
 
 struct Texture {
-    Texture() noexcept;
-    ~Texture() noexcept;
-
     VkImage image;
+    VkImageLayout layout;
     VmaAllocation allocation;
 
     VkFormat format;

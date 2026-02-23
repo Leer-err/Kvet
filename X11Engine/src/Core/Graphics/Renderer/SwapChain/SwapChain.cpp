@@ -5,6 +5,7 @@
 #include <cstdint>
 
 #include "GraphicsResources.h"
+#include "ImageBarrier.h"
 #include "InternalSwapChain.h"
 #include "Semaphore.h"
 #include "Texture.h"
@@ -31,20 +32,14 @@ void SwapChain::present() {
     auto& command_buffer = frame.buffer;
     command_buffer.begin();
 
-    VkImageMemoryBarrier2 barrier = {};
-    barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2;
-    barrier.image = swap_chain->images[swap_chain->image_index];
-    barrier.srcStageMask = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT;
-    barrier.dstStageMask = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT;
-    barrier.dstAccessMask =
-        VK_ACCESS_2_MEMORY_WRITE_BIT | VK_ACCESS_2_MEMORY_READ_BIT;
-    barrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    barrier.newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-    barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-    barrier.subresourceRange.baseMipLevel = 0;
-    barrier.subresourceRange.levelCount = 1;
-    barrier.subresourceRange.baseArrayLayer = 0;
-    barrier.subresourceRange.layerCount = 1;
+    Internal::ImageBarrier barrier_builder(
+        swap_chain->images[swap_chain->image_index],
+        VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+    barrier_builder.src_stage_mask =
+        VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT;
+    barrier_builder.src_access_mask = VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT;
+
+    auto barrier = barrier_builder.create();
 
     VkDependencyInfo dep = {};
     dep.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO;
