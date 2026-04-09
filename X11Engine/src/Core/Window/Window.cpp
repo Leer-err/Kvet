@@ -63,35 +63,34 @@ void Window::init() {
     }
 
     handle = SDL_CreateWindow("SDL3 Project", width, height, flags);
-    SDL_SetWindowRelativeMouseMode(handle, true);
+
+    // SDL_SetWindowRelativeMouseMode(handle, true);
 }
 
 bool Window::processMessages() {
     SDL_Event event;
 
-    while (true) {
-        while (SDL_PollEvent(&event)) {
-            switch (event.type) {
-                case SDL_EVENT_QUIT:
-                    return false;
-                case SDL_EVENT_KEY_DOWN:
-                    processKeyDown(&event);
-                    break;
-                case SDL_EVENT_KEY_UP:
-                    processKeyUp(&event);
-                    break;
-                case SDL_EVENT_MOUSE_BUTTON_DOWN:
-                    processMouseButtonDown(&event);
-                    break;
-                case SDL_EVENT_MOUSE_BUTTON_UP:
-                    processMouseButtonUp(&event);
-                    break;
-                case SDL_EVENT_MOUSE_MOTION:
-                    processMouseMove(&event);
-                    break;
-                default:
-                    break;
-            }
+    while (SDL_PollEvent(&event)) {
+        switch (event.type) {
+            case SDL_EVENT_QUIT:
+                return false;
+            case SDL_EVENT_KEY_DOWN:
+                processKeyDown(&event);
+                break;
+            case SDL_EVENT_KEY_UP:
+                processKeyUp(&event);
+                break;
+            case SDL_EVENT_MOUSE_BUTTON_DOWN:
+                processMouseButtonDown(&event);
+                break;
+            case SDL_EVENT_MOUSE_BUTTON_UP:
+                processMouseButtonUp(&event);
+                break;
+            case SDL_EVENT_MOUSE_MOTION:
+                processMouseMove(&event);
+                break;
+            default:
+                break;
         }
     }
 

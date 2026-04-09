@@ -1,40 +1,60 @@
 #include "Engine.h"
 
 #include <chrono>
+#include <thread>
 #include <tracy/Tracy.hpp>
 
-#include "GameInputConfigReader.h"
-#include "Overlay.h"
-#include "PhysicalInput.h"
-#include "ScriptLoader.h"
-#include "ScriptSandbox.h"
+#include "Renderer.h"
+#include "Window.h"
+
+// #include "GameInputConfigReader.h"
+// #include "Overlay.h"
+// #include "PhysicalInput.h"
+// #include "ScriptLoader.h"
+// #include "ScriptSandbox.h"
 
 namespace Engine {
 
 Engine::Engine() : should_exit(false) {}
 
 bool Engine::init() {
-    Renderer::get().initializeResources();
+    // Renderer::get().initializeResources();
 
-    Scene::get();
-    ::Engine::Script::ScriptLoader().loadFromDirectory(
-        "E:\\repos\\X11Engine\\X11Engine\\Scripts");
-    Script::ScriptSandbox::get().runFunction("Init");
+    // Scene::get();
+    // ::Engine::Script::ScriptLoader().loadFromDirectory(
+    //     "E:\\repos\\X11Engine\\X11Engine\\Scripts");
+    // Script::ScriptSandbox::get().runFunction("Init");
 
-    Overlay::Overlay::get().add<Overlay::OverlayElements::Text>(
-        "General", [this]() { return std::format("FPS is {}", fps); });
+    // Overlay::Overlay::get().add<Overlay::OverlayElements::Text>(
+    //     "General", [this]() { return std::format("FPS is {}", fps); });
 
     return true;
 }
 
 void Engine::run() {
-    GameInputConfigReader input_config_reader;
-    input_config_reader.read(
-        "E:\\repos\\X11Engine\\X11Engine\\src\\Data\\Input\\Config.json",
-        GameInputContext::get());
+    // GameInputConfigReader input_config_reader;
+    // input_config_reader.read(
+    //     "E:\\repos\\X11Engine\\X11Engine\\src\\Data\\Input\\Config.json",
+    //     GameInputContext::get());
 
+    main_loop_thread = std::thread([this]() { mainLoopWorker(); });
+
+    windowWorker();
+
+    main_loop_thread.join();
+}
+
+void Engine::windowWorker() {
+    while (Window::get().processMessages()) {
+    }
+
+    should_exit = true;
+}
+
+void Engine::mainLoopWorker() {
     last_elapsed = clock.now();
     start = clock.now();
+
     while (should_exit == false) {
         auto elapsed = clock.now();
         float delta_time =
@@ -52,15 +72,16 @@ void Engine::update(float delta_time) {
 
     fps = 1.f / delta_time;
 
-    PhysicalInput::get().saveState();
+    // PhysicalInput::get().saveState();
 
-    Renderer::get().beginFrame();
+    Graphics::Renderer::get().beginFrame();
 
     Scene::get().update(delta_time);
 
-    Overlay::Overlay::get().draw();
+    // Overlay::Overlay::get().draw();
 
-    Renderer::get().endFrame();
+    Graphics::Renderer::get().endFrame();
+
     FrameMark;
 }
 

@@ -17,6 +17,8 @@ Renderer::Renderer() { Resources::get(); }
 void Renderer::beginFrame() {
     ZoneScoped;
 
+    Resources::get().swapFrame();
+
     // auto context = Context();
 
     // context.clean(default_render_target);

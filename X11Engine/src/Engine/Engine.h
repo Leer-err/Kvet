@@ -1,12 +1,11 @@
 #pragma once
 
+#include <atomic>
 #include <chrono>
-#include <memory>
+#include <thread>
 
-#include "Renderer.h"
-#include "Scene.h"
-#include "Window.h"
-#include "World.h"
+// #include "Scene.h"
+// #include "World.h"
 
 namespace Engine {
 
@@ -30,6 +29,9 @@ class Engine {
     Engine(Engine&&) = delete;
     Engine& operator=(Engine&&) = delete;
 
+    void windowWorker();
+    void mainLoopWorker();
+
     void update(float delta_time);
 
     void setupSystemPipeline();
@@ -42,7 +44,9 @@ class Engine {
     void setupPostSimulateStep();
     void setupRenderingStep();
 
-    bool should_exit;
+    std::atomic_bool should_exit;
+
+    std::thread main_loop_thread;
 
     std::chrono::high_resolution_clock clock;
     std::chrono::high_resolution_clock::time_point last_elapsed;
