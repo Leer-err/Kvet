@@ -20,6 +20,7 @@ class ShaderRegistry {
 
    private:
     ShaderRegistry();
+    ~ShaderRegistry();
 
     std::optional<VkShaderModule> loadModule(const std::string& filename);
     std::optional<std::vector<char>> readFile(const std::string& filename);

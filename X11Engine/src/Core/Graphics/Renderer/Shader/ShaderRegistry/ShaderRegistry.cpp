@@ -7,9 +7,16 @@
 #include <string>
 #include <vector>
 
+#include "APIResources.h"
+
 namespace Graphics {
 
 ShaderRegistry::ShaderRegistry() {}
+ShaderRegistry::~ShaderRegistry() {
+    for (auto& [filename, module] : shader_modules) {
+        vkDestroyShaderModule(APIResources::get().getDevice(), module, nullptr);
+    }
+}
 
 std::optional<VkShaderModule> ShaderRegistry::getModule(
     const std::string& filename) {
