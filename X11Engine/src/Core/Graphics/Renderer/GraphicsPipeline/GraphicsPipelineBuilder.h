@@ -1,24 +1,24 @@
 #pragma once
 
-#include "DepthStencil.h"
+// #include "DepthStencil.h"
 #include "GraphicsPipeline.h"
-#include "InputLayout.h"
-#include "PixelShader.h"
-#include "RenderTarget.h"
-#include "VertexShader.h"
+// #include "InputLayout.h"
+#include "Shader.h"
+// #include "RenderTarget.h"
 
 class GraphicsPipelineBuilder {
    public:
-    GraphicsPipelineBuilder(InputLayout input_layout,
-                            VertexShader vertex_shader,
-                            PixelShader pixel_shader);
+    // GraphicsPipelineBuilder(InputLayout input_layout,
+    //                         VertexShader vertex_shader,
+    //                         PixelShader pixel_shader);
+    GraphicsPipelineBuilder(Shader vertex_shader, Shader pixel_shader);
 
-    GraphicsPipelineBuilder& setRenderTarget(RenderTarget render_target);
-    GraphicsPipelineBuilder& setDepthStencilBuffer(
-        DepthStencil depth_stencil_buffer);
+    // GraphicsPipelineBuilder& setRenderTarget(RenderTarget render_target);
+    // GraphicsPipelineBuilder& setDepthStencilBuffer(
+    // DepthStencil depth_stencil_buffer);
 
-    GraphicsPipelineBuilder& setRasterizerState(
-        Engine::Graphics::Rasterizer rasterizer);
+    // GraphicsPipelineBuilder& setRasterizerState(
+    // Engine::Graphics::Rasterizer rasterizer);
 
     GraphicsPipeline create();
 
@@ -26,13 +26,13 @@ class GraphicsPipelineBuilder {
     bool default_render_target;
     bool has_depth_stencil;
 
-    RenderTarget render_target;
-    DepthStencil depth_stencil_buffer;
+    // RenderTarget render_target;
+    // DepthStencil depth_stencil_buffer;
 
-    InputLayout input_layout;
+    // InputLayout input_layout;
 
-    VertexShader vertex_shader;
-    PixelShader pixel_shader;
+    Shader vertex_shader;
+    Shader pixel_shader;
 
-    Engine::Graphics::Rasterizer rasterizer;
+    // Engine::Graphics::Rasterizer rasterizer;
 };

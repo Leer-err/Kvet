@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Buffer.h"
+// #include "Buffer.h"
 #include "GraphicsPipeline.h"
-#include "Mesh.h"
+// #include "Mesh.h"
 
 class Stars {
    public:
@@ -11,10 +11,10 @@ class Stars {
     void draw();
 
    private:
-    Mesh screen_plane;
+    // Mesh screen_plane;
     GraphicsPipeline pipeline;
-    Buffer camera_parameters_buffer;
-    Buffer star_parameters_buffer;
+    // Buffer camera_parameters_buffer;
+    // Buffer star_parameters_buffer;
 
     float star_density;
     float blinking_speed;

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Clouds.h"
+// #include "Clouds.h"
 #include "Stars.h"
 
 class Sky {
@@ -10,6 +10,6 @@ class Sky {
     void draw();
 
    private:
-    Clouds clouds;
+    // Clouds clouds;
     Stars stars;
 };

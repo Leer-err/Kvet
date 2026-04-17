@@ -7,14 +7,14 @@
 #include <string>
 #include <vector>
 
-#include "APIResources.h"
+#include "GraphicsResources.h"
 
 namespace Graphics {
 
 ShaderRegistry::ShaderRegistry() {}
 ShaderRegistry::~ShaderRegistry() {
     for (auto& [filename, module] : shader_modules) {
-        vkDestroyShaderModule(APIResources::get().getDevice(), module, nullptr);
+        vkDestroyShaderModule(Resources::get().getDevice(), module, nullptr);
     }
 }
 
@@ -38,7 +38,7 @@ std::optional<VkShaderModule> ShaderRegistry::loadModule(
     info.codeSize = shader_bytecode->size();
 
     VkShaderModule module = {};
-    if (vkCreateShaderModule(APIResources::get().getDevice(), &info, nullptr,
+    if (vkCreateShaderModule(Resources::get().getDevice(), &info, nullptr,
                              &module) != VK_SUCCESS)
         return std::nullopt;
 

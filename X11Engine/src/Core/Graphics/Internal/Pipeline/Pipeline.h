@@ -1,11 +1,11 @@
 #pragma once
 
+#include <vulkan/vulkan_core.h>
+
 namespace Graphics::Internal {
 
-struct Buffer;
-struct Texture;
-struct SwapChain;
-struct Shader;
-struct Pipeline;
+struct Pipeline {
+    VkPipeline pipeline;
+};
 
 }  // namespace Graphics::Internal
