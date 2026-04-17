@@ -9,7 +9,7 @@ target_include_directories(Graphics PUBLIC
 add_subdirectory(Resources)
 # add_subdirectory(Context)
 add_subdirectory(SwapChain)
-# add_subdirectory(Shader)
+add_subdirectory(Shader)
 add_subdirectory(Texture)
 add_subdirectory(Buffer)
 # add_subdirectory(RenderTarget)
