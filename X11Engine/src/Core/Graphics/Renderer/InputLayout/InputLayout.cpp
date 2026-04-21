@@ -1,8 +1,21 @@
 #include "InputLayout.h"
 
-InputLayout::InputLayout(Microsoft::WRL::ComPtr<ID3D11InputLayout> input_layout)
-    : input_layout(input_layout) {}
+#include "InternalInputLayout.h"
 
-Microsoft::WRL::ComPtr<ID3D11InputLayout> InputLayout::get() const {
-    return input_layout.Get();
+namespace Graphics {
+
+InputLayout::~InputLayout() = default;
+
+InputLayout::InputLayout(InputLayout&&) = default;
+
+InputLayout& InputLayout::operator=(InputLayout&&) = default;
+
+InputLayout::InputLayout() {
+    input_layout = std::make_unique<Internal::InputLayout>();
 }
+
+InputLayout::InputLayout(Internal::InputLayout&& input_layout)
+    : input_layout(
+          std::make_unique<Internal::InputLayout>(std::move(input_layout))) {}
+
+}  // namespace Graphics

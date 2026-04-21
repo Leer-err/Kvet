@@ -1,20 +1,28 @@
 #pragma once
 
-#include <d3d11.h>
-#include <wrl/client.h>
+#include <memory>
+
+#include "GraphicsInternalsForward.h"
+
+namespace Graphics {
 
 class InputLayout {
     friend class InputLayoutBuilder;
-    friend class Context;
+    friend class GraphicsPipelineBuilder;
 
    public:
-    InputLayout() = default;
+    InputLayout();
+    ~InputLayout();
+
+    InputLayout(InputLayout&&);
+    InputLayout& operator=(InputLayout&&);
 
    protected:
-    InputLayout(Microsoft::WRL::ComPtr<ID3D11InputLayout> input_layout);
-
-    Microsoft::WRL::ComPtr<ID3D11InputLayout> get() const;
+    InputLayout(Internal::InputLayout&& buffer);
+    Internal::InputLayout* getInternal() const;
 
    private:
-    Microsoft::WRL::ComPtr<ID3D11InputLayout> input_layout;
+    std::unique_ptr<Internal::InputLayout> input_layout;
 };
+
+}  // namespace Graphics

@@ -19,21 +19,20 @@ Result<Shader, ShaderError> ShaderBuilder::create() {
     auto module = ShaderRegistry::get().getModule(filename);
     if (module == std::nullopt) return ShaderError::NotFound;
 
-    VkPipelineShaderStageCreateInfo info = {};
-    info.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-    info.module = *module;
-    info.pName = entrypoint.c_str();
+    VkShaderStageFlagBits vk_stage;
 
     switch (stage) {
         case ShaderStage::Vertex:
-            info.stage = VK_SHADER_STAGE_VERTEX_BIT;
+            vk_stage = VK_SHADER_STAGE_VERTEX_BIT;
             break;
         case ShaderStage::Pixel:
-            info.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
+            vk_stage = VK_SHADER_STAGE_FRAGMENT_BIT;
     }
 
     auto internal = Internal::Shader{};
-    internal.info = info;
+    internal.shader = *module;
+    internal.stage = vk_stage;
+    internal.entrypoint = entrypoint;
 
     return Shader(std::move(internal));
 }

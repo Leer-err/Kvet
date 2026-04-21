@@ -1,26 +1,24 @@
 #pragma once
 
-// #include "DepthStencil.h"
-// #include "InputLayout.h"
-// #include "Rasterizer.h"
-// #include "RenderTarget.h"
+#include <memory>
 
-// namespace Graphics = Engine::Graphics;
+#include "GraphicsInternalsForward.h"
+
+namespace Graphics {
 
 class GraphicsPipeline {
     friend class GraphicsPipelineBuilder;
+    friend class Context;
 
    public:
-    GraphicsPipeline();
-    ~GraphicsPipeline();
-
-    GraphicsPipeline(GraphicsPipeline&&);
-    GraphicsPipeline& operator=(GraphicsPipeline&&);
+    GraphicsPipeline() = default;
 
    protected:
-    GraphicsPipeline(Internal::Pipeline&& buffer);
-    Internal::Pipeline* getInternal() const;
+    GraphicsPipeline(const Internal::Pipeline& pipeline);
+    const Internal::Pipeline* getInternal() const;
 
    private:
-    std::unique_ptr<Internal::Pipeline> pipeline;
+    std::shared_ptr<Internal::WrappedPipeline> pipeline;
 };
+
+}  // namespace Graphics

@@ -5,6 +5,7 @@
 #include <tracy/Tracy.hpp>
 
 #include "Renderer.h"
+#include "Scene.h"
 #include "Window.h"
 
 // #include "GameInputConfigReader.h"
@@ -76,7 +77,7 @@ void Engine::update(float delta_time) {
 
     Graphics::Renderer::get().beginFrame();
 
-    // Scene::get().update(delta_time);
+    Scene::get().update(delta_time);
 
     // Overlay::Overlay::get().draw();
 

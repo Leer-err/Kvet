@@ -38,6 +38,10 @@ SwapChain SwapChainBuilder::create() {
             break;
     }
 
+    VkSurfaceFormatKHR format = {};
+    format.format = VK_FORMAT_R8G8B8A8_SRGB;
+    format.colorSpace = VK_COLORSPACE_SRGB_NONLINEAR_KHR;
+    swapchain_builder.set_desired_format(format);
     swapchain_builder.add_fallback_present_mode(mode);
     swapchain_builder.set_desired_min_image_count(queue_size);
 

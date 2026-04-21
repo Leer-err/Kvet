@@ -3,15 +3,20 @@
 // #include "DepthStencil.h"
 #include "GraphicsPipeline.h"
 // #include "InputLayout.h"
+#include "InputLayout.h"
 #include "Shader.h"
 // #include "RenderTarget.h"
+
+namespace Graphics {
 
 class GraphicsPipelineBuilder {
    public:
     // GraphicsPipelineBuilder(InputLayout input_layout,
     //                         VertexShader vertex_shader,
     //                         PixelShader pixel_shader);
-    GraphicsPipelineBuilder(Shader vertex_shader, Shader pixel_shader);
+    GraphicsPipelineBuilder(const InputLayout& input_layout,
+                            const Shader& vertex_shader,
+                            const Shader& pixel_shader);
 
     // GraphicsPipelineBuilder& setRenderTarget(RenderTarget render_target);
     // GraphicsPipelineBuilder& setDepthStencilBuffer(
@@ -26,13 +31,12 @@ class GraphicsPipelineBuilder {
     bool default_render_target;
     bool has_depth_stencil;
 
-    // RenderTarget render_target;
-    // DepthStencil depth_stencil_buffer;
+    const InputLayout& input_layout;
 
-    // InputLayout input_layout;
-
-    Shader vertex_shader;
-    Shader pixel_shader;
+    const Shader& vertex_shader;
+    const Shader& pixel_shader;
 
     // Engine::Graphics::Rasterizer rasterizer;
 };
+
+}  // namespace Graphics

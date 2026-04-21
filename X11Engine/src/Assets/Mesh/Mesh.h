@@ -3,6 +3,6 @@
 #include "Buffer.h"
 
 struct Mesh {
-    Buffer vertex_buffer;
-    Buffer index_buffer;
+    Graphics::Buffer vertex_buffer;
+    Graphics::Buffer index_buffer;
 };

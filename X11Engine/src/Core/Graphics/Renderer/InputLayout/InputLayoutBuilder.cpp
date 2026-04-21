@@ -1,53 +1,78 @@
 #include "InputLayoutBuilder.h"
 
-#include <d3d11.h>
-#include <wrl/client.h>
+#include <vulkan/vulkan_core.h>
 
-#include <stdexcept>
+#include <cstddef>
+#include <cstdint>
 #include <vector>
 
-#include "APIResources.h"
 #include "InputLayout.h"
-#include "VertexShader.h"
+#include "InternalInputLayout.h"
 
-InputLayoutBuilder::InputLayoutBuilder(VertexShader shader)
-    : elements(), shader(shader) {}
+namespace Graphics {
+
+constexpr size_t getFormatSize(InputElementFormat format) {
+    switch (format) {
+        case InputElementFormat::Vector3f:
+            return sizeof(float) * 3;
+    }
+
+    return 0;
+}
+
+constexpr VkFormat getVulkanFormat(InputElementFormat format) {
+    switch (format) {
+        case InputElementFormat::Vector3f:
+            return VK_FORMAT_R32G32B32_SFLOAT;
+    }
+
+    return VK_FORMAT_UNDEFINED;
+}
+
+InputLayoutBuilder::InputLayoutBuilder() : elements() {}
 
 InputLayoutBuilder::~InputLayoutBuilder() {}
 
-InputLayoutBuilder& InputLayoutBuilder::addElement(std::string name,
-                                                   DXGI_FORMAT format) {
-    elements.push_back(Element{name, format});
+InputLayoutBuilder& InputLayoutBuilder::addElement(InputElementFormat format) {
+    elements.push_back(format);
 
     return *this;
 }
 
 InputLayout InputLayoutBuilder::create() {
-    auto device = APIResources::get().getDevice();
-    auto shader_bytecode = shader.getBytecode();
+    std::vector<VkVertexInputAttributeDescription> vertexAttributes;
 
-    std::vector<D3D11_INPUT_ELEMENT_DESC> d3d_input_elements(elements.size());
+    size_t vertex_size = 0;
+    size_t element_index = 0;
 
-    for (int i = 0; i < elements.size(); ++i) {
-        const auto& element = elements[i];
+    auto internal = Internal::InputLayout{};
+    internal.elements.reserve(elements.size());
 
-        D3D11_INPUT_ELEMENT_DESC desc;
-        desc.SemanticName = element.name.c_str();
-        desc.InputSlot = 0;
-        desc.Format = element.format;
-        desc.SemanticIndex = 0;
-        desc.InstanceDataStepRate = 0;
-        desc.InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
-        desc.AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
+    for (const auto& format : elements) {
+        auto internal_format = getVulkanFormat(format);
+        auto format_size = getFormatSize(format);
 
-        d3d_input_elements[i] = (desc);
+        if (internal_format == VK_FORMAT_UNDEFINED || format_size == 0) throw;
+
+        VkVertexInputAttributeDescription desc = {};
+        desc.binding = 0;
+        desc.format = internal_format;
+        desc.location = element_index;
+        desc.offset = vertex_size;
+
+        internal.elements.push_back(desc);
+
+        vertex_size += format_size;
+        element_index++;
     }
 
-    Microsoft::WRL::ComPtr<ID3D11InputLayout> input_layout = nullptr;
-    HRESULT hr = device->CreateInputLayout(
-        d3d_input_elements.data(), static_cast<UINT>(d3d_input_elements.size()),
-        shader_bytecode->GetBufferPointer(), shader_bytecode->GetBufferSize(),
-        input_layout.GetAddressOf());
+    VkVertexInputBindingDescription binding;
+    binding.binding = 0;
+    binding.stride = static_cast<uint32_t>(vertex_size);
+    binding.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+    internal.buffer_binding_description = binding;
 
-    return InputLayout(input_layout);
+    return InputLayout(std::move(internal));
 }
+
+}  // namespace Graphics

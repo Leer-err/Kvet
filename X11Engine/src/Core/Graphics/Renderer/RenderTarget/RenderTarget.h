@@ -1,27 +1,21 @@
 #pragma once
 
-#include <d3d11.h>
-#include <wrl/client.h>
+#include <memory>
 
-#include "Texture.h"
+#include "GraphicsInternalsForward.h"
+
+namespace Graphics {
 
 class RenderTarget {
-    friend class RenderTargetBuilder;
-    friend class Context;
+    friend class GraphicsPipelineBuilder;
 
    public:
-    RenderTarget() = default;
-    RenderTarget(const Texture& texture);
-
-    static RenderTarget getDefault();
-
    protected:
-    RenderTarget(Microsoft::WRL::ComPtr<ID3D11RenderTargetView> render_target);
-
-    Microsoft::WRL::ComPtr<ID3D11RenderTargetView> get() const;
-    D3D11_VIEWPORT getViewport() const;
+    RenderTarget(const Internal::RenderTarget& render_target);
+    Internal::RenderTarget* getInternal() const;
 
    private:
-    Microsoft::WRL::ComPtr<ID3D11RenderTargetView> render_target;
-    D3D11_VIEWPORT viewport;
+    std::shared_ptr<Internal::WrappedRenderTarget> render_target;
 };
+
+}  // namespace Graphics

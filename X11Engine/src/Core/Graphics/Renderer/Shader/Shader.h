@@ -7,9 +7,6 @@
 namespace Graphics {
 
 class Shader {
-    friend class ShaderBuilder;
-    friend class Context;
-
    public:
     Shader();
     ~Shader();
@@ -17,7 +14,6 @@ class Shader {
     Shader(Shader&&);
     Shader& operator=(Shader&&);
 
-   protected:
     Shader(Internal::Shader&& shader);
     Internal::Shader* getInternal() const;
 

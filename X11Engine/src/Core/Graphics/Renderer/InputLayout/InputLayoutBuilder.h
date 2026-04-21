@@ -7,23 +7,22 @@
 #include <vector>
 
 #include "InputLayout.h"
-#include "VertexShader.h"
+
+namespace Graphics {
+
+enum class InputElementFormat { Vector3f };
 
 class InputLayoutBuilder {
-    struct Element {
-        std::string name;
-        DXGI_FORMAT format;
-    };
-
    public:
-    InputLayoutBuilder(VertexShader shader);
+    InputLayoutBuilder();
     ~InputLayoutBuilder();
 
-    InputLayoutBuilder& addElement(std::string name, DXGI_FORMAT format);
+    InputLayoutBuilder& addElement(InputElementFormat format);
 
     InputLayout create();
 
    private:
-    std::vector<Element> elements;
-    VertexShader shader;
+    std::vector<InputElementFormat> elements;
 };
+
+}  // namespace Graphics

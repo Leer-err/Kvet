@@ -18,6 +18,8 @@ void Renderer::beginFrame() {
     ZoneScoped;
 
     Resources::get().swapFrame();
+    auto frame = Resources::get().getFrameInFlight();
+    frame.buffer.begin();
 
     // auto context = Context();
 
@@ -26,7 +28,9 @@ void Renderer::beginFrame() {
 
 void Renderer::endFrame() {
     ZoneScoped;
-    // auto context = Context();
+
+    auto frame = Resources::get().getFrameInFlight();
+    frame.buffer.end();
 
     auto backbuffer = swap_chain.getBackbuffer();
     // context.copy(render_target_texture, backbuffer);

@@ -4,10 +4,11 @@
 
 namespace Graphics::Internal {
 
-struct Pipeline {
+struct RenderTarget {
     void destroy();
 
-    VkPipeline pipeline;
+    VkImageView render_target;
+    VkFormat format;
 };
 
 }  // namespace Graphics::Internal
