@@ -23,10 +23,13 @@ class Context {
     ~Context();
 
     void bindRenderEnviroment(const RenderEnviroment& render_enviroment);
+    void unbindRenderEnviroment();
     void setPipeline(const GraphicsPipeline& pipeline);
     void cleanPipeline();
 
     void draw(const Buffer& vertex_buffer, const Buffer& index_buffer);
+
+    RenderTarget createRenderTarget(const Texture& texture);
 
     // void copy(const Texture& source, Texture destination);
 

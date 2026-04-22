@@ -1,9 +1,12 @@
 #include "RenderTarget.h"
 
+#include <vulkan/vulkan_core.h>
+
 #include <memory>
 
 #include "InternalRenderTarget.h"
 #include "ResourceWrapper.h"
+#include "Texture.h"
 
 namespace Graphics {
 

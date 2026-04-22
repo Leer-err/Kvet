@@ -26,7 +26,6 @@ class Texture {
     uint32_t getWidth() const;
     uint32_t getHeight() const;
 
-   protected:
     Texture(Internal::Texture&& texture);
 
     Internal::Texture* getInternal() const;

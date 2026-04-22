@@ -6,11 +6,10 @@
 
 namespace Graphics {
 
-class RenderTarget {
-    friend class GraphicsPipelineBuilder;
+class Texture;
 
+class RenderTarget {
    public:
-   protected:
     RenderTarget(const Internal::RenderTarget& render_target);
     Internal::RenderTarget* getInternal() const;
 

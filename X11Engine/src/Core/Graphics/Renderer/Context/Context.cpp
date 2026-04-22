@@ -1,13 +1,19 @@
 #include "Context.h"
 
+#include <vulkan/vulkan_core.h>
+
 #include <memory>
 
 #include "CommandBuffer.h"
 #include "GraphicsPipeline.h"
 #include "GraphicsResources.h"
 #include "InternalBuffer.h"
+#include "InternalRenderTarget.h"
+#include "InternalTexture.h"
 #include "Pipeline.h"
+
 // #include "Sampler.h"
+#include "RenderTarget.h"
 #include "Texture.h"
 #include "Window.h"
 
@@ -21,7 +27,65 @@ Context::Context() {
 Context::~Context() = default;
 
 void Context::bindRenderEnviroment(const RenderEnviroment& render_enviroment) {
-    auto enviroment_internals = render_enviroment.getInternal();
+    VkRenderingInfo render_info = {};
+    render_info.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
+    render_info.renderArea.extent.width =
+        static_cast<uint32_t>(Window::get().getWidth());
+    render_info.renderArea.extent.height =
+        static_cast<uint32_t>(Window::get().getHeight());
+    render_info.layerCount = 1;
+
+    if (render_enviroment.render_target) {
+        auto render_target =
+            render_enviroment.render_target->getInternal()->render_target;
+
+        VkRenderingAttachmentInfo colorAttachmentInfo = {};
+        colorAttachmentInfo.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
+        colorAttachmentInfo.imageView = render_target;
+        colorAttachmentInfo.imageLayout = VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL;
+        colorAttachmentInfo.loadOp = VK_ATTACHMENT_LOAD_OP_LOAD;
+        colorAttachmentInfo.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+
+        if (render_enviroment.clear_render_target) {
+            colorAttachmentInfo.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+            colorAttachmentInfo.clearValue.color.float32[0] =
+                render_enviroment.render_target_clear_value.x;
+            colorAttachmentInfo.clearValue.color.float32[1] =
+                render_enviroment.render_target_clear_value.y;
+            colorAttachmentInfo.clearValue.color.float32[2] =
+                render_enviroment.render_target_clear_value.z;
+            colorAttachmentInfo.clearValue.color.float32[3] =
+                render_enviroment.render_target_clear_value.w;
+        }
+
+        render_info.colorAttachmentCount = 1;
+        render_info.pColorAttachments = &colorAttachmentInfo;
+    }
+
+    // VkRenderingAttachmentInfo depthAttachmentInfo{
+    //     .sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO,
+    //     .imageView = depthImageView,
+    //     .imageLayout = VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL,
+    //     .loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
+    //     .storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
+    //     .clearValue = {.depthStencil = {1.0f, 0}}};
+
+    // VkRenderingInfo renderingInfo{
+    //     .sType = VK_STRUCTURE_TYPE_RENDERING_INFO,
+    //     .renderArea{.extent{.width = static_cast<uint32_t>(windowSize.x),
+    //                         .height = static_cast<uint32_t>(windowSize.y)}},
+    //     .layerCount = 1,
+    //     .colorAttachmentCount = 1,
+    //     .pColorAttachments = &colorAttachmentInfo,
+    //     .pDepthAttachment = &depthAttachmentInfo};
+
+    auto command_buffer_handle = command_buffer.get()->buffer;
+    vkCmdBeginRendering(command_buffer_handle, &render_info);
+}
+
+void Context::unbindRenderEnviroment() {
+    auto command_buffer_handle = command_buffer.get()->buffer;
+    vkCmdEndRendering(command_buffer_handle);
 }
 
 void Context::setPipeline(const GraphicsPipeline& pipeline) {
@@ -52,7 +116,31 @@ void Context::draw(const Buffer& vertex_buffer, const Buffer& index_buffer) {
 
     auto index_count = index_buffer.getSize() / sizeof(uint32_t);
 
-    vkCmdDrawIndexed(command_buffer_handle, index_count, 3, 0, 0, 0);
+    // vkCmdDrawIndexed(command_buffer_handle, index_count, 3, 0, 0, 0);
+}
+
+RenderTarget Context::createRenderTarget(const Texture& texture) {
+    auto command_buffer_handle = command_buffer.get()->buffer;
+
+    auto texture_internal = texture.getInternal();
+
+    VkImageViewCreateInfo info = {};
+    info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+    info.image = texture_internal->image;
+    info.viewType = VK_IMAGE_VIEW_TYPE_2D;
+    info.format = texture_internal->format,
+    info.subresourceRange = {.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+                             .levelCount = 1,
+                             .layerCount = 1};
+
+    VkImageView view;
+    vkCreateImageView(Resources::get().getDevice(), &info, nullptr, &view);
+
+    Internal::RenderTarget render_target = {};
+    render_target.render_target = view;
+    render_target.format = texture_internal->format;
+
+    return RenderTarget(render_target);
 }
 
 }  // namespace Graphics

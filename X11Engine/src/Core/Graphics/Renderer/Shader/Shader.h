@@ -8,17 +8,11 @@ namespace Graphics {
 
 class Shader {
    public:
-    Shader();
-    ~Shader();
-
-    Shader(Shader&&);
-    Shader& operator=(Shader&&);
-
     Shader(Internal::Shader&& shader);
     Internal::Shader* getInternal() const;
 
    private:
-    std::unique_ptr<Internal::Shader> shader;
+    std::shared_ptr<Internal::Shader> shader;
 };
 
 }  // namespace Graphics

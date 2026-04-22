@@ -13,7 +13,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 add_subdirectory(src)
-add_subdirectory(Assets)
+# add_subdirectory(Assets)
 # add_subdirectory(test)
 
 #Fake_Assets folder to force cmake to always copy data

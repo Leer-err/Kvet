@@ -1,5 +1,4 @@
 target_sources(Graphics PRIVATE
-    RenderEnviroment.cpp
 )
 
 target_include_directories(Graphics PUBLIC
