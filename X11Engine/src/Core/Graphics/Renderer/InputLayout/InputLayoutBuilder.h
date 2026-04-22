@@ -1,9 +1,5 @@
 #pragma once
 
-#include <d3d11_1.h>
-#include <dxgi1_4.h>
-
-#include <string>
 #include <vector>
 
 #include "InputLayout.h"

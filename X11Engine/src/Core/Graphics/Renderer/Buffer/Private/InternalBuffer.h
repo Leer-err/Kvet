@@ -6,8 +6,7 @@
 namespace Graphics::Internal {
 
 struct Buffer {
-    Buffer() noexcept;
-    ~Buffer() noexcept;
+    void destroy();
 
     VkBuffer buffer;
     VmaAllocation allocation;

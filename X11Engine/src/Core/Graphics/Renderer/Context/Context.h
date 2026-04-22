@@ -12,6 +12,7 @@
 // #include "Sampler.h"
 // #include "ShaderResource.h"
 #include "GraphicsInternalsForward.h"
+#include "RenderEnviroment.h"
 #include "Texture.h"
 
 namespace Graphics {
@@ -21,12 +22,13 @@ class Context {
     Context();
     ~Context();
 
+    void bindRenderEnviroment(const RenderEnviroment& render_enviroment);
     void setPipeline(const GraphicsPipeline& pipeline);
     void cleanPipeline();
 
     void draw(const Buffer& vertex_buffer, const Buffer& index_buffer);
 
-    void copy(const Texture& source, Texture destination);
+    // void copy(const Texture& source, Texture destination);
 
     // template <typename T>
     // T* mapConstantBuffer(Buffer buffer) {
@@ -34,13 +36,13 @@ class Context {
     // }
     // void unmapConstantBuffer(const Buffer& buffer);
 
-    void bindConstantBuffer(const Buffer& resource, const Binding& binding);
-    void unbindConstantBuffer(const Binding& binding);
-    void bindShaderResource(const ShaderResource& resource,
-                            const Binding& binding);
-    void unbindShaderResource(const Binding& binding);
+    // void bindConstantBuffer(const Buffer& resource, const Binding& binding);
+    // void unbindConstantBuffer(const Binding& binding);
+    // void bindShaderResource(const ShaderResource& resource,
+    //                         const Binding& binding);
+    // void unbindShaderResource(const Binding& binding);
     // void bindSampler(const Sampler& sampler, const Binding& binding);
-    void unbindSampler(const Binding& binding);
+    // void unbindSampler(const Binding& binding);
 
     void clean(RenderTarget render_target);
 

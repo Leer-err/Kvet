@@ -61,12 +61,12 @@ Stars::Stars() : star_density(30), blinking_speed(1), blink_strength(0.6) {
     //         sizeof(screen_quad_indices)) .create();
 
     auto vertex_shader =
-        Graphics::ShaderBuilder("./Assets/Shaders/Stars/Stars.hlsl",
+        Graphics::ShaderBuilder("./Assets/Shaders/Stars/Stars.spv",
                                 "vertex_main", ShaderStage::Vertex)
             .create()
             .getResult();
     auto pixel_shader =
-        Graphics::ShaderBuilder("./Assets/Shaders/Stars/Stars.hlsl",
+        Graphics::ShaderBuilder("./Assets/Shaders/Stars/Stars.spv",
                                 "pixel_main", ShaderStage::Pixel)
             .create()
             .getResult();
@@ -137,6 +137,6 @@ void Stars::draw() {
     //                            StarData::star_parameters);
     context.draw(quad_vertices, quad_indices);
 
-    context.unbindConstantBuffer(StarData::camera_parameters);
-    context.unbindConstantBuffer(StarData::star_parameters);
+    // context.unbindConstantBuffer(StarData::camera_parameters);
+    // context.unbindConstantBuffer(StarData::star_parameters);
 }

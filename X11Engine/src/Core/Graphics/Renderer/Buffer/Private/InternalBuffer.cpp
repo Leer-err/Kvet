@@ -6,9 +6,7 @@
 
 namespace Graphics::Internal {
 
-Buffer::Buffer() noexcept : buffer(VK_NULL_HANDLE) {}
-
-Buffer::~Buffer() noexcept {
+void Buffer::destroy() {
     if (buffer != VK_NULL_HANDLE) {
         auto allocator = Resources::get().getAllocator();
 

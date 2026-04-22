@@ -18,6 +18,8 @@ constexpr ComponentId INVALID_COMPONENT_ID = {0};
 
 class IComponentPool {
    public:
+    virtual ~IComponentPool() = default;
+
     virtual ComponentId add(EntityId entity) = 0;
     virtual bool has(EntityId entity) const = 0;
     virtual void remove(EntityId entity) = 0;

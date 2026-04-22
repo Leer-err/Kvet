@@ -11,18 +11,12 @@ class InputLayout {
     friend class GraphicsPipelineBuilder;
 
    public:
-    InputLayout();
-    ~InputLayout();
-
-    InputLayout(InputLayout&&);
-    InputLayout& operator=(InputLayout&&);
-
    protected:
-    InputLayout(Internal::InputLayout&& buffer);
-    Internal::InputLayout* getInternal() const;
+    InputLayout(const Internal::InputLayout& buffer);
+    const Internal::InputLayout* getInternal() const;
 
    private:
-    std::unique_ptr<Internal::InputLayout> input_layout;
+    std::shared_ptr<Internal::WrappedInputLayout> input_layout;
 };
 
 }  // namespace Graphics

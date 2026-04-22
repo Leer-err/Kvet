@@ -31,10 +31,10 @@ class GraphicsPipelineBuilder {
     bool default_render_target;
     bool has_depth_stencil;
 
-    const InputLayout& input_layout;
+    InputLayout input_layout;
 
-    const Shader& vertex_shader;
-    const Shader& pixel_shader;
+    Shader vertex_shader;
+    Shader pixel_shader;
 
     // Engine::Graphics::Rasterizer rasterizer;
 };

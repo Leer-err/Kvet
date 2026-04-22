@@ -20,6 +20,10 @@ Context::Context() {
 
 Context::~Context() = default;
 
+void Context::bindRenderEnviroment(const RenderEnviroment& render_enviroment) {
+    auto enviroment_internals = render_enviroment.getInternal();
+}
+
 void Context::setPipeline(const GraphicsPipeline& pipeline) {
     auto pipeline_internals = pipeline.getInternal();
     auto command_buffer_handle = command_buffer.get()->buffer;

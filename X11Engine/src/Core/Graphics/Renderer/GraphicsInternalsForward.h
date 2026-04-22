@@ -16,5 +16,6 @@ class ResourceWrapper;
 
 using WrappedRenderTarget = ResourceWrapper<RenderTarget>;
 using WrappedPipeline = ResourceWrapper<Pipeline>;
+using WrappedInputLayout = ResourceWrapper<InputLayout>;
 
 }  // namespace Graphics::Internal
