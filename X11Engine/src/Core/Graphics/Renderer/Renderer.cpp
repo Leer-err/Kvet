@@ -11,6 +11,7 @@
 #include "Context.h"
 #include "GraphicsResources.h"
 #include "ImageBarrier.h"
+#include "InternalSwapChain.h"
 #include "RenderEnviroment.h"
 #include "SwapChainBuilder.h"
 #include "TextureBuilder.h"
@@ -143,7 +144,10 @@ void Renderer::endFrame() {
 
     VkSemaphoreSubmitInfo semaphore_info = {};
     semaphore_info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO;
-    semaphore_info.semaphore = backbuffer.getInternal()->is_ready.semaphore;
+    semaphore_info.semaphore =
+        swap_chain.getInternal()
+            ->semaphores[swap_chain.getInternal()->image_index]
+            .semaphore;
 
     VkSemaphoreSubmitInfo wait_info = {};
     wait_info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO;

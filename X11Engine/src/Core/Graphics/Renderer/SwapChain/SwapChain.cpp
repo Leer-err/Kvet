@@ -59,9 +59,8 @@ Texture SwapChain::getBackbuffer() {
 
     Internal::Texture texture = {};
     texture.image = swap_chain->images[swap_chain->image_index];
-    texture.is_ready = swap_chain->semaphores[swap_chain->image_index];
 
-    return Texture(std::move(texture));
+    return Texture(texture, false);
 }
 
 Internal::SwapChain* SwapChain::getInternal() const { return swap_chain.get(); }

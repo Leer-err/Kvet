@@ -1,24 +1,25 @@
 #include "Texture.h"
 
+#include <memory>
+
+#include "GraphicsInternalsForward.h"
 #include "InternalTexture.h"
+#include "ResourceWrapper.h"
 
 namespace Graphics {
 
-Texture::~Texture() = default;
+Texture::Texture(const Internal::Texture& texture, bool should_be_destroyed)
+    : texture(std::make_shared<Internal::WrappedTexture>(
+          texture, should_be_destroyed)) {}
 
-Texture::Texture(Texture&&) = default;
+Internal::Texture* Texture::getInternal() const {
+    if (!texture) return nullptr;
 
-Texture& Texture::operator=(Texture&&) = default;
+    return texture.get()->getPtr();
+}
 
-Texture::Texture() : texture(std::make_unique<Internal::Texture>()) {}
+uint32_t Texture::getWidth() const { return texture->getRef().width; }
 
-Texture::Texture(Internal::Texture&& texture)
-    : texture(std::make_unique<Internal::Texture>(texture)) {}
-
-Internal::Texture* Texture::getInternal() const { return texture.get(); }
-
-uint32_t Texture::getWidth() const { return texture->width; }
-
-uint32_t Texture::getHeight() const { return texture->height; }
+uint32_t Texture::getHeight() const { return texture->getRef().height; }
 
 }  // namespace Graphics

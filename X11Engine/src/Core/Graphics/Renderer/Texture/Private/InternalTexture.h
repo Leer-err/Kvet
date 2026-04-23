@@ -5,21 +5,18 @@
 
 #include <cstddef>
 
-#include "Semaphore.h"
-
-
 namespace Graphics::Internal {
 
 struct Texture {
+    void destroy();
+
     VkImage image;
-    VkImageLayout layout;
     VmaAllocation allocation;
+    VkImageLayout layout;
 
     VkFormat format;
     size_t width;
     size_t height;
-
-    Semaphore is_ready;
 };
 
 }  // namespace Graphics::Internal

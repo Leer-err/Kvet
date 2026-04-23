@@ -8,30 +8,19 @@
 namespace Graphics {
 
 class Texture {
-    friend class TextureBuilder;
-    friend class SwapChain;
-    friend class RenderTarget;
-    friend class ShaderResource;
-    friend class Context;
-
    public:
     enum class Format { RGBA8, RGBA8_SRGB };
 
-    Texture();
-    ~Texture();
-
-    Texture(Texture&&);
-    Texture& operator=(Texture&&);
+    Texture() = default;
 
     uint32_t getWidth() const;
     uint32_t getHeight() const;
 
-    Texture(Internal::Texture&& texture);
-
+    Texture(const Internal::Texture& texture, bool should_be_destroyed = true);
     Internal::Texture* getInternal() const;
 
    private:
-    std::unique_ptr<Internal::Texture> texture;
+    std::shared_ptr<Internal::WrappedTexture> texture;
 };
 
 }  // namespace Graphics

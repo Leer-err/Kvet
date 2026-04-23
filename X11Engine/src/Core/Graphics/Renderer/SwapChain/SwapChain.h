@@ -9,8 +9,6 @@ namespace Graphics {
 class Texture;
 
 class SwapChain {
-    friend class SwapChainBuilder;
-
    public:
     SwapChain();
     ~SwapChain();
@@ -21,8 +19,6 @@ class SwapChain {
     void present();
 
     Texture getBackbuffer();
-
-   protected:
     SwapChain(Internal::SwapChain&& swap_chain);
     Internal::SwapChain* getInternal() const;
 

@@ -5,6 +5,8 @@
 
 #include "GraphicsResources.h"
 #include "InternalTexture.h"
+#include "Semaphore.h"
+#include "Texture.h"
 
 namespace Graphics {
 
@@ -51,8 +53,19 @@ TextureBuilder& TextureBuilder::isCopyDestination() {
     return *this;
 }
 
+static VkFormat translateFormat(Texture::Format format) {
+    switch (format) {
+        case Texture::Format::RGBA8:
+            return VK_FORMAT_R8G8B8A8_UNORM;
+        case Texture::Format::RGBA8_SRGB:
+            return VK_FORMAT_R8G8B8A8_SRGB;
+    }
+
+    throw;
+}
+
 Result<Texture, TextureError> TextureBuilder::create() {
-    VkFormat format = VK_FORMAT_R8G8B8A8_SRGB;
+    auto native_format = translateFormat(format);
 
     VkImageCreateInfo image_info = {};
     image_info.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
@@ -61,7 +74,7 @@ Result<Texture, TextureError> TextureBuilder::create() {
     image_info.extent = {.width = width, .height = height, .depth = 1};
     image_info.mipLevels = 1;
     image_info.arrayLayers = 1;
-    image_info.format = format;
+    image_info.format = native_format;
     image_info.tiling = VK_IMAGE_TILING_OPTIMAL;
     image_info.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
     image_info.samples = VK_SAMPLE_COUNT_1_BIT;
@@ -82,13 +95,14 @@ Result<Texture, TextureError> TextureBuilder::create() {
                    &image, &allocation, nullptr);
 
     auto internal = Internal::Texture{};
+    internal.image = image;
     internal.allocation = allocation;
-    internal.format = format;
+    internal.layout = VK_IMAGE_LAYOUT_UNDEFINED;
+    internal.format = native_format;
     internal.width = width;
     internal.height = height;
-    internal.image = image;
 
-    return std::move(Texture(std::move(internal)));
+    return Texture(internal);
 }
 
 }  // namespace Graphics
