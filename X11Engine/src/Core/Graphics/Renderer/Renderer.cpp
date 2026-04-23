@@ -103,6 +103,7 @@ void Renderer::endFrame() {
     copy_region.sType = VK_STRUCTURE_TYPE_IMAGE_COPY_2;
     copy_region.extent.width = 1280;
     copy_region.extent.height = 720;
+    copy_region.extent.depth = 1;
     copy_region.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
     copy_region.srcSubresource.layerCount = 1;
     copy_region.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
