@@ -44,6 +44,8 @@ SwapChain SwapChainBuilder::create() {
     swapchain_builder.set_desired_format(format);
     swapchain_builder.add_fallback_present_mode(mode);
     swapchain_builder.set_desired_min_image_count(queue_size);
+    swapchain_builder.set_image_usage_flags(
+        VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT);
 
     auto swap_ret = swapchain_builder.build();
     if (!swap_ret) {

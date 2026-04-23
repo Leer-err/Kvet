@@ -70,15 +70,63 @@ void Renderer::endFrame() {
 
     auto backbuffer = swap_chain.getBackbuffer();
 
+    VkImageMemoryBarrier2 barriers[2] = {};
+
+    Internal::ImageBarrier backbuffer_barrier_builder(
+        backbuffer.getInternal()->image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+    backbuffer_barrier_builder.dst_stage_mask =
+        VK_PIPELINE_STAGE_2_TRANSFER_BIT;
+    backbuffer_barrier_builder.dst_access_mask = VK_ACCESS_2_TRANSFER_WRITE_BIT;
+    barriers[0] = backbuffer_barrier_builder.create();
+
+    Internal::ImageBarrier render_target_barrier_builder(
+        render_target_texture.getInternal()->image,
+        VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
+    render_target_barrier_builder.src_stage_mask =
+        VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT;
+    render_target_barrier_builder.src_access_mask =
+        VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT;
+    render_target_barrier_builder.dst_stage_mask =
+        VK_PIPELINE_STAGE_2_TRANSFER_BIT;
+    render_target_barrier_builder.dst_access_mask =
+        VK_ACCESS_2_TRANSFER_READ_BIT;
+    barriers[1] = render_target_barrier_builder.create();
+
+    VkDependencyInfo dep = {};
+    dep.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO;
+    dep.imageMemoryBarrierCount = 2;
+    dep.pImageMemoryBarriers = barriers;
+
+    vkCmdPipelineBarrier2(frame.buffer.buffer, &dep);
+
+    VkImageCopy2 copy_region = {};
+    copy_region.sType = VK_STRUCTURE_TYPE_IMAGE_COPY_2;
+    copy_region.extent.width = 1280;
+    copy_region.extent.height = 720;
+    copy_region.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    copy_region.srcSubresource.layerCount = 1;
+    copy_region.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    copy_region.dstSubresource.layerCount = 1;
+
+    VkCopyImageInfo2 copy_info = {};
+    copy_info.sType = VK_STRUCTURE_TYPE_COPY_IMAGE_INFO_2;
+    copy_info.srcImage = render_target_texture.getInternal()->image;
+    copy_info.srcImageLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+    copy_info.dstImage = backbuffer.getInternal()->image;
+    copy_info.dstImageLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+    copy_info.regionCount = 1;
+    copy_info.pRegions = &copy_region;
+
+    vkCmdCopyImage2(frame.buffer.buffer, &copy_info);
+
     Internal::ImageBarrier barrier_builder(backbuffer.getInternal()->image,
                                            VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
-    barrier_builder.src_stage_mask =
-        VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT;
-    barrier_builder.src_access_mask = VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT;
+    barrier_builder.src_stage_mask = VK_PIPELINE_STAGE_2_TRANSFER_BIT;
+    barrier_builder.src_access_mask = VK_ACCESS_2_TRANSFER_WRITE_BIT;
 
     auto barrier = barrier_builder.create();
 
-    VkDependencyInfo dep = {};
+    dep = {};
     dep.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO;
     dep.imageMemoryBarrierCount = 1;
     dep.pImageMemoryBarriers = &barrier;
