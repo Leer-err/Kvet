@@ -22,6 +22,9 @@ class Buffer {
 
     size_t getSize() const;
 
+    void* map();
+    void unmap();
+
    protected:
     Buffer(Internal::Buffer&& buffer);
     Internal::Buffer* getInternal() const;
