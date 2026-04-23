@@ -5,6 +5,9 @@
 
 #include <cstddef>
 
+#include "Semaphore.h"
+
+
 namespace Graphics::Internal {
 
 struct Texture {
@@ -15,6 +18,8 @@ struct Texture {
     VkFormat format;
     size_t width;
     size_t height;
+
+    Semaphore is_ready;
 };
 
 }  // namespace Graphics::Internal

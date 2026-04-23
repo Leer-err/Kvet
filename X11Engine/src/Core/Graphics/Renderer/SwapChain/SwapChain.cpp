@@ -61,7 +61,8 @@ void SwapChain::present() {
     info.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
     info.pNext = nullptr;
     info.waitSemaphoreCount = 1;
-    info.pWaitSemaphores = &frame.ready_for_present.semaphore;
+    info.pWaitSemaphores =
+        &swap_chain->semaphores[swap_chain->image_index].semaphore;
     info.swapchainCount = 1;
     info.pSwapchains = swap_chains;
     info.pImageIndices = &swap_chain->image_index;
@@ -83,6 +84,7 @@ Texture SwapChain::getBackbuffer() {
 
     Internal::Texture texture = {};
     texture.image = swap_chain->images[swap_chain->image_index];
+    texture.is_ready = swap_chain->semaphores[swap_chain->image_index];
 
     return Texture(std::move(texture));
 }

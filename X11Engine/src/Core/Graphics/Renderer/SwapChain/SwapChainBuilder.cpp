@@ -55,6 +55,7 @@ SwapChain SwapChainBuilder::create() {
     auto swap_cahin_images = swap_ret.value().get_images().value();
     for (int i = 0; i < queue_size; i++) {
         swap_chain.images[i] = swap_cahin_images[i];
+        swap_chain.semaphores[i] = Internal::Semaphore::create();
     }
 
     return SwapChain(std::move(swap_chain));
