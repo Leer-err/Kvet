@@ -79,7 +79,8 @@ Result<Buffer, BufferError> BufferBuilder::create() {
     VmaAllocationCreateInfo alloc_info = {};
     alloc_info.usage = VMA_MEMORY_USAGE_AUTO;
     if (cpu_writable)
-        alloc_info.flags |= VMA_ALLOCATION_CREATE_HOST_ACCESS_RANDOM_BIT;
+        alloc_info.flags |=
+            VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
 
     VkBuffer buffer;
     VmaAllocation allocation;
@@ -88,6 +89,7 @@ Result<Buffer, BufferError> BufferBuilder::create() {
 
     auto internal = Internal::Buffer{};
     internal.buffer = buffer;
+    internal.allocation = allocation;
     internal.size = size;
 
     return Buffer(std::move(internal));
