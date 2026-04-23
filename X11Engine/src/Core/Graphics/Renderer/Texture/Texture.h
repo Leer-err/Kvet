@@ -15,7 +15,7 @@ class Texture {
     friend class Context;
 
    public:
-    enum class Format { RGBA8 };
+    enum class Format { RGBA8, RGBA8_SRGB };
 
     Texture();
     ~Texture();

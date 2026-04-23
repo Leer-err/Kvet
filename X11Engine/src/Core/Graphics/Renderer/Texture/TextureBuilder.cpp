@@ -52,7 +52,7 @@ TextureBuilder& TextureBuilder::isCopyDestination() {
 }
 
 Result<Texture, TextureError> TextureBuilder::create() {
-    VkFormat format = VK_FORMAT_R8G8B8A8_UNORM;
+    VkFormat format = VK_FORMAT_R8G8B8A8_SRGB;
 
     VkImageCreateInfo image_info = {};
     image_info.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;

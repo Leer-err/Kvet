@@ -1,5 +1,6 @@
 #include "Stars.h"
 
+#include <cstring>
 #include <tracy/Tracy.hpp>
 
 #include "Binding.h"
@@ -46,12 +47,21 @@ Stars::Stars() : star_density(30), blinking_speed(1), blink_strength(0.6) {
 
     quad_vertices = Graphics::BufferBuilder(sizeof(screen_quad_vertices))
                         .isVertexBuffer(sizeof(Vector3))
+                        .isCPUWritable()
                         .create()
                         .getResult();
+    auto vertex_data = quad_vertices.map();
+    memcpy(vertex_data, screen_quad_vertices, sizeof(screen_quad_vertices));
+    quad_vertices.unmap();
+
     quad_indices = Graphics::BufferBuilder(sizeof(screen_quad_indices))
                        .isIndexBuffer()
+                       .isCPUWritable()
                        .create()
                        .getResult();
+    auto index_data = quad_indices.map();
+    memcpy(index_data, screen_quad_indices, sizeof(screen_quad_indices));
+    quad_indices.unmap();
 
     // screen_plane =
     //     MeshBuilder()

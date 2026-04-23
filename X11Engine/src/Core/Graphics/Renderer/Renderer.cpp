@@ -1,5 +1,7 @@
 #include "Renderer.h"
 
+#include <vulkan/vulkan_core.h>
+
 #include <tracy/Tracy.hpp>
 
 // #include "AppConfig.h"
@@ -30,16 +32,32 @@ void Renderer::beginFrame() {
 
     frame.buffer.begin();
 
-    auto context = Context();
-    auto render_target = context.createRenderTarget(render_target_texture);
+    Internal::ImageBarrier barrier_builder(
+        render_target_texture.getInternal()->image,
+        VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+    barrier_builder.src_stage_mask =
+        VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT;
+    barrier_builder.dst_stage_mask =
+        VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT;
+    barrier_builder.dst_access_mask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT |
+                                      VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+
+    auto barrier = barrier_builder.create();
+
+    VkDependencyInfo dep = {};
+    dep.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO;
+    dep.imageMemoryBarrierCount = 1;
+    dep.pImageMemoryBarriers = &barrier;
+
+    vkCmdPipelineBarrier2(frame.buffer.buffer, &dep);
+
     auto render_enviroment = RenderEnviroment{};
-    render_enviroment.render_target = render_target;
+    render_enviroment.render_target = default_render_target;
     render_enviroment.clear_render_target = true;
     render_enviroment.render_target_clear_value = Vector4();
 
+    auto context = Context();
     context.bindRenderEnviroment(render_enviroment);
-
-    // context.clean(default_render_target);
 }
 
 void Renderer::endFrame() {
@@ -69,6 +87,31 @@ void Renderer::endFrame() {
 
     frame.buffer.end();
 
+    VkCommandBufferSubmitInfo command_buffer_info = {};
+    command_buffer_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_SUBMIT_INFO;
+    command_buffer_info.commandBuffer = frame.buffer.buffer;
+    command_buffer_info.deviceMask = 0;
+
+    VkSemaphoreSubmitInfo semaphore_info = {};
+    semaphore_info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO;
+    semaphore_info.semaphore = backbuffer.getInternal()->is_ready.semaphore;
+
+    VkSemaphoreSubmitInfo wait_info = {};
+    wait_info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO;
+    wait_info.semaphore = frame.ready_for_render.semaphore;
+
+    VkSubmitInfo2 submit_info = {};
+    submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO_2;
+    submit_info.waitSemaphoreInfoCount = 1;
+    submit_info.pWaitSemaphoreInfos = &wait_info;
+    submit_info.signalSemaphoreInfoCount = 1;
+    submit_info.pSignalSemaphoreInfos = &semaphore_info;
+    submit_info.commandBufferInfoCount = 1;
+    submit_info.pCommandBufferInfos = &command_buffer_info;
+
+    vkQueueSubmit2(Resources::get().getGraphicsQueue(), 1, &submit_info,
+                   frame.render_finished.fence);
+
     // context.copy(render_target_texture, backbuffer);
 
     swap_chain.present();
@@ -85,14 +128,15 @@ void Renderer::initializeResources() {
                      .create();
 
     render_target_texture =
-        TextureBuilder(Texture::Format::RGBA8, config.render_width,
+        TextureBuilder(Texture::Format::RGBA8_SRGB, config.render_width,
                        config.render_height)
-            .isCopyDestination()
+            .isCopySource()
             .isRenderTarget()
             .create()
             .getResult();
 
-    // default_render_target = RenderTarget(render_target_texture);
+    auto context = Context();
+    default_render_target = context.createRenderTarget(render_target_texture);
 
     // auto context = APIResources::get().getContext();
     // auto device = APIResources::get().getDevice();

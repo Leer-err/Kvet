@@ -114,9 +114,17 @@ void Context::setPipeline(const GraphicsPipeline& pipeline) {
 void Context::draw(const Buffer& vertex_buffer, const Buffer& index_buffer) {
     auto command_buffer_handle = command_buffer.get()->buffer;
 
-    auto index_count = index_buffer.getSize() / sizeof(uint32_t);
+    auto index_buffer_handle = index_buffer.getInternal()->buffer;
+    vkCmdBindIndexBuffer(command_buffer_handle, index_buffer_handle, 0,
+                         VK_INDEX_TYPE_UINT32);
 
-    // vkCmdDrawIndexed(command_buffer_handle, index_count, 3, 0, 0, 0);
+    auto vertex_buffer_handle = vertex_buffer.getInternal()->buffer;
+    VkDeviceSize vertex_buffer_offset = 0;
+    vkCmdBindVertexBuffers(command_buffer_handle, 0, 1, &vertex_buffer_handle,
+                           &vertex_buffer_offset);
+
+    auto index_count = index_buffer.getSize() / sizeof(uint32_t);
+    vkCmdDrawIndexed(command_buffer_handle, index_count, 3, 0, 0, 0);
 }
 
 RenderTarget Context::createRenderTarget(const Texture& texture) {

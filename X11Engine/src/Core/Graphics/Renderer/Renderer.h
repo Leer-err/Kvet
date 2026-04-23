@@ -4,6 +4,7 @@
 // #include "RenderTarget.h"
 #include <cstdint>
 
+#include "RenderTarget.h"
 #include "SwapChain.h"
 #include "Texture.h"
 
@@ -35,7 +36,7 @@ class Renderer {
     Renderer();
 
     Texture render_target_texture;
-    // RenderTarget default_render_target;
+    RenderTarget default_render_target;
     // DepthStencil default_depth_stencil_buffer;
 
     SwapChain swap_chain;

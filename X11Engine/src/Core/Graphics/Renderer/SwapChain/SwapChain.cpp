@@ -32,31 +32,6 @@ void SwapChain::present() {
     auto& frame = Resources::get().getFrameInFlight();
     auto& command_buffer = frame.buffer;
 
-    VkCommandBufferSubmitInfo command_buffer_info = {};
-    command_buffer_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_SUBMIT_INFO;
-    command_buffer_info.commandBuffer = command_buffer.buffer;
-    command_buffer_info.deviceMask = 0;
-
-    VkSemaphoreSubmitInfo semaphore_info = {};
-    semaphore_info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO;
-    semaphore_info.semaphore = frame.ready_for_present.semaphore;
-
-    VkSemaphoreSubmitInfo wait_info = {};
-    wait_info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO;
-    wait_info.semaphore = frame.ready_for_render.semaphore;
-
-    VkSubmitInfo2 submit_info = {};
-    submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO_2;
-    submit_info.waitSemaphoreInfoCount = 1;
-    submit_info.pWaitSemaphoreInfos = &wait_info;
-    submit_info.signalSemaphoreInfoCount = 1;
-    submit_info.pSignalSemaphoreInfos = &semaphore_info;
-    submit_info.commandBufferInfoCount = 1;
-    submit_info.pCommandBufferInfos = &command_buffer_info;
-
-    vkQueueSubmit2(Resources::get().getGraphicsQueue(), 1, &submit_info,
-                   frame.render_finished.fence);
-
     VkPresentInfoKHR info = {};
     info.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
     info.pNext = nullptr;
