@@ -73,25 +73,16 @@ void Renderer::endFrame() {
 
     VkImageMemoryBarrier2 barriers[2] = {};
 
-    Internal::ImageBarrier backbuffer_barrier_builder(
-        backbuffer.getInternal()->image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
-    backbuffer_barrier_builder.dst_stage_mask =
-        VK_PIPELINE_STAGE_2_TRANSFER_BIT;
-    backbuffer_barrier_builder.dst_access_mask = VK_ACCESS_2_TRANSFER_WRITE_BIT;
-    barriers[0] = backbuffer_barrier_builder.create();
+    barriers[0] = backbuffer.getInternal()->createBarrier(
+        VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_PIPELINE_STAGE_NONE,
+        VK_ACCESS_2_NONE, VK_PIPELINE_STAGE_2_TRANSFER_BIT,
+        VK_ACCESS_2_TRANSFER_WRITE_BIT);
 
-    Internal::ImageBarrier render_target_barrier_builder(
-        render_target_texture.getInternal()->image,
-        VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
-    render_target_barrier_builder.src_stage_mask =
-        VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT;
-    render_target_barrier_builder.src_access_mask =
-        VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT;
-    render_target_barrier_builder.dst_stage_mask =
-        VK_PIPELINE_STAGE_2_TRANSFER_BIT;
-    render_target_barrier_builder.dst_access_mask =
-        VK_ACCESS_2_TRANSFER_READ_BIT;
-    barriers[1] = render_target_barrier_builder.create();
+    barriers[1] = render_target_texture.getInternal()->createBarrier(
+        VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+        VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT,
+        VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT,
+        VK_PIPELINE_STAGE_2_TRANSFER_BIT, VK_ACCESS_2_TRANSFER_READ_BIT);
 
     VkDependencyInfo dep = {};
     dep.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO;
@@ -121,12 +112,10 @@ void Renderer::endFrame() {
 
     vkCmdCopyImage2(frame.buffer.buffer, &copy_info);
 
-    Internal::ImageBarrier barrier_builder(backbuffer.getInternal()->image,
-                                           VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
-    barrier_builder.src_stage_mask = VK_PIPELINE_STAGE_2_TRANSFER_BIT;
-    barrier_builder.src_access_mask = VK_ACCESS_2_TRANSFER_WRITE_BIT;
-
-    auto barrier = barrier_builder.create();
+    auto barrier = backbuffer.getInternal()->createBarrier(
+        VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, VK_PIPELINE_STAGE_2_TRANSFER_BIT,
+        VK_ACCESS_2_TRANSFER_WRITE_BIT, VK_PIPELINE_STAGE_2_NONE,
+        VK_ACCESS_2_NONE);
 
     dep = {};
     dep.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO;
