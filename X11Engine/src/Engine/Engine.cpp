@@ -75,13 +75,13 @@ void Engine::update(float delta_time) {
 
     // PhysicalInput::get().saveState();
 
-    Graphics::Renderer::get().beginFrame();
+    // Graphics::Renderer::get().beginFrame();
 
-    Scene::get().update(delta_time);
+    // Scene::get().update(delta_time);
 
     // Overlay::Overlay::get().draw();
 
-    Graphics::Renderer::get().endFrame();
+    // Graphics::Renderer::get().endFrame();
 
     FrameMark;
 }

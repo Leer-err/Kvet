@@ -9,6 +9,7 @@ target_link_libraries(Graphics
         Window
         Logger
         Types
+        Utility
         Tracy::TracyClient
         SDL3::SDL3
         vulkan-interface
@@ -18,3 +19,4 @@ target_link_libraries(Graphics
 
 add_subdirectory(Renderer)
 add_subdirectory(Internal)
+add_subdirectory(GraphicsCommunicationManager)

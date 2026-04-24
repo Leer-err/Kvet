@@ -19,8 +19,7 @@ class Renderer {
 
     void initializeResources();
 
-    void beginFrame();
-    void endFrame();
+    void render();
 
     uint32_t getWidth() const;
     uint32_t getHeight() const;

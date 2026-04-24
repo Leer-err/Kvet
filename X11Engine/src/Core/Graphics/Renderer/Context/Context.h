@@ -31,7 +31,7 @@ class Context {
 
     RenderTarget createRenderTarget(const Texture& texture);
 
-    // void copy(const Texture& source, Texture destination);
+    void copy(const Texture& source, const Texture& destination);
 
     // template <typename T>
     // T* mapConstantBuffer(Buffer buffer) {

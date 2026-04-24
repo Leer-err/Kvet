@@ -151,6 +151,28 @@ RenderTarget Context::createRenderTarget(const Texture& texture) {
     return RenderTarget(render_target);
 }
 
+void Context::copy(const Texture& source, const Texture& destination) {
+    VkImageMemoryBarrier2 barriers[2] = {};
+
+    barriers[0] = source.getInternal()->createBarrier(
+        VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_PIPELINE_STAGE_NONE,
+        VK_ACCESS_2_NONE, VK_PIPELINE_STAGE_2_TRANSFER_BIT,
+        VK_ACCESS_2_TRANSFER_WRITE_BIT);
+
+    barriers[1] = destination.getInternal()->createBarrier(
+        VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+        VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT,
+        VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT,
+        VK_PIPELINE_STAGE_2_TRANSFER_BIT, VK_ACCESS_2_TRANSFER_READ_BIT);
+
+    VkDependencyInfo dep = {};
+    dep.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO;
+    dep.imageMemoryBarrierCount = 2;
+    dep.pImageMemoryBarriers = barriers;
+
+    // vkCmdPipelineBarrier2(frame.buffer.buffer, &dep);
+}
+
 }  // namespace Graphics
 
 // Context::Context() { context = APIResources::get().getContext(); }

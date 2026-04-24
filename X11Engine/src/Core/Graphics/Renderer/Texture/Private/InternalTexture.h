@@ -14,11 +14,11 @@ struct Texture {
                                         VkPipelineStageFlags2 src_stages,
                                         VkAccessFlags2 src_access,
                                         VkPipelineStageFlags2 dst_stages,
-                                        VkAccessFlags2 dst_access) const;
+                                        VkAccessFlags2 dst_access);
 
     VkImage image;
     VmaAllocation allocation;
-    VkImageLayout layout;
+    VkImageLayout layout = VK_IMAGE_LAYOUT_UNDEFINED;
 
     VkFormat format;
     size_t width;
