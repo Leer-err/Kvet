@@ -5,11 +5,10 @@
 #include <string>
 
 #include "Result.h"
+#include "Shader.h"
 #include "ShaderError.h"
 
 namespace Graphics {
-
-class Shader;
 
 class ShaderBuilder {
    public:

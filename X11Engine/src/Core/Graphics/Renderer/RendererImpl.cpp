@@ -17,6 +17,7 @@
 #include "CameraData.h"
 #include "ImageBuilder.h"
 #include "RenderTarget.h"
+#include "StarsData.h"
 #include "SwapChain.h"
 
 namespace Graphics {
@@ -35,16 +36,23 @@ RendererImpl::~RendererImpl() { swap_chain.destroy(); }
 void RendererImpl::render() {
     ZoneScoped;
     auto& manager = GraphicsCommunicationManager::get();
-    auto data = manager.recieve<CameraData>();
+    // auto data = manager.recieve<CameraData>();
+    CameraData data = {};
+    data.view_projection = Matrix::identity();
+    data.inverse_view_projection = Matrix::identity();
+
+    auto stars = manager.recieve<StarsData>();
 
     void* mapped_buffer = camera_data.map();
-    mempcpy(mapped_buffer, &data, sizeof(CameraData));
+    memcpy(mapped_buffer, &data, sizeof(CameraData));
     camera_data.unmap();
 
     beginFrame();
 
-    auto frame = Resources::get().getFrameInFlight();
-    star_renderer.render(frame.buffer, camera_data);
+    if (stars) {
+        auto frame = Resources::get().getFrameInFlight();
+        star_renderer.render(frame.buffer, camera_data, *stars);
+    }
 
     endFrame();
 }
@@ -127,6 +135,7 @@ void RendererImpl::init() {
 }
 
 void RendererImpl::waitRenderFinished() {
+    ZoneScoped;
     auto frame = Resources::get().getFrameInFlight();
 
     frame.render_finished.wait();
@@ -134,13 +143,14 @@ void RendererImpl::waitRenderFinished() {
 }
 
 void RendererImpl::prepareRenderTargetForRendering() {
+    ZoneScoped;
     auto frame = Resources::get().getFrameInFlight();
 
     auto barrier = render_target_texture.createBarrier(
         VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_PIPELINE_STAGE_2_NONE,
         VK_ACCESS_2_NONE, VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT,
-        VK_ACCESS_COLOR_ATTACHMENT_READ_BIT |
-            VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT);
+        VK_ACCESS_2_COLOR_ATTACHMENT_READ_BIT |
+            VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT);
 
     VkDependencyInfo dep = {};
     dep.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO;
@@ -151,12 +161,13 @@ void RendererImpl::prepareRenderTargetForRendering() {
 }
 
 void RendererImpl::copyToBackbuffer(Image& render_target, Image& backbuffer) {
+    ZoneScoped;
     auto frame = Resources::get().getFrameInFlight();
 
     VkImageMemoryBarrier2 barriers[2] = {};
 
     barriers[0] = backbuffer.createBarrier(
-        VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_PIPELINE_STAGE_NONE,
+        VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_PIPELINE_STAGE_2_NONE,
         VK_ACCESS_2_NONE, VK_PIPELINE_STAGE_2_TRANSFER_BIT,
         VK_ACCESS_2_TRANSFER_WRITE_BIT);
 
@@ -177,6 +188,7 @@ void RendererImpl::copyToBackbuffer(Image& render_target, Image& backbuffer) {
 }
 
 void RendererImpl::prepareBackbufferForPresentation(Image& backbuffer) {
+    ZoneScoped;
     auto frame = Resources::get().getFrameInFlight();
 
     auto render_finished = backbuffer.createBarrier(

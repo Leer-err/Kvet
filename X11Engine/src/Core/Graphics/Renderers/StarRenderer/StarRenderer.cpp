@@ -11,6 +11,7 @@
 #include "InputLayoutBuilder.h"
 #include "Shader.h"
 #include "ShaderBuilder.h"
+#include "StarsData.h"
 #include "Vector3.h"
 
 namespace Graphics {
@@ -49,6 +50,7 @@ StarRenderer::StarRenderer() {
     auto pixel_shader =
         Graphics::ShaderBuilder("./Assets/Shaders/Stars/Stars.spv",
                                 "pixel_main", VK_SHADER_STAGE_FRAGMENT_BIT)
+            .withConstants(sizeof(VkDeviceAddress))
             .create()
             .getResult();
 
@@ -60,21 +62,28 @@ StarRenderer::StarRenderer() {
                                                  pixel_shader)
                    .create();
 
-    // star_parameters_buffer =
-    //     Graphics::BufferBuilder(sizeof(StarData::StarParameters))
-    //         .isConstantBuffer()
-    //         .isCPUWritable()
-    //         .create()
-    //         .getResult();
+    stars_data_buffer = Graphics::BufferBuilder(sizeof(StarsData))
+                            .isConstantBuffer()
+                            .isCPUWritable()
+                            .create()
+                            .getResult();
 }
 
 void StarRenderer::render(const CommandBuffer& command_buffer,
-                          const Buffer& camera_data) {
+                          const Buffer& camera_data,
+                          const StarsData& stars_data) {
+    auto stars_data_ptr = stars_data_buffer.map();
+    memcpy(stars_data_ptr, &stars_data, sizeof(stars_data));
+    stars_data_buffer.unmap();
+
     command_buffer.setPipeline(pipeline);
 
-    VkDeviceAddress address = camera_data.getDeviceAddress();
-    command_buffer.pushConstants(pipeline, VK_SHADER_STAGE_VERTEX_BIT, &address,
-                                 sizeof(address));
+    VkDeviceAddress camera_address = camera_data.getDeviceAddress();
+    command_buffer.pushConstants(pipeline, VK_SHADER_STAGE_VERTEX_BIT,
+                                 &camera_address, sizeof(camera_address));
+    VkDeviceAddress stars_address = stars_data_buffer.getDeviceAddress();
+    command_buffer.pushConstants(pipeline, VK_SHADER_STAGE_FRAGMENT_BIT,
+                                 &stars_address, sizeof(stars_address));
 
     command_buffer.draw(quad_vertices, quad_indices);
 }

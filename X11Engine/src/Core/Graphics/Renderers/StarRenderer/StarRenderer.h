@@ -1,9 +1,9 @@
 #pragma once
 
 #include "Buffer.h"
-#include "CameraData.h"
 #include "CommandBuffer.h"
 #include "GraphicsPipeline.h"
+#include "StarsData.h"
 
 namespace Graphics {
 
@@ -11,7 +11,8 @@ class StarRenderer {
    public:
     StarRenderer();
 
-    void render(const CommandBuffer& command_buffer, const Buffer& camera_data);
+    void render(const CommandBuffer& command_buffer, const Buffer& camera_data,
+                const StarsData& stars_data);
 
    private:
     Graphics::Buffer quad_vertices;
@@ -19,7 +20,7 @@ class StarRenderer {
 
     Graphics::GraphicsPipeline pipeline;
 
-    // Graphics::Buffer star_parameters_buffer;
+    Graphics::Buffer stars_data_buffer;
 };
 
 }  // namespace Graphics

@@ -8,7 +8,7 @@
 // #include "Name.h"
 // #include "PhysicsSystem.h"
 // #include "PlayerLook.h"
-#include "GraphicsCommunicationManager/GraphicsCommunicationManager.h"
+#include "GraphicsCommunicationManager.h"
 #include "Quaternion.h"
 // #include "ScriptSystem.h"
 // #include "Shape.h"

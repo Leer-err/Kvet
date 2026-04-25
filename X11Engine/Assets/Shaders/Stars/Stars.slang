@@ -139,7 +139,7 @@ float remap(float value, float in_min, float in_max, float out_min, float out_ma
     return lerp(out_min, out_max, t);
 }
 
-struct StarData
+struct StarsData
 {
     float time;
     float star_density;
@@ -147,21 +147,16 @@ struct StarData
     float blink_strength;
 };
 
-// [[vk::binding(0, 2)]]
-// ConstantBuffer<StarData> star_data;
-
 [shader("pixel")]
-float4 pixel_main(in Vertex_Output data) : SV_TARGET
+float4 pixel_main(in Vertex_Output data, uniform StarsData* stars_data) : SV_TARGET
 {
-    StarData star_data = {};
-
     float3 noise_position = normalize(data.position);
-    float noise = 1 - voronoi3d(noise_position * star_data.star_density).x;
+    float noise = 1 - voronoi3d(noise_position * stars_data.star_density).x;
     float stars = step(0.95, noise);
 
-    float blink_offset = star_data.time * star_data.blinking_speed;
+    float blink_offset = stars_data.time * stars_data.blinking_speed;
     float brightness_noise = fbm((noise_position * 10 + blink_offset) , 0.5);
-    float star_brightness = remap(brightness_noise, 0, 1, 1 - star_data.blink_strength, 1);
+    float star_brightness = remap(brightness_noise, 0, 1, 1 - stars_data.blink_strength, 1);
 
     stars = stars * star_brightness;
 

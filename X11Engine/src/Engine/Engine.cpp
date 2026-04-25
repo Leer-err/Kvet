@@ -13,6 +13,7 @@
 // #include "PhysicalInput.h"
 // #include "ScriptLoader.h"
 // #include "ScriptSandbox.h"
+#include "GraphicsCommunicationManager.h"
 
 namespace Engine {
 
@@ -78,6 +79,8 @@ void Engine::update(float delta_time) {
     // Graphics::Renderer::get().beginFrame();
 
     Scene::get().update(delta_time);
+
+    GraphicsCommunicationManager::get().flush();
 
     renderer.render();
 

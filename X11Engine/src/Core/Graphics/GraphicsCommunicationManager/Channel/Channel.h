@@ -25,7 +25,7 @@ class Channel : public IChannel {
     std::optional<T> recieve() {
         std::scoped_lock<std::mutex> lock(access_mutex);
 
-        if (queue.empty()) return {};
+        if (ready_elements_count == 0) return {};
 
         auto value = queue.back();
         queue.pop();
