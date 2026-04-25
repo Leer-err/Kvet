@@ -7,7 +7,6 @@
 #include <vector>
 
 #include "InputLayout.h"
-#include "InternalInputLayout.h"
 
 namespace Graphics {
 
@@ -45,8 +44,8 @@ InputLayout InputLayoutBuilder::create() {
     size_t vertex_size = 0;
     size_t element_index = 0;
 
-    auto internal = Internal::InputLayout{};
-    internal.elements.reserve(elements.size());
+    auto result = InputLayout{};
+    result.elements.reserve(elements.size());
 
     for (const auto& format : elements) {
         auto internal_format = getVulkanFormat(format);
@@ -60,7 +59,7 @@ InputLayout InputLayoutBuilder::create() {
         desc.location = element_index;
         desc.offset = vertex_size;
 
-        internal.elements.push_back(desc);
+        result.elements.push_back(desc);
 
         vertex_size += format_size;
         element_index++;
@@ -70,9 +69,9 @@ InputLayout InputLayoutBuilder::create() {
     binding.binding = 0;
     binding.stride = static_cast<uint32_t>(vertex_size);
     binding.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-    internal.buffer_binding_description = binding;
+    result.buffer_binding_description = binding;
 
-    return InputLayout(std::move(internal));
+    return result;
 }
 
 }  // namespace Graphics

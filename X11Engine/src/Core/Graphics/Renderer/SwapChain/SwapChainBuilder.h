@@ -1,23 +1,23 @@
-#pragma once
+// #pragma once
 
-#include <cstdint>
+// #include <cstdint>
 
-#include "GraphicsConfig.h"
-#include "SwapChain.h"
+// #include "GraphicsConfig.h"
+// #include "SwapChain.h"
 
-namespace Graphics {
+// namespace Graphics {
 
-class SwapChainBuilder {
-   public:
-    SwapChainBuilder(uint32_t width, uint32_t height,
-                     Config::BufferingMode buffering_mode);
+// class SwapChainBuilder {
+//    public:
+//     SwapChainBuilder(uint32_t width, uint32_t height,
+//                      Config::BufferingMode buffering_mode);
 
-    SwapChain create();
+//     SwapChain create();
 
-   private:
-    uint32_t width;
-    uint32_t height;
-    Config::BufferingMode buffering_mode;
-};
+//    private:
+//     uint32_t width;
+//     uint32_t height;
+//     Config::BufferingMode buffering_mode;
+// };
 
-}  // namespace Graphics
+// }  // namespace Graphics

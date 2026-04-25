@@ -1,32 +1,24 @@
 #include "Buffer.h"
 
-#include <memory>
-
 #include "GraphicsResources.h"
-#include "InternalBuffer.h"
 
 namespace Graphics {
 
-Buffer::~Buffer() = default;
+void Buffer::destroy() {
+    if (buffer != VK_NULL_HANDLE) {
+        auto allocator = Resources::get().getAllocator();
 
-Buffer::Buffer(Buffer&&) = default;
+        vmaDestroyBuffer(allocator, buffer, allocation);
+    }
+}
 
-Buffer& Buffer::operator=(Buffer&&) = default;
-
-Buffer::Buffer() { buffer = std::make_unique<Internal::Buffer>(); }
-
-Buffer::Buffer(Internal::Buffer&& buffer)
-    : buffer(std::make_unique<Internal::Buffer>(std::move(buffer))) {}
-
-Internal::Buffer* Buffer::getInternal() const { return buffer.get(); }
-
-size_t Buffer::getSize() const { return buffer->size; }
+size_t Buffer::getSize() const { return size; }
 
 void* Buffer::map() {
     auto allocator = Resources::get().getAllocator();
 
     void* mapped_data;
-    vmaMapMemory(allocator, buffer->allocation, &mapped_data);
+    vmaMapMemory(allocator, allocation, &mapped_data);
 
     return mapped_data;
 }
@@ -34,7 +26,16 @@ void* Buffer::map() {
 void Buffer::unmap() {
     auto allocator = Resources::get().getAllocator();
 
-    vmaUnmapMemory(allocator, buffer->allocation);
+    vmaUnmapMemory(allocator, allocation);
+}
+
+VkDeviceAddress Buffer::getDeviceAddress() const {
+    auto device = Resources::get().getDevice();
+
+    VkBufferDeviceAddressInfo info = {};
+    info.sType = VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO;
+    info.buffer = buffer;
+    return vkGetBufferDeviceAddress(device, &info);
 }
 
 }  // namespace Graphics

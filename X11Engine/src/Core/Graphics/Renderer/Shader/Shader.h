@@ -1,18 +1,14 @@
 #pragma once
+#include <vulkan/vulkan_core.h>
 
-#include <memory>
-
-#include "GraphicsInternalsForward.h"
-
+#include <string>
 namespace Graphics {
 
-class Shader {
-   public:
-    Shader(Internal::Shader&& shader);
-    Internal::Shader* getInternal() const;
-
-   private:
-    std::shared_ptr<Internal::Shader> shader;
+struct Shader {
+    VkShaderModule shader;
+    std::string entrypoint;
+    VkShaderStageFlagBits stage;
+    size_t constant_range_size;
 };
 
 }  // namespace Graphics

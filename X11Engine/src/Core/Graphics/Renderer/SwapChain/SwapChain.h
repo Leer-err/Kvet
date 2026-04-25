@@ -1,29 +1,41 @@
 #pragma once
 
-#include <memory>
+#include <VkBootstrap.h>
+#include <vulkan/vulkan_core.h>
 
+#include "GraphicsConfig.h"
 #include "GraphicsInternalsForward.h"
+#include "Image.h"
+#include "Semaphore.h"
 
 namespace Graphics {
 
-class Texture;
-
 class SwapChain {
    public:
-    SwapChain();
-    ~SwapChain();
+    struct BackBuffer {
+        Image backbuffer;
+        Semaphore ready_for_present;
+    };
 
-    SwapChain(SwapChain&&);
-    SwapChain& operator=(SwapChain&&);
+    SwapChain() = default;
+    SwapChain(uint32_t width, uint32_t height,
+              Config::BufferingMode buffering_mode);
+
+    void destroy();
 
     void present();
 
-    Texture getBackbuffer();
-    SwapChain(Internal::SwapChain&& swap_chain);
-    Internal::SwapChain* getInternal() const;
+    BackBuffer getBackbuffer();
 
    private:
-    std::unique_ptr<Internal::SwapChain> swap_chain;
+    static constexpr size_t SWAP_CHAIN_MAX_SIZE = 3;
+
+    vkb::Swapchain swap_chain;
+
+    Image images[SWAP_CHAIN_MAX_SIZE];
+    Semaphore semaphores[SWAP_CHAIN_MAX_SIZE];
+    uint32_t image_index;
+    int swap_chain_size;
 };
 
 }  // namespace Graphics

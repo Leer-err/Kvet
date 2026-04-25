@@ -5,11 +5,14 @@
 #include <queue>
 
 class IChannel {
+   public:
+    virtual ~IChannel() {}
+
     virtual void flush() = 0;
 };
 
 template <typename T>
-class Channel : IChannel {
+class Channel : public IChannel {
    public:
     Channel() : ready_elements_count(0) {}
 

@@ -4,7 +4,7 @@
 
 #include "GraphicsResources.h"
 
-namespace Graphics::Internal {
+namespace Graphics {
 
 Semaphore Semaphore::create() {
     auto device = Resources::get().getDevice();
@@ -24,4 +24,17 @@ Semaphore Semaphore::create(VkDevice device) {
     return semaphore;
 }
 
-}  // namespace Graphics::Internal
+void Semaphore::destroy() {
+    auto device = Resources::get().getDevice();
+    vkDestroySemaphore(device, semaphore, nullptr);
+}
+
+VkSemaphoreSubmitInfo Semaphore::submit() const {
+    VkSemaphoreSubmitInfo info = {};
+    info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO;
+    info.semaphore = semaphore;
+
+    return info;
+}
+
+}  // namespace Graphics

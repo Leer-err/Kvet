@@ -66,6 +66,9 @@ void Resources::createDevice() {
         return;
     }
 
+    VkPhysicalDeviceVulkan12Features features12 = {};
+    features12.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES;
+    features12.bufferDeviceAddress = VK_TRUE;
     VkPhysicalDeviceSynchronization2FeaturesKHR synchronization_2{
         VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SYNCHRONIZATION_2_FEATURES_KHR};
     synchronization_2.synchronization2 = VK_TRUE;
@@ -74,6 +77,7 @@ void Resources::createDevice() {
         VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES_KHR;
     dynamic_rendering_feature.dynamicRendering = VK_TRUE;
     vkb::DeviceBuilder device_builder{phys_ret.value()};
+    device_builder.add_pNext(&features12);
     device_builder.add_pNext(&synchronization_2);
     device_builder.add_pNext(&dynamic_rendering_feature);
     auto dev_ret = device_builder.build();
@@ -106,6 +110,7 @@ void Resources::createAllocator() {
     allocatorCreateInfo.physicalDevice = device.physical_device;
     allocatorCreateInfo.device = device.device;
     allocatorCreateInfo.instance = instance.instance;
+    allocatorCreateInfo.flags = VMA_ALLOCATOR_CREATE_BUFFER_DEVICE_ADDRESS_BIT;
 
     VkResult result = vmaCreateAllocator(&allocatorCreateInfo, &allocator);
     if (result != VK_SUCCESS)
@@ -138,9 +143,7 @@ void Resources::prepareFrames() {
         frames[i].buffer.buffer = buffer_handles[i];
         frames[i].render_finished =
             Internal::Fence::create(device.device, true);
-        frames[i].ready_for_render = Internal::Semaphore::create(device.device);
-        frames[i].ready_for_present =
-            Internal::Semaphore::create(device.device);
+        frames[i].ready_for_render = Semaphore::create(device.device);
     }
 }
 

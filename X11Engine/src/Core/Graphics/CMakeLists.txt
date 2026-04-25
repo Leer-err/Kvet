@@ -1,5 +1,9 @@
 add_library(Graphics STATIC)
 
+target_sources(Graphics PRIVATE
+    Graphics.cpp
+)
+
 target_include_directories(Graphics PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
 )
@@ -18,5 +22,7 @@ target_link_libraries(Graphics
 )
 
 add_subdirectory(Renderer)
+add_subdirectory(Renderers)
+add_subdirectory(RenderData)
 add_subdirectory(Internal)
 add_subdirectory(GraphicsCommunicationManager)

@@ -17,14 +17,12 @@ struct Vertex_input{
 // ConstantBuffer<CameraData> camera_data;
 
 [shader("vertex")]
-Vertex_Output vertex_main(in Vertex_input vertex)
+Vertex_Output vertex_main(in Vertex_input vertex, uniform CameraData* camera_data)
 {
-    CameraData camera_data = {};
-
     Vertex_Output output;
 
     output.viewport_position = float4(vertex.position, 1);
-    float4 position = mul(camera_data.inverse_view_projection, output.viewport_position);
+    float4 position = mul(camera_data->inverse_view_projection, output.viewport_position);
     position = position / position.w;
     output.position = position.xyz;
 

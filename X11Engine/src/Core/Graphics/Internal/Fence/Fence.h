@@ -9,6 +9,7 @@ struct Fence {
     static Fence create(VkDevice device, bool is_signaled);
 
     void reset();
+    void wait();
 
     VkFence fence;
 };

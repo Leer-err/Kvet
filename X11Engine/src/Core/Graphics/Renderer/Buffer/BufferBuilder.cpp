@@ -7,7 +7,6 @@
 
 #include "Buffer.h"
 #include "GraphicsResources.h"
-#include "InternalBuffer.h"
 #include "Result.h"
 
 namespace Graphics {
@@ -70,7 +69,8 @@ Result<Buffer, BufferError> BufferBuilder::create() {
     if (shader_resource)
         buffer_info.usage |= VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
     if (constant_buffer)
-        buffer_info.usage |= VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
+        buffer_info.usage |= VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT |
+                             VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT;
     if (vertex_buffer) buffer_info.usage |= VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
     if (index_buffer) buffer_info.usage |= VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
     if (copy_source) buffer_info.usage |= VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
@@ -87,12 +87,12 @@ Result<Buffer, BufferError> BufferBuilder::create() {
     vmaCreateBuffer(Resources::get().getAllocator(), &buffer_info, &alloc_info,
                     &buffer, &allocation, nullptr);
 
-    auto internal = Internal::Buffer{};
-    internal.buffer = buffer;
-    internal.allocation = allocation;
-    internal.size = size;
+    auto result = Buffer{};
+    result.buffer = buffer;
+    result.allocation = allocation;
+    result.size = size;
 
-    return Buffer(std::move(internal));
+    return result;
 }
 
 }  // namespace Graphics

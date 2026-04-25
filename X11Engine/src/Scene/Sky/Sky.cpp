@@ -5,6 +5,6 @@
 void Sky::draw() {
     ZoneScoped;
 
-    stars.draw();
+    // stars.draw();
     // clouds.draw();
 }

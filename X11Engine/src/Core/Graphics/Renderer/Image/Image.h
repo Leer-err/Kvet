@@ -5,9 +5,9 @@
 
 #include <cstddef>
 
-namespace Graphics::Internal {
+namespace Graphics {
 
-struct Texture {
+struct Image {
     void destroy();
 
     VkImageMemoryBarrier2 createBarrier(VkImageLayout new_layout,
@@ -25,4 +25,4 @@ struct Texture {
     size_t height;
 };
 
-}  // namespace Graphics::Internal
+}  // namespace Graphics

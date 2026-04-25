@@ -3,7 +3,7 @@
 
 #include <memory>
 
-#include "Buffer.h"
+#include "CameraData.h"
 #include "Entity.h"
 #include "ICamera.h"
 
@@ -21,7 +21,7 @@ class CameraManager {
     Entity getMainCameraEntity() const;
 
     void updateCameraData();
-    Buffer getCameraData() const;
+    CameraData getCameraData() const;
 
    private:
     CameraManager();
@@ -32,8 +32,7 @@ class CameraManager {
 
     std::shared_ptr<ICamera> main_camera;
     Entity main_camera_entity;
-
-    Buffer camera_buffer;
+    CameraData camera_data;
 };
 
 #endif  // CAMERA_MANAGER_H

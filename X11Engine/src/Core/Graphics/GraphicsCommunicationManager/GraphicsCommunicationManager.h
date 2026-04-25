@@ -1,6 +1,8 @@
 #pragma once
 
+#include <cstddef>
 #include <map>
+#include <memory>
 #include <optional>
 
 #include "Channel.h"
@@ -17,7 +19,7 @@ class GraphicsCommunicationManager {
     template <typename T>
     void send(const T& data) {
         auto channel = getOrCreteChannel<T>();
-        channel.send(data);
+        channel->send(data);
     }
 
     template <typename T>
@@ -25,7 +27,13 @@ class GraphicsCommunicationManager {
         auto channel = getChannel<T>();
         if (channel == nullptr) return {};
 
-        return channel.recieve();
+        return channel->recieve();
+    }
+
+    void flush() {
+        for (const auto& [type_id, channel] : channels) {
+            channel->flush();
+        }
     }
 
    private:
@@ -35,7 +43,7 @@ class GraphicsCommunicationManager {
         auto channel_it = channels.find(type_id);
         if (channel_it == channels.end()) return nullptr;
 
-        return &channel_it->second;
+        return reinterpret_cast<Channel<T>*>(channel_it->second.get());
     }
 
     template <typename T>
@@ -44,10 +52,18 @@ class GraphicsCommunicationManager {
         if (ptr != nullptr) return ptr;
 
         auto type_id = TypeIdHelper::getTypeId<T>();
-        channels.emplace(type_id, Channel<T>());
 
-        return &channels[type_id];
+        channels.emplace(type_id, std::move(std::make_unique<Channel<T>>()));
+
+        return reinterpret_cast<Channel<T>*>(channels[type_id].get());
     }
 
-    std::map<TypeId, IChannel*> channels;
+   private:
+    GraphicsCommunicationManager() = default;
+
+    GraphicsCommunicationManager(const GraphicsCommunicationManager&) = delete;
+    GraphicsCommunicationManager& operator=(
+        const GraphicsCommunicationManager&) = delete;
+
+    std::map<TypeId, std::unique_ptr<IChannel>> channels;
 };

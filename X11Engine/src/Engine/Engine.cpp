@@ -77,7 +77,9 @@ void Engine::update(float delta_time) {
 
     // Graphics::Renderer::get().beginFrame();
 
-    // Scene::get().update(delta_time);
+    Scene::get().update(delta_time);
+
+    renderer.render();
 
     // Overlay::Overlay::get().draw();
 

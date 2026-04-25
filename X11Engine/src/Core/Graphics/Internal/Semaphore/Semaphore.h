@@ -2,13 +2,17 @@
 
 #include <vulkan/vulkan_core.h>
 
-namespace Graphics::Internal {
+namespace Graphics {
 
 struct Semaphore {
     static Semaphore create();
     static Semaphore create(VkDevice device);
 
+    void destroy();
+
+    VkSemaphoreSubmitInfo submit() const;
+
     VkSemaphore semaphore;
 };
 
-}  // namespace Graphics::Internal
+}  // namespace Graphics

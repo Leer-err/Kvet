@@ -1,22 +1,22 @@
-#include "InternalTexture.h"
+#include "Image.h"
 
 #include <vulkan/vulkan_core.h>
 
 #include "GraphicsResources.h"
 
-namespace Graphics::Internal {
+namespace Graphics {
 
-void Texture::destroy() {
+void Image::destroy() {
     Resources::get().getAllocator();
 
     vmaDestroyImage(Resources::get().getAllocator(), image, allocation);
 }
 
-VkImageMemoryBarrier2 Texture::createBarrier(VkImageLayout new_layout,
-                                             VkPipelineStageFlags2 src_stages,
-                                             VkAccessFlags2 src_access,
-                                             VkPipelineStageFlags2 dst_stages,
-                                             VkAccessFlags2 dst_access) {
+VkImageMemoryBarrier2 Image::createBarrier(VkImageLayout new_layout,
+                                           VkPipelineStageFlags2 src_stages,
+                                           VkAccessFlags2 src_access,
+                                           VkPipelineStageFlags2 dst_stages,
+                                           VkAccessFlags2 dst_access) {
     VkImageMemoryBarrier2 barrier = {};
     barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2;
     barrier.image = image;
@@ -37,4 +37,4 @@ VkImageMemoryBarrier2 Texture::createBarrier(VkImageLayout new_layout,
     return barrier;
 }
 
-}  // namespace Graphics::Internal
+}  // namespace Graphics

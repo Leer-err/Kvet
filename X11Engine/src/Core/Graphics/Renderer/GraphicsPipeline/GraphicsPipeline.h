@@ -1,24 +1,14 @@
 #pragma once
 
-#include <memory>
-
-#include "GraphicsInternalsForward.h"
+#include <vulkan/vulkan_core.h>
 
 namespace Graphics {
 
-class GraphicsPipeline {
-    friend class GraphicsPipelineBuilder;
-    friend class Context;
+struct GraphicsPipeline {
+    void destroy();
 
-   public:
-    GraphicsPipeline() = default;
-
-   protected:
-    GraphicsPipeline(const Internal::Pipeline& pipeline);
-    const Internal::Pipeline* getInternal() const;
-
-   private:
-    std::shared_ptr<Internal::WrappedPipeline> pipeline;
+    VkPipeline pipeline;
+    VkPipelineLayout layout;
 };
 
 }  // namespace Graphics

@@ -40,22 +40,22 @@ float Vector3::length() const { return glm::length(get(*this)); }
 
 Vector3::operator physx::PxVec3() const { return physx::PxVec3(x, y, z); }
 
-inline Vector3 operator+(const Vector3& a, const Vector3& b) {
+Vector3 operator+(const Vector3& a, const Vector3& b) {
     auto result = get(a) + get(b);
     return Vector3(result.x, result.y, result.z);
 }
 
-inline Vector3 operator-(const Vector3& a, const Vector3& b) {
+Vector3 operator-(const Vector3& a, const Vector3& b) {
     auto result = get(a) - get(b);
     return Vector3(result.x, result.y, result.z);
 }
 
-inline Vector3 operator*(const Vector3& a, float b) {
+Vector3 operator*(const Vector3& a, float b) {
     auto result = get(a) * b;
     return Vector3(result.x, result.y, result.z);
 }
 
-inline Vector3 operator/(const Vector3& a, float b) {
+Vector3 operator/(const Vector3& a, float b) {
     auto result = get(a) / b;
     return Vector3(result.x, result.y, result.z);
 }

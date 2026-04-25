@@ -4,19 +4,12 @@
 #include <tracy/Tracy.hpp>
 
 #include "Binding.h"
-#include "BufferBuilder.h"
 
 // #include "CameraManager.h"
-#include "Context.h"
 #include "Engine.h"
-#include "GraphicsPipelineBuilder.h"
-#include "InputLayoutBuilder.h"
 #include "Matrix.h"
 // #include "MeshBuilder.h"
 // #include "Overlay.h"
-
-#include "ShaderBuilder.h"
-#include "ShaderStage.h"
 #include "Vector3.h"
 
 namespace StarData {
@@ -38,98 +31,10 @@ struct StarParameters {
 
 };  // namespace StarData
 
-Stars::Stars() : star_density(30), blinking_speed(1), blink_strength(0.6) {
-    constexpr Vector3 screen_quad_vertices[] = {
-        Vector3(-1, -1, 1), Vector3(1, -1, 1), Vector3(-1, 1, 1),
-        Vector3(1, 1, 1)};
-
-    constexpr uint32_t screen_quad_indices[] = {0, 1, 2, 1, 3, 2};
-
-    quad_vertices = Graphics::BufferBuilder(sizeof(screen_quad_vertices))
-                        .isVertexBuffer(sizeof(Vector3))
-                        .isCPUWritable()
-                        .create()
-                        .getResult();
-    auto vertex_data = quad_vertices.map();
-    memcpy(vertex_data, screen_quad_vertices, sizeof(screen_quad_vertices));
-    quad_vertices.unmap();
-
-    quad_indices = Graphics::BufferBuilder(sizeof(screen_quad_indices))
-                       .isIndexBuffer()
-                       .isCPUWritable()
-                       .create()
-                       .getResult();
-    auto index_data = quad_indices.map();
-    memcpy(index_data, screen_quad_indices, sizeof(screen_quad_indices));
-    quad_indices.unmap();
-
-    // screen_plane =
-    //     MeshBuilder()
-    //         .addVertexData(&screen_quad_vertices[0],
-    //                        sizeof(screen_quad_vertices), sizeof(Vector3))
-    //         .setIndexData(&screen_quad_indices[0],
-    //         sizeof(screen_quad_indices)) .create();
-
-    auto vertex_shader =
-        Graphics::ShaderBuilder("./Assets/Shaders/Stars/Stars.spv",
-                                "vertex_main", ShaderStage::Vertex)
-            .create()
-            .getResult();
-    auto pixel_shader =
-        Graphics::ShaderBuilder("./Assets/Shaders/Stars/Stars.spv",
-                                "pixel_main", ShaderStage::Pixel)
-            .create()
-            .getResult();
-
-    auto input_layout = Graphics::InputLayoutBuilder()
-                            .addElement(Graphics::InputElementFormat::Vector3f)
-                            .create();
-
-    pipeline = Graphics::GraphicsPipelineBuilder(input_layout, vertex_shader,
-                                                 pixel_shader)
-                   .create();
-
-    camera_parameters_buffer =
-        Graphics::BufferBuilder(sizeof(StarData::CameraParameters))
-            .isConstantBuffer()
-            .isCPUWritable()
-            .create()
-            .getResult();
-    star_parameters_buffer =
-        Graphics::BufferBuilder(sizeof(StarData::StarParameters))
-            .isConstantBuffer()
-            .isCPUWritable()
-            .create()
-            .getResult();
-
-    auto context = Graphics::Context();
-
-    // auto star_parameters =
-    // context.mapConstantBuffer<StarData::StarParameters>(
-    //     star_parameters_buffer);
-    // star_parameters->time = 0;
-    // star_parameters->star_density = star_density;
-    // star_parameters->blink_strength = blink_strength;
-    // star_parameters->blinking_speed = blinking_speed;
-    // context.unmapConstantBuffer(star_parameters_buffer);
-
-    // Overlay::Overlay::get().add<Overlay::OverlayElements::SliderFloat>(
-    //     "Stars", "Density", [this](float value) { star_density = value; },
-    //     0.f, 1000.f, star_density);
-    // Overlay::Overlay::get().add<Overlay::OverlayElements::SliderFloat>(
-    //     "Stars", "Blinking strength",
-    //     [this](float value) { blink_strength = value; }, 0.f, 1.f,
-    //     blink_strength);
-    // Overlay::Overlay::get().add<Overlay::OverlayElements::SliderFloat>(
-    //     "Stars", "Blinking speed",
-    //     [this](float value) { blinking_speed = value; }, 0.f, 10.f,
-    //     blinking_speed);
-}
+Stars::Stars() : star_density(30), blinking_speed(1), blink_strength(0.6) {}
 
 void Stars::draw() {
     ZoneScoped;
-
-    auto context = Graphics::Context();
 
     // auto star_parameters =
     // context.mapConstantBuffer<StarData::StarParameters>(
@@ -140,12 +45,10 @@ void Stars::draw() {
     // star_parameters->blinking_speed = blinking_speed;
     // context.unmapConstantBuffer(star_parameters_buffer);
 
-    context.setPipeline(pipeline);
     // context.bindConstantBuffer(CameraManager::get().getCameraData(),
     //                            StarData::camera_parameters);
     // context.bindConstantBuffer(star_parameters_buffer,
     //                            StarData::star_parameters);
-    context.draw(quad_vertices, quad_indices);
 
     // context.unbindConstantBuffer(StarData::camera_parameters);
     // context.unbindConstantBuffer(StarData::star_parameters);

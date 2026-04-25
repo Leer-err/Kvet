@@ -2,7 +2,7 @@
 
 #include <vulkan/vulkan_core.h>
 
-namespace Graphics::Internal {
+namespace Graphics {
 
 struct Pipeline {
     void destroy();
@@ -10,4 +10,4 @@ struct Pipeline {
     VkPipeline pipeline;
 };
 
-}  // namespace Graphics::Internal
+}  // namespace Graphics

@@ -29,4 +29,9 @@ void Fence::reset() {
     vkResetFences(device, 1, &fence);
 }
 
+void Fence::wait() {
+    auto device = Resources::get().getDevice();
+    vkWaitForFences(device, 1, &fence, true, UINT64_MAX);
+}
+
 }  // namespace Graphics::Internal

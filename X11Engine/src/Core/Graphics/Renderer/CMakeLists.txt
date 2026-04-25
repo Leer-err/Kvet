@@ -1,5 +1,6 @@
 target_sources(Graphics PRIVATE
     Renderer.cpp
+    RendererImpl.cpp
 )
 
 target_include_directories(Graphics PUBLIC
@@ -7,10 +8,9 @@ target_include_directories(Graphics PUBLIC
 )
 
 add_subdirectory(Resources)
-add_subdirectory(Context)
+add_subdirectory(Image)
 add_subdirectory(SwapChain)
 add_subdirectory(Shader)
-add_subdirectory(Texture)
 add_subdirectory(Buffer)
 add_subdirectory(RenderTarget)
 add_subdirectory(RenderEnviroment)

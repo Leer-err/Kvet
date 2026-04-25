@@ -1,13 +1,13 @@
 #include "Core.h"
 
-#include "Renderer.h"
+#include "Graphics.h"
 #include "Window.h"
 
 namespace Core {
 
 void init() {
     Window::get().init();
-    Graphics::Renderer::get().initializeResources();
+    Graphics::init();
 }
 
 }  // namespace Core

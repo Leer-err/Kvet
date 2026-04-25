@@ -1,18 +1,14 @@
 #include "GraphicsPipeline.h"
 
-#include <memory>
+#include <vulkan/vulkan_core.h>
 
-#include "Pipeline.h"
-#include "ResourceWrapper.h"
+#include "GraphicsResources.h"
 
 namespace Graphics {
 
-GraphicsPipeline::GraphicsPipeline(const Internal::Pipeline& pipeline) {
-    this->pipeline = std::make_shared<Internal::WrappedPipeline>(pipeline);
-}
-
-const Internal::Pipeline* GraphicsPipeline::getInternal() const {
-    return pipeline->getPtr();
+void GraphicsPipeline::destroy() {
+    auto device = Resources::get().getDevice();
+    vkDestroyPipeline(device, pipeline, nullptr);
 }
 
 }  // namespace Graphics

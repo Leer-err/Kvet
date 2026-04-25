@@ -5,64 +5,104 @@
 #include <cstdint>
 
 #include "GraphicsResources.h"
-#include "ImageBarrier.h"
-#include "InternalSwapChain.h"
-#include "InternalTexture.h"
 #include "Semaphore.h"
-#include "Texture.h"
+#include "VkBootstrap.h"
 
 namespace Graphics {
 
-SwapChain::~SwapChain() = default;
+SwapChain::SwapChain(uint32_t width, uint32_t height,
+                     Config::BufferingMode buffering_mode) {
+    auto device = Graphics::Resources::get().getVKBDevice();
 
-SwapChain::SwapChain(SwapChain&&) = default;
+    vkb::SwapchainBuilder swapchain_builder{device};
 
-SwapChain& SwapChain::operator=(SwapChain&&) = default;
+    swap_chain_size = 2;
+    VkPresentModeKHR mode;
+    switch (buffering_mode) {
+        case Config::BufferingMode::NoBuffering:
+            mode = VK_PRESENT_MODE_IMMEDIATE_KHR;
+            break;
+        case Config::BufferingMode::VSyncNoBuffering:
+            mode = VK_PRESENT_MODE_MAILBOX_KHR;
+            break;
+        case Config::BufferingMode::DoubleBuffering:
+            mode = VK_PRESENT_MODE_FIFO_KHR;
+            break;
+        case Config::BufferingMode::TripleBuffering:
+            mode = VK_PRESENT_MODE_FIFO_KHR;
+            swap_chain_size = 3;
+            break;
+    }
 
-SwapChain::SwapChain() : swap_chain(std::make_unique<Internal::SwapChain>()) {}
+    VkSurfaceFormatKHR format = {};
+    format.format = VK_FORMAT_R8G8B8A8_SRGB;
+    format.colorSpace = VK_COLORSPACE_SRGB_NONLINEAR_KHR;
+    swapchain_builder.set_desired_format(format);
+    swapchain_builder.add_fallback_present_mode(mode);
+    swapchain_builder.set_desired_min_image_count(swap_chain_size);
+    swapchain_builder.set_image_usage_flags(
+        VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT);
 
-SwapChain::SwapChain(Internal::SwapChain&& swap_chain)
-    : swap_chain(std::make_unique<Internal::SwapChain>(std::move(swap_chain))) {
+    auto swap_ret = swapchain_builder.build();
+    if (!swap_ret) {
+    }
+
+    swap_chain = swap_ret.value();
+
+    auto swap_cahin_images = swap_chain.get_images().value();
+    swap_chain_size = swap_cahin_images.size();
+    for (int i = 0; i < swap_chain_size; i++) {
+        Image image = {};
+        image.image = swap_cahin_images[i];
+        image.format = format.format;
+
+        images[i] = image;
+        semaphores[i] = Semaphore::create();
+    }
+}
+
+void SwapChain::destroy() {
+    auto device = Resources::get().getDevice();
+    vkDeviceWaitIdle(device);
+
+    vkDestroySwapchainKHR(device, swap_chain, nullptr);
+
+    for (int i = 0; i < swap_chain_size; i++) {
+        semaphores[i].destroy();
+    }
 }
 
 void SwapChain::present() {
-    VkSwapchainKHR swap_chains[] = {swap_chain->swap_chain};
     auto device = Resources::get().getDevice();
 
-    auto& frame = Resources::get().getFrameInFlight();
-    auto& command_buffer = frame.buffer;
-
+    VkSwapchainKHR swap_chains[] = {swap_chain};
     VkPresentInfoKHR info = {};
     info.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
     info.pNext = nullptr;
     info.waitSemaphoreCount = 1;
-    info.pWaitSemaphores =
-        &swap_chain->semaphores[swap_chain->image_index].semaphore;
+    info.pWaitSemaphores = &semaphores[image_index].semaphore;
     info.swapchainCount = 1;
     info.pSwapchains = swap_chains;
-    info.pImageIndices = &swap_chain->image_index;
+    info.pImageIndices = &image_index;
     info.pResults = nullptr;
 
     auto queue = Resources::get().getPresentationQueue();
     vkQueuePresentKHR(queue, &info);
 }
 
-Texture SwapChain::getBackbuffer() {
+SwapChain::BackBuffer SwapChain::getBackbuffer() {
     auto device = Resources::get().getDevice();
     auto& frame = Resources::get().getFrameInFlight();
 
-    auto vk_swap_chain = swap_chain->swap_chain.swapchain;
-    auto image_index_ptr = &swap_chain->image_index;
-    vkAcquireNextImageKHR(device, vk_swap_chain, UINT64_MAX,
+    vkAcquireNextImageKHR(device, swap_chain, UINT64_MAX,
                           frame.ready_for_render.semaphore, VK_NULL_HANDLE,
-                          image_index_ptr);
+                          &image_index);
 
-    Internal::Texture texture = {};
-    texture.image = swap_chain->images[swap_chain->image_index];
+    BackBuffer backbuffer = {};
+    backbuffer.backbuffer = images[image_index];
+    backbuffer.ready_for_present = semaphores[image_index];
 
-    return Texture(texture, false);
+    return backbuffer;
 }
-
-Internal::SwapChain* SwapChain::getInternal() const { return swap_chain.get(); }
 
 }  // namespace Graphics

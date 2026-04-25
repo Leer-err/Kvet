@@ -1,19 +1,15 @@
-#include "TextureBuilder.h"
+#include "ImageBuilder.h"
 
 #include <vk_mem_alloc.h>
 #include <vulkan/vulkan_core.h>
 
 #include "GraphicsResources.h"
-#include "InternalTexture.h"
-#include "Semaphore.h"
-#include "Texture.h"
+#include "Image.h"
 
 namespace Graphics {
 
-TextureBuilder::TextureBuilder(Texture::Format format, uint32_t width,
-                               uint32_t height)
-    : data(nullptr),
-      format(format),
+ImageBuilder::ImageBuilder(VkFormat format, uint32_t width, uint32_t height)
+    : format(format),
       width(width),
       height(height),
       shader_resource(false),
@@ -23,50 +19,37 @@ TextureBuilder::TextureBuilder(Texture::Format format, uint32_t width,
       is_copy_target(false),
       is_copy_source(false) {}
 
-TextureBuilder& TextureBuilder::isShaderResource() {
+ImageBuilder& ImageBuilder::isShaderResource() {
     shader_resource = true;
     return *this;
 }
 
-TextureBuilder& TextureBuilder::isRenderTarget() {
+ImageBuilder& ImageBuilder::isRenderTarget() {
     render_target = true;
     return *this;
 }
 
-TextureBuilder& TextureBuilder::isDepthStencil() {
+ImageBuilder& ImageBuilder::isDepthStencil() {
     depth_stencil = true;
     return *this;
 }
 
-TextureBuilder& TextureBuilder::isCPUWritable() {
+ImageBuilder& ImageBuilder::isCPUWritable() {
     cpu_writable = true;
     return *this;
 }
 
-TextureBuilder& TextureBuilder::isCopySource() {
+ImageBuilder& ImageBuilder::isCopySource() {
     is_copy_source = true;
     return *this;
 }
 
-TextureBuilder& TextureBuilder::isCopyDestination() {
+ImageBuilder& ImageBuilder::isCopyDestination() {
     is_copy_target = true;
     return *this;
 }
 
-static VkFormat translateFormat(Texture::Format format) {
-    switch (format) {
-        case Texture::Format::RGBA8:
-            return VK_FORMAT_R8G8B8A8_UNORM;
-        case Texture::Format::RGBA8_SRGB:
-            return VK_FORMAT_R8G8B8A8_SRGB;
-    }
-
-    throw;
-}
-
-Result<Texture, TextureError> TextureBuilder::create() {
-    auto native_format = translateFormat(format);
-
+Result<Image, ImageError> ImageBuilder::create() {
     VkImageCreateInfo image_info = {};
     image_info.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
     image_info.pNext = nullptr;
@@ -74,7 +57,7 @@ Result<Texture, TextureError> TextureBuilder::create() {
     image_info.extent = {.width = width, .height = height, .depth = 1};
     image_info.mipLevels = 1;
     image_info.arrayLayers = 1;
-    image_info.format = native_format;
+    image_info.format = format;
     image_info.tiling = VK_IMAGE_TILING_OPTIMAL;
     image_info.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
     image_info.samples = VK_SAMPLE_COUNT_1_BIT;
@@ -94,15 +77,15 @@ Result<Texture, TextureError> TextureBuilder::create() {
     vmaCreateImage(Resources::get().getAllocator(), &image_info, &alloc_info,
                    &image, &allocation, nullptr);
 
-    auto internal = Internal::Texture{};
-    internal.image = image;
-    internal.allocation = allocation;
-    internal.layout = VK_IMAGE_LAYOUT_UNDEFINED;
-    internal.format = native_format;
-    internal.width = width;
-    internal.height = height;
+    auto result = Image{};
+    result.image = image;
+    result.allocation = allocation;
+    result.layout = VK_IMAGE_LAYOUT_UNDEFINED;
+    result.format = format;
+    result.width = width;
+    result.height = height;
 
-    return Texture(internal);
+    return result;
 }
 
 }  // namespace Graphics

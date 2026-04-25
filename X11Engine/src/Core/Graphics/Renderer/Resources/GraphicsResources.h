@@ -12,9 +12,8 @@
 namespace Graphics {
 
 struct FrameData {
-    Internal::CommandBuffer buffer;
-    Internal::Semaphore ready_for_render;
-    Internal::Semaphore ready_for_present;
+    CommandBuffer buffer;
+    Semaphore ready_for_render;
     Internal::Fence render_finished;
 };
 

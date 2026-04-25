@@ -3,11 +3,12 @@
 #include <memory>
 #include <tracy/Tracy.hpp>
 
-// #include "CameraManager.h"
+#include "CameraManager.h"
 // #include "DynamicRigidBody.h"
 // #include "Name.h"
 // #include "PhysicsSystem.h"
 // #include "PlayerLook.h"
+#include "GraphicsCommunicationManager/GraphicsCommunicationManager.h"
 #include "Quaternion.h"
 // #include "ScriptSystem.h"
 // #include "Shape.h"
@@ -71,6 +72,8 @@ void Scene::update(float deltaTime) {
     world.update(deltaTime);
 
     // CameraManager::get().updateCameraData();
+    GraphicsCommunicationManager::get().send(
+        CameraManager::get().getCameraData());
 }
 
 void Scene::setupSystems() {

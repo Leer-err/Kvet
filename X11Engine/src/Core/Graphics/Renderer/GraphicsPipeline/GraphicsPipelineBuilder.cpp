@@ -5,9 +5,6 @@
 // #include "CommonRasterizers.h"
 #include "GraphicsPipeline.h"
 #include "GraphicsResources.h"
-#include "InternalInputLayout.h"
-#include "InternalShader.h"
-#include "Pipeline.h"
 #include "Shader.h"
 
 namespace Graphics {
@@ -45,35 +42,35 @@ GraphicsPipelineBuilder::GraphicsPipelineBuilder(
 // }
 
 static VkPipelineShaderStageCreateInfo getStageInfo(const Shader& shader) {
-    auto shader_internal = shader.getInternal();
-
     VkPipelineShaderStageCreateInfo stage_info = {};
     stage_info.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-    stage_info.stage = shader_internal->stage;
-    stage_info.module = shader_internal->shader;
-    stage_info.pName = shader_internal->entrypoint.c_str();
+    stage_info.stage = shader.stage;
+    stage_info.module = shader.shader;
+    stage_info.pName = shader.entrypoint.c_str();
 
     return stage_info;
 }
 
 GraphicsPipeline GraphicsPipelineBuilder::create() {
-    // if (default_render_target) render_target = RenderTarget::getDefault();
+    auto pipeline = GraphicsPipeline{};
 
-    VkPushConstantRange pushConstantRange = {};
-    pushConstantRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-    pushConstantRange.size = 0;
+    VkPushConstantRange shader_constants[2] = {};
+    shader_constants[0].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+    shader_constants[0].size = vertex_shader.constant_range_size;
+
+    shader_constants[1].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+    shader_constants[1].size = pixel_shader.constant_range_size;
 
     VkPipelineLayoutCreateInfo pipelineLayoutCI = {};
     pipelineLayoutCI.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
     pipelineLayoutCI.setLayoutCount = 0;
     pipelineLayoutCI.pSetLayouts = nullptr;
-    pipelineLayoutCI.pushConstantRangeCount = 0;
-    pipelineLayoutCI.pPushConstantRanges = nullptr;
+    pipelineLayoutCI.pushConstantRangeCount = 2;
+    pipelineLayoutCI.pPushConstantRanges = shader_constants;
 
-    VkPipelineLayout pipelineLayout;
     auto result =
         vkCreatePipelineLayout(Resources::get().getDevice(), &pipelineLayoutCI,
-                               nullptr, &pipelineLayout);
+                               nullptr, &pipeline.layout);
 
     std::vector<VkPipelineShaderStageCreateInfo> shader_stages;
     shader_stages.push_back(getStageInfo(vertex_shader));
@@ -84,17 +81,16 @@ GraphicsPipeline GraphicsPipelineBuilder::create() {
         VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
     input_assembly_state.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
 
-    auto input_layout_internal = input_layout.getInternal();
     VkPipelineVertexInputStateCreateInfo vertex_input_state = {};
     vertex_input_state.sType =
         VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
     vertex_input_state.vertexBindingDescriptionCount = 1;
     vertex_input_state.pVertexBindingDescriptions =
-        &input_layout_internal->buffer_binding_description;
+        &input_layout.buffer_binding_description;
     vertex_input_state.vertexAttributeDescriptionCount =
-        static_cast<uint32_t>(input_layout_internal->elements.size());
+        static_cast<uint32_t>(input_layout.elements.size());
     vertex_input_state.pVertexAttributeDescriptions =
-        input_layout_internal->elements.data();
+        input_layout.elements.data();
 
     VkPipelineViewportStateCreateInfo viewportState = {};
     viewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
@@ -160,14 +156,13 @@ GraphicsPipeline GraphicsPipelineBuilder::create() {
     pipeline_info.pDepthStencilState = &depthStencilState;
     pipeline_info.pColorBlendState = &colorBlendState;
     pipeline_info.pDynamicState = &dynamicState;
-    pipeline_info.layout = pipelineLayout;
+    pipeline_info.layout = pipeline.layout;
 
-    auto internal = Internal::Pipeline{};
     result = vkCreateGraphicsPipelines(Resources::get().getDevice(),
                                        VK_NULL_HANDLE, 1, &pipeline_info,
-                                       nullptr, &internal.pipeline);
+                                       nullptr, &pipeline.pipeline);
 
-    return GraphicsPipeline(std::move(internal));
+    return pipeline;
 }
 
 }  // namespace Graphics

@@ -1,36 +1,24 @@
 #pragma once
 
 #include <stddef.h>
-
-// #include <cstddef>
-#include <memory>
-
-#include "GraphicsInternalsForward.h"
+#include <vk_mem_alloc.h>
+#include <vulkan/vulkan_core.h>
 
 namespace Graphics {
 
-class Buffer {
-    friend class BufferBuilder;
-    friend class Context;
-
-   public:
-    Buffer();
-    ~Buffer();
-
-    Buffer(Buffer&&);
-    Buffer& operator=(Buffer&&);
+struct Buffer {
+    void destroy();
 
     size_t getSize() const;
 
     void* map();
     void unmap();
 
-   protected:
-    Buffer(Internal::Buffer&& buffer);
-    Internal::Buffer* getInternal() const;
+    VkDeviceAddress getDeviceAddress() const;
 
-   private:
-    std::unique_ptr<Internal::Buffer> buffer;
+    VkBuffer buffer;
+    VmaAllocation allocation;
+    size_t size;
 };
 
 }  // namespace Graphics

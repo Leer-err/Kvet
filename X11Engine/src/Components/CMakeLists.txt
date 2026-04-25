@@ -8,7 +8,7 @@ target_include_directories(${TARGET_NAME} PUBLIC
 )
 
 add_subdirectory(PositionComponents)
-add_subdirectory(PlayerComponents)
-add_subdirectory(PhysicsComponents)
+# add_subdirectory(PlayerComponents)
+# add_subdirectory(PhysicsComponents)
 add_subdirectory(GeneralComponents)
-add_subdirectory(ScriptComponent)
+# add_subdirectory(ScriptComponent)

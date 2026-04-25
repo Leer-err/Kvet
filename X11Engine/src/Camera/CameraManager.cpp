@@ -1,22 +1,13 @@
 #include "CameraManager.h"
 
-#include "Buffer.h"
-#include "BufferBuilder.h"
 #include "CameraData.h"
-#include "Context.h"
 #include "Matrix.h"
 #include "Quaternion.h"
 #include "Transform.h"
 #include "Vector3.h"
 #include "WorldMatrix.h"
 
-CameraManager::CameraManager() {
-    camera_buffer = BufferBuilder(sizeof(CameraData))
-                        .isConstantBuffer()
-                        .isCPUWritable()
-                        .create()
-                        .getResult();
-}
+CameraManager::CameraManager() {}
 
 std::shared_ptr<ICamera> CameraManager::getMainCamera() const {
     return main_camera;
@@ -48,11 +39,8 @@ void CameraManager::updateCameraData() {
 
     Matrix view_projection = view * projection;
 
-    auto context = Context();
-    auto camera_data = context.mapConstantBuffer<CameraData>(camera_buffer);
-    camera_data->view_projection = view_projection;
-    camera_data->inverse_view_projection = view_projection.inverse();
-    context.unmapConstantBuffer(camera_buffer);
+    camera_data.view_projection = view_projection;
+    camera_data.inverse_view_projection = view_projection.inverse();
 }
 
-Buffer CameraManager::getCameraData() const { return camera_buffer; }
+CameraData CameraManager::getCameraData() const { return camera_data; }

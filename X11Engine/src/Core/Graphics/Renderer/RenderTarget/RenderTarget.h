@@ -1,22 +1,20 @@
 #pragma once
 
-#include <memory>
+#include <vulkan/vulkan_core.h>
 
-#include "GraphicsInternalsForward.h"
+#include "Image.h"
 
 namespace Graphics {
 
-class Texture;
-
-class RenderTarget {
+struct RenderTarget {
    public:
-    RenderTarget() = default;
+    static RenderTarget create(const Image& image);
 
-    RenderTarget(const Internal::RenderTarget& render_target);
-    Internal::RenderTarget* getInternal() const;
+    void destroy();
 
-   private:
-    std::shared_ptr<Internal::WrappedRenderTarget> render_target;
+    VkImageView render_target;
+    uint32_t width;
+    uint32_t height;
 };
 
 }  // namespace Graphics

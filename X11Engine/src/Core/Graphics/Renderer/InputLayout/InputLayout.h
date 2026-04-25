@@ -1,22 +1,13 @@
 #pragma once
 
-#include <memory>
+#include <vulkan/vulkan_core.h>
 
-#include "GraphicsInternalsForward.h"
-
+#include <vector>
 namespace Graphics {
 
-class InputLayout {
-    friend class InputLayoutBuilder;
-    friend class GraphicsPipelineBuilder;
-
-   public:
-   protected:
-    InputLayout(const Internal::InputLayout& buffer);
-    const Internal::InputLayout* getInternal() const;
-
-   private:
-    std::shared_ptr<Internal::WrappedInputLayout> input_layout;
+struct InputLayout {
+    std::vector<VkVertexInputAttributeDescription> elements;
+    VkVertexInputBindingDescription buffer_binding_description;
 };
 
 }  // namespace Graphics
