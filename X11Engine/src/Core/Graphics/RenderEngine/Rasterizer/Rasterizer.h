@@ -1,25 +1,15 @@
 #pragma once
 
-#include <d3d11_1.h>
-#include <wrl/client.h>
+#include <vulkan/vulkan_core.h>
 
-namespace Engine::Graphics {
+namespace Graphics {
 
-class Rasterizer {
-    friend class Context;
-    friend class RasterizerBuilder;
+namespace Rasterizer {
 
-   public:
-    Rasterizer() = default;
+VkPipelineRasterizationStateCreateInfo wireframe();
 
-   protected:
-    Rasterizer(Microsoft::WRL::ComPtr<ID3D11RasterizerState1> rasterizer)
-        : rasterizer(rasterizer) {}
+VkPipelineRasterizationStateCreateInfo fill();
 
-    Microsoft::WRL::ComPtr<ID3D11RasterizerState1> get() const;
+};  // namespace Rasterizer
 
-   private:
-    Microsoft::WRL::ComPtr<ID3D11RasterizerState1> rasterizer;
-};
-
-};  // namespace Engine::Graphics
+};  // namespace Graphics

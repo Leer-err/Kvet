@@ -9,6 +9,7 @@
 #include "GraphicsPipeline.h"
 #include "GraphicsResources.h"
 #include "InputLayout.h"
+#include "Rasterizer.h"
 #include "Shader.h"
 
 namespace Graphics {
@@ -19,7 +20,7 @@ GraphicsPipelineBuilder::GraphicsPipelineBuilder(
     : vertex_shader(vertex_shader),
       pixel_shader(pixel_shader),
       input_layout(input_layout),
-      //   rasterizer(Engine::Graphics::CommonRasterizers::fill()),
+      rasterizer(Graphics::Rasterizer::fill()),
       default_render_target(true),
       has_depth_stencil(false) {}
 
@@ -128,9 +129,6 @@ GraphicsPipeline GraphicsPipelineBuilder::create() {
     multisampleState.sType =
         VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
     multisampleState.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
-
-    VkGraphicsPipelineCreateInfo info = {};
-    info.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
 
     VkGraphicsPipelineCreateInfo pipeline_info = {};
     pipeline_info.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;

@@ -1,12 +1,7 @@
-
-
-target_sources(${TARGET_NAME} PUBLIC
+target_sources(Graphics PRIVATE
     Rasterizer.cpp
-    RasterizerBuilder.cpp
 )
 
-target_include_directories(${TARGET_NAME} PUBLIC
+target_include_directories(Graphics PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}
 )
-
-add_subdirectory(CommonRasterizers)
