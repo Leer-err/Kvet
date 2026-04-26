@@ -1,5 +1,6 @@
 target_sources(Graphics PRIVATE
-    StarRenderer.cpp
+    GraphicsPipeline.cpp
+    GraphicsPipelineBuilder.cpp
 )
 
 target_include_directories(Graphics PRIVATE

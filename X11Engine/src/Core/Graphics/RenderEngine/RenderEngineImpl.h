@@ -1,0 +1,61 @@
+#pragma once
+
+// #include "DepthStencil.h"
+// #include "RenderTarget.h"
+#include <cstdint>
+
+// #include "RenderTarget.h"
+#include "CloudsRenderer.h"
+#include "CommandBuffer.h"
+#include "RenderEnviroment.h"
+#include "RenderTarget.h"
+#include "StarRenderer.h"
+#include "SwapChain.h"
+// #include "Texture.h"
+
+namespace Graphics {
+
+class RenderEngineImpl {
+   public:
+    RenderEngineImpl();
+    ~RenderEngineImpl();
+
+    void init();
+    void render();
+
+    uint32_t getWidth() const;
+    uint32_t getHeight() const;
+
+   private:
+    void beginFrame();
+    void endFrame();
+
+    void waitRenderFinished();
+    void prepareRenderTargetForRendering(const CommandBuffer& cmd);
+
+    void copyToBackbuffer(const CommandBuffer& cmd, Image& render_target,
+                          Image& backbuffer);
+    void prepareBackbufferForPresentation(const CommandBuffer& cmd,
+                                          Image& backbuffer);
+
+    // void preRenderPass();
+    void beginMainRenderPass(const CommandBuffer& cmd);
+    void mainRenderPass(const CommandBuffer& cmd);
+    void endMainRenderPass(const CommandBuffer& cmd);
+
+    StarRenderer star_renderer;
+    // CloudsRenderer clouds_renderer;
+
+    Image render_target_texture;
+    RenderEnviroment render_enviroment;
+    // DepthStencil default_depth_stencil_buffer;
+
+    SwapChain swap_chain;
+
+    Buffer camera_data;
+
+    uint32_t width;
+    uint32_t height;
+};
+
+}  // namespace Graphics

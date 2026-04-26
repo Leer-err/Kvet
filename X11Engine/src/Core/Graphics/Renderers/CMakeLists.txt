@@ -1,1 +1,2 @@
 add_subdirectory(StarRenderer)
+add_subdirectory(CloudsRenderer)

@@ -1,5 +1,5 @@
 target_sources(Graphics PRIVATE
-    StarRenderer.cpp
+    SwapChain.cpp
 )
 
 target_include_directories(Graphics PRIVATE

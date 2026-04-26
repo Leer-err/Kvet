@@ -4,7 +4,7 @@
 #include <thread>
 #include <tracy/Tracy.hpp>
 
-#include "Renderer.h"
+#include "RenderEngine.h"
 #include "Scene.h"
 #include "Window.h"
 
@@ -20,7 +20,7 @@ namespace Engine {
 Engine::Engine() : should_exit(false) {}
 
 bool Engine::init() {
-    // Renderer::get().initializeResources();
+    // RenderEngine::get().initializeResources();
 
     // Scene::get();
     // ::Engine::Script::ScriptLoader().loadFromDirectory(
@@ -76,7 +76,7 @@ void Engine::update(float delta_time) {
 
     // PhysicalInput::get().saveState();
 
-    // Graphics::Renderer::get().beginFrame();
+    // Graphics::RenderEngine::get().beginFrame();
 
     Scene::get().update(delta_time);
 
@@ -86,7 +86,7 @@ void Engine::update(float delta_time) {
 
     // Overlay::Overlay::get().draw();
 
-    // Graphics::Renderer::get().endFrame();
+    // Graphics::RenderEngine::get().endFrame();
 
     FrameMark;
 }

@@ -1,0 +1,26 @@
+#pragma once
+
+#include <vulkan/vulkan_core.h>
+
+#include <string>
+
+#include "Result.h"
+#include "Shader.h"
+#include "ShaderError.h"
+
+namespace Graphics {
+
+class ShaderBuilder {
+   public:
+    ShaderBuilder(const std::string& filename, const std::string& entrypoint,
+                  VkShaderStageFlagBits stage);
+
+    Result<Shader, ShaderError> create();
+
+   private:
+    std::string filename;
+    std::string entrypoint;
+    VkShaderStageFlagBits stage;
+};
+
+}  // namespace Graphics

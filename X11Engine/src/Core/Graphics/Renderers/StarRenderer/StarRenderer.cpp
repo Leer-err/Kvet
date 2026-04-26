@@ -16,6 +16,11 @@
 
 namespace Graphics {
 
+struct Constants {
+    VkDeviceAddress camera_data;
+    VkDeviceAddress stars_data;
+};
+
 StarRenderer::StarRenderer() {
     constexpr Vector3 screen_quad_vertices[] = {
         Vector3(-1, -1, 1), Vector3(1, -1, 1), Vector3(-1, 1, 1),
@@ -44,18 +49,17 @@ StarRenderer::StarRenderer() {
     auto vertex_shader =
         Graphics::ShaderBuilder("./Assets/Shaders/Stars/Stars.spv",
                                 "vertex_main", VK_SHADER_STAGE_VERTEX_BIT)
-            .withConstants(sizeof(VkDeviceAddress))
             .create()
             .getResult();
     auto pixel_shader =
         Graphics::ShaderBuilder("./Assets/Shaders/Stars/Stars.spv",
                                 "pixel_main", VK_SHADER_STAGE_FRAGMENT_BIT)
-            .withConstants(sizeof(VkDeviceAddress))
             .create()
             .getResult();
 
     auto input_layout = Graphics::InputLayoutBuilder()
-                            .addElement(Graphics::InputElementFormat::Vector3f)
+                            .addElement(VK_FORMAT_R32G32B32_SFLOAT)
+                            .setPushConstantsSize(sizeof(Constants))
                             .create();
 
     pipeline = Graphics::GraphicsPipelineBuilder(input_layout, vertex_shader,
@@ -79,11 +83,9 @@ void StarRenderer::render(const CommandBuffer& command_buffer,
     command_buffer.setPipeline(pipeline);
 
     VkDeviceAddress camera_address = camera_data.getDeviceAddress();
-    command_buffer.pushConstants(pipeline, VK_SHADER_STAGE_VERTEX_BIT,
-                                 &camera_address, sizeof(camera_address));
     VkDeviceAddress stars_address = stars_data_buffer.getDeviceAddress();
-    command_buffer.pushConstants(pipeline, VK_SHADER_STAGE_FRAGMENT_BIT,
-                                 &stars_address, sizeof(stars_address));
+    auto constants = Constants{camera_address, stars_address};
+    command_buffer.pushConstants(pipeline, &constants);
 
     command_buffer.draw(quad_vertices, quad_indices);
 }

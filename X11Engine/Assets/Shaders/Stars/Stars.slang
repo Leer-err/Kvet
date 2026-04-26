@@ -6,18 +6,15 @@ struct CameraData
 
 struct Vertex_Output{
     float4 viewport_position : SV_POSITION;
-    float3 position : POSITION;
+    float3 position;
 };
 
 struct Vertex_input{
-    float3 position : POSITION;
+    float3 position;
 };
 
-// [[vk::binding(0, 1)]]
-// ConstantBuffer<CameraData> camera_data;
-
 [shader("vertex")]
-Vertex_Output vertex_main(in Vertex_input vertex, uniform CameraData* camera_data)
+Vertex_Output vertex_main(in Vertex_input vertex, uniform CameraData* camera_data, uniform StarsData* stars_data)
 {
     Vertex_Output output;
 
@@ -148,7 +145,7 @@ struct StarsData
 };
 
 [shader("pixel")]
-float4 pixel_main(in Vertex_Output data, uniform StarsData* stars_data) : SV_TARGET
+float4 pixel_main(in Vertex_Output data, uniform CameraData* camera_data, uniform StarsData* stars_data)
 {
     float3 noise_position = normalize(data.position);
     float noise = 1 - voronoi3d(noise_position * stars_data.star_density).x;

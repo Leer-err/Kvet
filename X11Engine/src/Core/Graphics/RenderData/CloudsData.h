@@ -1,6 +1,7 @@
 #pragma once
 
+#include "Vector3.h"
 struct CloudsData {
-    Matrix view_projection;
-    Matrix inverse_view_projection;
+    Vector3 color;
+    float time;
 };

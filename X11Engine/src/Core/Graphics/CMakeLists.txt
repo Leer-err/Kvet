@@ -21,8 +21,7 @@ target_link_libraries(Graphics
         vk-bootstrap::vk-bootstrap
 )
 
-add_subdirectory(Renderer)
+add_subdirectory(RenderEngine)
 add_subdirectory(Renderers)
 add_subdirectory(RenderData)
-add_subdirectory(Internal)
 add_subdirectory(GraphicsCommunicationManager)

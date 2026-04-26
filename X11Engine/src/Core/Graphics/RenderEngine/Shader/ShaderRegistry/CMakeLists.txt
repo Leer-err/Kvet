@@ -1,5 +1,5 @@
 target_sources(Graphics PRIVATE
-    StarRenderer.cpp
+    ShaderRegistry.cpp
 )
 
 target_include_directories(Graphics PRIVATE
