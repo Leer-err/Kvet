@@ -1,20 +1,21 @@
 #pragma once
 
-#include <d3d11.h>
-#include <wrl/client.h>
+#include <vulkan/vulkan_core.h>
+
+#include <cstdint>
+
+#include "Image.h"
+
+namespace Graphics {
 
 class DepthStencil {
-    friend class DepthStencilBuilder;
-    friend class Context;
+    static DepthStencil create(const Image& image);
 
-   public:
-    DepthStencil() = default;
+    void destroy();
 
-   protected:
-    DepthStencil(Microsoft::WRL::ComPtr<ID3D11DepthStencilView> depth_stencil);
-
-    Microsoft::WRL::ComPtr<ID3D11DepthStencilView> get() const;
-
-   private:
-    Microsoft::WRL::ComPtr<ID3D11DepthStencilView> depth_stencil;
+    VkImageView depth_stencil;
+    uint32_t width;
+    uint32_t height;
 };
+
+}  // namespace Graphics

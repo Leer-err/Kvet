@@ -1,9 +1,7 @@
-
-
-target_sources(${TARGET_NAME} PRIVATE
+target_sources(Graphics PRIVATE
     DepthStencil.cpp
 )
 
-target_include_directories(${TARGET_NAME} PUBLIC
+target_include_directories(Graphics PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}
 )
