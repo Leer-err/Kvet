@@ -4,12 +4,13 @@
 #include <vulkan/vulkan_core.h>
 
 #include <optional>
+#include <string>
 
 #include "GraphicsPipeline.h"
 
-
 // #include "InputLayout.h"
 #include "InputLayout.h"
+#include "Result.h"
 #include "Shader.h"
 // #include "RenderTarget.h"
 
@@ -17,30 +18,34 @@ namespace Graphics {
 
 class GraphicsPipelineBuilder {
    public:
+    enum class Error { ShaderFileNotFound, VertexInputTypeNotSupported };
+
     GraphicsPipelineBuilder(const Shader& vertex_shader,
                             const Shader& pixel_shader);
-    GraphicsPipelineBuilder(const InputLayout& input_layout,
-                            const Shader& vertex_shader,
-                            const Shader& pixel_shader);
+    GraphicsPipelineBuilder(const std::string& vertex_shader_filename,
+                            const std::string& vertex_shader_entrypoint,
+                            const std::string& pixel_shader_filename,
+                            const std::string& pixel_shader_entrypoint);
 
     GraphicsPipelineBuilder& setRasterizer(
         VkPipelineRasterizationStateCreateInfo rasterizer);
 
-    GraphicsPipeline create();
+    Result<GraphicsPipeline, Error> create();
 
    private:
     void createPipelineLayout(GraphicsPipeline& pipeline,
                               const InputLayout& layout);
 
-    bool default_render_target;
-    bool has_depth_stencil;
-
-    std::optional<InputLayout> input_layout;
+    Result<Shader, GraphicsPipelineBuilder::Error> createShader(
+        const std::string& filename, const std::string& entrypoint,
+        VkShaderStageFlagBits stage);
 
     Shader vertex_shader;
     Shader pixel_shader;
 
     VkPipelineRasterizationStateCreateInfo rasterizer;
+
+    std::optional<Error> error;
 };
 
 }  // namespace Graphics

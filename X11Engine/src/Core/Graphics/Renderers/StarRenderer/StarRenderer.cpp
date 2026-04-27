@@ -46,18 +46,11 @@ StarRenderer::StarRenderer() {
     memcpy(index_data, screen_quad_indices, sizeof(screen_quad_indices));
     quad_indices.unmap();
 
-    auto vertex_shader =
-        ShaderBuilder("./Assets/Shaders/Stars/Stars.spv", "vertex_main",
-                      VK_SHADER_STAGE_VERTEX_BIT)
-            .create()
-            .getResult();
-    auto pixel_shader =
-        ShaderBuilder("./Assets/Shaders/Stars/Stars.spv", "pixel_main",
-                      VK_SHADER_STAGE_FRAGMENT_BIT)
-            .create()
-            .getResult();
-
-    pipeline = GraphicsPipelineBuilder(vertex_shader, pixel_shader).create();
+    pipeline = GraphicsPipelineBuilder(
+                   "./Assets/Shaders/Stars/Stars.spv", "vertex_main",
+                   "./Assets/Shaders/Stars/Stars.spv", "pixel_main")
+                   .create()
+                   .getResult();
 
     stars_data_buffer = BufferBuilder(sizeof(StarsData))
                             .isConstantBuffer()

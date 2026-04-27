@@ -5,55 +5,48 @@
 #include <array>
 #include <cstddef>
 
-// #include "CommonRasterizers.h"
 #include "GraphicsPipeline.h"
 #include "GraphicsResources.h"
 #include "InputLayout.h"
 #include "InputLayoutBuilder.h"
 #include "Rasterizer.h"
 #include "Shader.h"
+#include "ShaderBuilder.h"
+#include "ShaderError.h"
 
 namespace Graphics {
+
+GraphicsPipelineBuilder::GraphicsPipelineBuilder(
+    const std::string& vertex_shader_filename,
+    const std::string& vertex_shader_entrypoint,
+    const std::string& pixel_shader_filename,
+    const std::string& pixel_shader_entrypoint)
+    : rasterizer(Graphics::Rasterizer::fill()) {
+    auto vertex_shader_result =
+        createShader(vertex_shader_filename, vertex_shader_entrypoint,
+                     VK_SHADER_STAGE_VERTEX_BIT);
+    auto pixel_shader_result =
+        createShader(pixel_shader_filename, pixel_shader_entrypoint,
+                     VK_SHADER_STAGE_FRAGMENT_BIT);
+
+    if (vertex_shader_result.isError()) {
+        error = vertex_shader_result.getError();
+        return;
+    }
+    if (pixel_shader_result.isError()) {
+        error = pixel_shader_result.getError();
+        return;
+    }
+
+    vertex_shader = vertex_shader_result.getResult();
+    pixel_shader = pixel_shader_result.getResult();
+}
 
 GraphicsPipelineBuilder::GraphicsPipelineBuilder(const Shader& vertex_shader,
                                                  const Shader& pixel_shader)
     : vertex_shader(vertex_shader),
       pixel_shader(pixel_shader),
-      rasterizer(Graphics::Rasterizer::fill()),
-      default_render_target(true),
-      has_depth_stencil(false) {}
-
-GraphicsPipelineBuilder::GraphicsPipelineBuilder(
-    const InputLayout& input_layout, const Shader& vertex_shader,
-    const Shader& pixel_shader)
-    : vertex_shader(vertex_shader),
-      pixel_shader(pixel_shader),
-      input_layout(input_layout),
-      rasterizer(Graphics::Rasterizer::fill()),
-      default_render_target(true),
-      has_depth_stencil(false) {}
-
-// GraphicsPipelineBuilder& GraphicsPipelineBuilder::setRenderTarget(
-//     RenderTarget render_target) {
-//     this->render_target = render_target;
-//     default_render_target = false;
-
-//     return *this;
-// }
-
-// GraphicsPipelineBuilder& GraphicsPipelineBuilder::setDepthStencilBuffer(
-//     DepthStencil depth_stencil_buffer) {
-//     this->depth_stencil_buffer = depth_stencil_buffer;
-
-//     return *this;
-// }
-
-// GraphicsPipelineBuilder& GraphicsPipelineBuilder::setRasterizerState(
-//     Engine::Graphics::Rasterizer rasterizer) {
-//     this->rasterizer = rasterizer;
-
-//     return *this;
-// }
+      rasterizer(Graphics::Rasterizer::fill()) {}
 
 static VkPipelineShaderStageCreateInfo getStageInfo(const Shader& shader) {
     VkPipelineShaderStageCreateInfo stage_info = {};
@@ -65,19 +58,29 @@ static VkPipelineShaderStageCreateInfo getStageInfo(const Shader& shader) {
     return stage_info;
 }
 
-GraphicsPipeline GraphicsPipelineBuilder::create() {
-    if (!input_layout) {
-        auto input_layout_result =
-            InputLayoutBuilder(vertex_shader.filename).create();
+Result<GraphicsPipeline, GraphicsPipelineBuilder::Error>
+GraphicsPipelineBuilder::create() {
+    // If error occured on previous build step return it immediately
+    if (error) return *error;
 
-        if (input_layout_result.isError()) throw;
+    auto input_layout_result =
+        InputLayoutBuilder(vertex_shader.filename).create();
 
-        input_layout = input_layout_result.getResult();
+    if (input_layout_result.isError()) {
+        switch (input_layout_result.getError()) {
+            case InputLayoutBuilder::Error::FileNotFound:
+                return Error::ShaderFileNotFound;
+            case InputLayoutBuilder::Error::UnsupportedElementSize:
+            case InputLayoutBuilder::Error::UnsupportedElementType:
+                return Error::VertexInputTypeNotSupported;
+        }
     }
+
+    auto input_layout = input_layout_result.getResult();
 
     auto pipeline = GraphicsPipeline{};
 
-    createPipelineLayout(pipeline, *input_layout);
+    createPipelineLayout(pipeline, input_layout);
 
     std::vector<VkPipelineShaderStageCreateInfo> shader_stages;
     shader_stages.push_back(getStageInfo(vertex_shader));
@@ -93,11 +96,11 @@ GraphicsPipeline GraphicsPipelineBuilder::create() {
         VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
     vertex_input_state.vertexBindingDescriptionCount = 1;
     vertex_input_state.pVertexBindingDescriptions =
-        &input_layout->buffer_binding_description;
+        &input_layout.buffer_binding_description;
     vertex_input_state.vertexAttributeDescriptionCount =
-        static_cast<uint32_t>(input_layout->elements.size());
+        static_cast<uint32_t>(input_layout.elements.size());
     vertex_input_state.pVertexAttributeDescriptions =
-        input_layout->elements.data();
+        input_layout.elements.data();
 
     VkPipelineViewportStateCreateInfo viewportState = {};
     viewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
@@ -194,4 +197,19 @@ void GraphicsPipelineBuilder::createPipelineLayout(GraphicsPipeline& pipeline,
                                nullptr, &pipeline.layout);
 }
 
+Result<Shader, GraphicsPipelineBuilder::Error>
+GraphicsPipelineBuilder::createShader(const std::string& filename,
+                                      const std::string& entrypoint,
+                                      VkShaderStageFlagBits stage) {
+    auto shader_build_result =
+        ShaderBuilder(filename, entrypoint, stage).create();
+
+    if (shader_build_result.isOk()) return shader_build_result.getResult();
+
+    auto error = shader_build_result.getError();
+    switch (error) {
+        case ShaderError::NotFound:
+            return Error::ShaderFileNotFound;
+    }
+}
 }  // namespace Graphics
