@@ -5,6 +5,7 @@
 #include <vulkan/vulkan_core.h>
 
 #include "CommandPool.h"
+#include "DeviceProperties.h"
 #include "Fence.h"
 #include "Logger.h"
 #include "Semaphore.h"
@@ -28,6 +29,8 @@ class Resources {
     VkQueue getGraphicsQueue() const;
     VkQueue getPresentationQueue() const;
     VmaAllocator getAllocator() const;
+    DeviceProperties getProperties() const;
+
     FrameData& getFrameInFlight();
 
     vkb::Device getVKBDevice() const;
@@ -47,6 +50,8 @@ class Resources {
     void createCommandPool();
     void prepareFrames();
 
+    void readProperties(const vkb::PhysicalDevice& device);
+
     void createAllocator();
 
     vkb::Instance instance;
@@ -54,6 +59,8 @@ class Resources {
     VkQueue graphics_queue;
     VkQueue presentation_queue;
     VmaAllocator allocator;
+
+    DeviceProperties properties;
 
     CommandPool pool;
     FrameData frames[2];

@@ -87,10 +87,30 @@ void Resources::createDevice() {
     }
     device = dev_ret.value();
 
+    readProperties(*phys_ret);
+}
+
+void Resources::readProperties(const vkb::PhysicalDevice& device) {
     VkPhysicalDeviceProperties device_properties;
-    vkGetPhysicalDeviceProperties(phys_ret->physical_device,
-                                  &device_properties);
-    logger.info("Using device {}", device_properties.deviceName);
+    vkGetPhysicalDeviceProperties(device, &device_properties);
+
+    VkPhysicalDeviceMemoryProperties memory_properties;
+    vkGetPhysicalDeviceMemoryProperties(device, &memory_properties);
+
+    size_t memory_size = 0;
+    for (uint32_t i = 0; i < memory_properties.memoryHeapCount; i++) {
+        VkDeviceSize heap_size = memory_properties.memoryHeaps[i].size;
+        VkMemoryHeapFlags flags = memory_properties.memoryHeaps[i].flags;
+
+        if (flags & VK_MEMORY_HEAP_DEVICE_LOCAL_BIT) memory_size += heap_size;
+    }
+
+    properties.device_name = device_properties.deviceName;
+    properties.memory_size = memory_size;
+
+    logger.info("Using device {}", properties.device_name);
+    logger.info("Device dedicated memory {} MB",
+                properties.memory_size / (1 << 20));
 }
 
 void Resources::createQueues() {
