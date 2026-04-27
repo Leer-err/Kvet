@@ -23,6 +23,7 @@ Result<Shader, ShaderError> ShaderBuilder::create() {
     result.shader = *module;
     result.stage = stage;
     result.entrypoint = entrypoint;
+    result.filename = filename;
 
     return result;
 }

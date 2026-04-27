@@ -27,6 +27,19 @@ std::optional<VkShaderModule> ShaderRegistry::getModule(
     return it->second;
 }
 
+std::optional<std::vector<char>> ShaderRegistry::getShaderBytecode(
+    const std::string& filename) {
+    auto it = shader_sources.find(filename);
+
+    if (it == shader_sources.end()) {
+        if (!loadModule(filename)) return {};
+
+        it = shader_sources.find(filename);
+    }
+
+    return it->second;
+}
+
 std::optional<VkShaderModule> ShaderRegistry::loadModule(
     const std::string& filename) {
     auto shader_bytecode = readFile(filename);
@@ -43,6 +56,7 @@ std::optional<VkShaderModule> ShaderRegistry::loadModule(
         return std::nullopt;
 
     shader_modules.emplace(filename, module);
+    shader_sources.emplace(filename, std::move(*shader_bytecode));
     return module;
 }
 

@@ -28,7 +28,7 @@ StarRenderer::StarRenderer() {
 
     constexpr uint32_t screen_quad_indices[] = {0, 1, 2, 1, 3, 2};
 
-    quad_vertices = Graphics::BufferBuilder(sizeof(screen_quad_vertices))
+    quad_vertices = BufferBuilder(sizeof(screen_quad_vertices))
                         .isVertexBuffer(sizeof(Vector3))
                         .isCPUWritable()
                         .create()
@@ -37,7 +37,7 @@ StarRenderer::StarRenderer() {
     memcpy(vertex_data, screen_quad_vertices, sizeof(screen_quad_vertices));
     quad_vertices.unmap();
 
-    quad_indices = Graphics::BufferBuilder(sizeof(screen_quad_indices))
+    quad_indices = BufferBuilder(sizeof(screen_quad_indices))
                        .isIndexBuffer()
                        .isCPUWritable()
                        .create()
@@ -47,26 +47,19 @@ StarRenderer::StarRenderer() {
     quad_indices.unmap();
 
     auto vertex_shader =
-        Graphics::ShaderBuilder("./Assets/Shaders/Stars/Stars.spv",
-                                "vertex_main", VK_SHADER_STAGE_VERTEX_BIT)
+        ShaderBuilder("./Assets/Shaders/Stars/Stars.spv", "vertex_main",
+                      VK_SHADER_STAGE_VERTEX_BIT)
             .create()
             .getResult();
     auto pixel_shader =
-        Graphics::ShaderBuilder("./Assets/Shaders/Stars/Stars.spv",
-                                "pixel_main", VK_SHADER_STAGE_FRAGMENT_BIT)
+        ShaderBuilder("./Assets/Shaders/Stars/Stars.spv", "pixel_main",
+                      VK_SHADER_STAGE_FRAGMENT_BIT)
             .create()
             .getResult();
 
-    auto input_layout = Graphics::InputLayoutBuilder()
-                            .addElement(VK_FORMAT_R32G32B32_SFLOAT)
-                            .setPushConstantsSize(sizeof(Constants))
-                            .create();
+    pipeline = GraphicsPipelineBuilder(vertex_shader, pixel_shader).create();
 
-    pipeline = Graphics::GraphicsPipelineBuilder(input_layout, vertex_shader,
-                                                 pixel_shader)
-                   .create();
-
-    stars_data_buffer = Graphics::BufferBuilder(sizeof(StarsData))
+    stars_data_buffer = BufferBuilder(sizeof(StarsData))
                             .isConstantBuffer()
                             .isCPUWritable()
                             .create()

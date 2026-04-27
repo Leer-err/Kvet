@@ -199,3 +199,7 @@ target_link_libraries(vulkan-allocator
 	PRIVATE
 		vulkan-interface
 )
+
+# SPIRV-Cross
+
+add_subdirectory(SPIRV-Cross EXCLUDE_FROM_ALL)

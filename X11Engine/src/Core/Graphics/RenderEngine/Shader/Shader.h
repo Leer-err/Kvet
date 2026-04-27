@@ -5,6 +5,7 @@
 namespace Graphics {
 
 struct Shader {
+    std::string filename;
     VkShaderModule shader;
     std::string entrypoint;
     VkShaderStageFlagBits stage;

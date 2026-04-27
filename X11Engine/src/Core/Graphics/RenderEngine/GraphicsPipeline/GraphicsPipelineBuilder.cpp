@@ -9,10 +9,19 @@
 #include "GraphicsPipeline.h"
 #include "GraphicsResources.h"
 #include "InputLayout.h"
+#include "InputLayoutBuilder.h"
 #include "Rasterizer.h"
 #include "Shader.h"
 
 namespace Graphics {
+
+GraphicsPipelineBuilder::GraphicsPipelineBuilder(const Shader& vertex_shader,
+                                                 const Shader& pixel_shader)
+    : vertex_shader(vertex_shader),
+      pixel_shader(pixel_shader),
+      rasterizer(Graphics::Rasterizer::fill()),
+      default_render_target(true),
+      has_depth_stencil(false) {}
 
 GraphicsPipelineBuilder::GraphicsPipelineBuilder(
     const InputLayout& input_layout, const Shader& vertex_shader,
@@ -57,9 +66,18 @@ static VkPipelineShaderStageCreateInfo getStageInfo(const Shader& shader) {
 }
 
 GraphicsPipeline GraphicsPipelineBuilder::create() {
+    if (!input_layout) {
+        auto input_layout_result =
+            InputLayoutBuilder(vertex_shader.filename).create();
+
+        if (input_layout_result.isError()) throw;
+
+        input_layout = input_layout_result.getResult();
+    }
+
     auto pipeline = GraphicsPipeline{};
 
-    createPipelineLayout(pipeline, input_layout);
+    createPipelineLayout(pipeline, *input_layout);
 
     std::vector<VkPipelineShaderStageCreateInfo> shader_stages;
     shader_stages.push_back(getStageInfo(vertex_shader));
@@ -75,11 +93,11 @@ GraphicsPipeline GraphicsPipelineBuilder::create() {
         VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
     vertex_input_state.vertexBindingDescriptionCount = 1;
     vertex_input_state.pVertexBindingDescriptions =
-        &input_layout.buffer_binding_description;
+        &input_layout->buffer_binding_description;
     vertex_input_state.vertexAttributeDescriptionCount =
-        static_cast<uint32_t>(input_layout.elements.size());
+        static_cast<uint32_t>(input_layout->elements.size());
     vertex_input_state.pVertexAttributeDescriptions =
-        input_layout.elements.data();
+        input_layout->elements.data();
 
     VkPipelineViewportStateCreateInfo viewportState = {};
     viewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;

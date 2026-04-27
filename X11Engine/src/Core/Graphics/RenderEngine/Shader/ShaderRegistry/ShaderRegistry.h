@@ -17,6 +17,7 @@ class ShaderRegistry {
     }
 
     std::optional<VkShaderModule> getModule(const std::string& name);
+    std::optional<std::vector<char>> getShaderBytecode(const std::string& name);
 
    private:
     ShaderRegistry();
@@ -26,6 +27,7 @@ class ShaderRegistry {
     std::optional<std::vector<char>> readFile(const std::string& filename);
 
     std::unordered_map<std::string, VkShaderModule> shader_modules;
+    std::unordered_map<std::string, std::vector<char>> shader_sources;
 };
 
 }  // namespace Graphics

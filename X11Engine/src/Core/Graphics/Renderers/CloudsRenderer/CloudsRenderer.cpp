@@ -63,9 +63,7 @@ CloudsRenderer::CloudsRenderer() {
     env.clear_render_target = true;
     env.render_target_clear_value.color = {0, 0, 0, 0};
 
-    pipeline =
-        GraphicsPipelineBuilder(input_layout, vertex_shader, pixel_shader)
-            .create();
+    pipeline = GraphicsPipelineBuilder(vertex_shader, pixel_shader).create();
 
     clouds_data_buffer = BufferBuilder(sizeof(CloudsData))
                              .isConstantBuffer()
