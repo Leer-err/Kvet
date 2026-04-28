@@ -1,6 +1,6 @@
 #include "GraphicsPipelineBuilder.h"
 
-#include <vulkan/vulkan_core.h>
+#include <vulkan/vulkan.h>
 
 #include <array>
 #include <cstddef>

@@ -1,13 +1,11 @@
-#include "RenderTarget.h"
+#include "TextureView.h"
 
 #include <vulkan/vulkan.h>
 
 #include "GraphicsResources.h"
 
-namespace Graphics {
-
-RenderTarget RenderTarget::create(const Image& image) {
-    auto device = Resources::get().getDevice();
+TextureView TextureView::create(const Image& image) {
+    auto device = Graphics::Resources::get().getDevice();
 
     VkImageViewCreateInfo info = {};
     info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -21,17 +19,15 @@ RenderTarget RenderTarget::create(const Image& image) {
     VkImageView view;
     vkCreateImageView(device, &info, nullptr, &view);
 
-    RenderTarget render_target = {};
-    render_target.render_target = view;
-    render_target.width = image.width;
-    render_target.height = image.height;
-    return render_target;
+    TextureView resource = {};
+    resource.shader_resource = view;
+    resource.width = static_cast<uint32_t>(image.width);
+    resource.height = static_cast<uint32_t>(image.height);
+    return resource;
 }
 
-void RenderTarget::destroy() {
-    auto device = Resources::get().getDevice();
+void TextureView::destroy() {
+    auto device = Graphics::Resources::get().getDevice();
 
-    vkDestroyImageView(device, render_target, nullptr);
+    vkDestroyImageView(device, shader_resource, nullptr);
 }
-
-}  // namespace Graphics

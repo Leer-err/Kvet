@@ -1,21 +1,22 @@
 #pragma once
 
-#include <d3d11.h>
-#include <wrl/client.h>
+#include <vulkan/vulkan.h>
+
+namespace Graphics {
 
 class Sampler {
-    friend class Context;
-    friend class SamplerBuilder;
-
    public:
-    Sampler() = default;
+    static Sampler point();
+    static Sampler linear();
+    static Sampler anisotropic(float anisotropy);
 
-   protected:
-    Sampler(Microsoft::WRL::ComPtr<ID3D11SamplerState> sampler)
-        : sampler(sampler) {}
+    void destroy();
 
-    Microsoft::WRL::ComPtr<ID3D11SamplerState> get() const;
+    VkSampler sampler;
 
    private:
-    Microsoft::WRL::ComPtr<ID3D11SamplerState> sampler;
+    VkSamplerCreateInfo createSampler(VkFilter filter, bool anisotropic,
+                                      float anisotropy);
 };
+
+}  // namespace Graphics

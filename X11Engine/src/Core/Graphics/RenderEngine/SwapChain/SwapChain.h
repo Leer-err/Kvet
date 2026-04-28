@@ -1,7 +1,7 @@
 #pragma once
 
 #include <VkBootstrap.h>
-#include <vulkan/vulkan_core.h>
+#include <vulkan/vulkan.h>
 
 #include "GraphicsConfig.h"
 #include "Image.h"

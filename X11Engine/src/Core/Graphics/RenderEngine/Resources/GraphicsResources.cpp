@@ -4,7 +4,7 @@
 #include <SDL3/SDL_vulkan.h>
 #include <VkBootstrap.h>
 #include <vulkan/vk_enum_string_helper.h>
-#include <vulkan/vulkan_core.h>
+#include <vulkan/vulkan.h>
 
 #include "CommandBuffer.h"
 #include "Fence.h"

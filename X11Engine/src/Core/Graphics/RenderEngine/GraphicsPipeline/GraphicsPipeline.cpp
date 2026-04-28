@@ -1,6 +1,6 @@
 #include "GraphicsPipeline.h"
 
-#include <vulkan/vulkan_core.h>
+#include <vulkan/vulkan.h>
 
 #include "GraphicsResources.h"
 

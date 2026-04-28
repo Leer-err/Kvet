@@ -2,7 +2,7 @@
 
 #include "Rasterizer.h"
 
-#include <vulkan/vulkan_core.h>
+#include <vulkan/vulkan.h>
 
 namespace Graphics {
 

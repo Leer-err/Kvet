@@ -1,7 +1,7 @@
 #pragma once
 
 // #include "DepthStencil.h"
-#include <vulkan/vulkan_core.h>
+#include <vulkan/vulkan.h>
 
 #include <optional>
 #include <string>
