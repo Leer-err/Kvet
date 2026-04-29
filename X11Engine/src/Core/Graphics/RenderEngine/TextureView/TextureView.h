@@ -4,6 +4,8 @@
 
 #include "Image.h"
 
+namespace Graphics {
+
 struct TextureView {
     static TextureView create(const Image& image);
 
@@ -13,3 +15,5 @@ struct TextureView {
     uint32_t width;
     uint32_t height;
 };
+
+}  // namespace Graphics

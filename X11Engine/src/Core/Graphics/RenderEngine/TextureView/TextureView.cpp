@@ -3,6 +3,9 @@
 #include <vulkan/vulkan.h>
 
 #include "GraphicsResources.h"
+#include "Image.h"
+
+namespace Graphics {
 
 TextureView TextureView::create(const Image& image) {
     auto device = Graphics::Resources::get().getDevice();
@@ -31,3 +34,5 @@ void TextureView::destroy() {
 
     vkDestroyImageView(device, shader_resource, nullptr);
 }
+
+}  // namespace Graphics
