@@ -1,5 +1,3 @@
-#pragma once
-
 #include "Rasterizer.h"
 
 #include <vulkan/vulkan.h>

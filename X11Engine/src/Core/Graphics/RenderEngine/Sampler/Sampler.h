@@ -15,8 +15,8 @@ class Sampler {
     VkSampler sampler;
 
    private:
-    VkSamplerCreateInfo createSampler(VkFilter filter, bool anisotropic,
-                                      float anisotropy);
+    static VkSampler createSampler(VkFilter filter, bool anisotropic,
+                                   float anisotropy);
 };
 
 }  // namespace Graphics
