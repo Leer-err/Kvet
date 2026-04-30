@@ -32,15 +32,15 @@ class RenderEngineImpl {
     RenderEngineImpl();
     ~RenderEngineImpl();
 
-    void init();
+    void reinitWindowDependentResources();
     void render();
 
     uint32_t getWidth() const;
     uint32_t getHeight() const;
 
    private:
-    void beginFrame();
-    void endFrame();
+    void beginFrame(const CommandBuffer& cmd);
+    void endFrame(const CommandBuffer& cmd);
 
     void waitRenderFinished();
     void prepareRenderTargetForRendering(const CommandBuffer& cmd);

@@ -90,12 +90,12 @@ void SwapChain::present() {
     vkQueuePresentKHR(queue, &info);
 }
 
-SwapChain::BackBuffer SwapChain::getBackbuffer() {
+SwapChain::BackBuffer SwapChain::getBackbuffer(
+    const Semaphore& ready_for_render) {
     auto device = Resources::get().getDevice();
-    auto& frame = Resources::get().getFrameInFlight();
 
     vkAcquireNextImageKHR(device, swap_chain, UINT64_MAX,
-                          frame.ready_for_render.semaphore, VK_NULL_HANDLE,
+                          ready_for_render.semaphore, VK_NULL_HANDLE,
                           &image_index);
 
     BackBuffer backbuffer = {};

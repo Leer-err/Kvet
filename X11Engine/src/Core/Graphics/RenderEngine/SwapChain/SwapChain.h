@@ -24,7 +24,7 @@ class SwapChain {
 
     void present();
 
-    BackBuffer getBackbuffer();
+    BackBuffer getBackbuffer(const Semaphore& ready_for_render);
 
    private:
     static constexpr size_t SWAP_CHAIN_MAX_SIZE = 3;

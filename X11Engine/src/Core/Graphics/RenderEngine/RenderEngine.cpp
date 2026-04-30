@@ -1,8 +1,8 @@
+#include "RenderEngine.h"
+
 #include <memory>
 
-#include "RenderEngine.h"
 #include "RenderEngineImpl.h"
-
 
 namespace Graphics {
 
@@ -10,8 +10,6 @@ RenderEngine::RenderEngine()
     : impl(std::move(std::make_unique<RenderEngineImpl>())) {}
 
 RenderEngine::~RenderEngine() = default;
-
-void RenderEngine::init() { impl->init(); }
 
 void RenderEngine::render() { impl->render(); }
 

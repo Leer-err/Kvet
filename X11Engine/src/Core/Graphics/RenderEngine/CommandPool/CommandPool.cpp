@@ -6,7 +6,7 @@
 
 namespace Graphics {
 
-static CommandPool create() {
+CommandPool CommandPool::create() {
     auto device = Resources::get().getDevice();
     auto queue = Resources::get().getGraphicsQueueIndex();
 

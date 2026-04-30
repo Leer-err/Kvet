@@ -6,25 +6,19 @@
 #include <vulkan/vk_enum_string_helper.h>
 #include <vulkan/vulkan.h>
 
-#include "CommandBuffer.h"
-#include "Fence.h"
 #include "Logger.h"
 #include "LoggerFactory.h"
-#include "Semaphore.h"
 #include "Window.h"
 
 namespace Graphics {
 
 constexpr int MAX_FRAMES_IN_FLIGHT = 2;
 
-Resources::Resources()
-    : logger(LoggerFactory::getLogger("Graphics")), frame_in_flight_index(0) {
+Resources::Resources() : logger(LoggerFactory::getLogger("Graphics")) {
     createInstance();
     createDevice();
     createQueues();
     createAllocator();
-    createCommandPool();
-    prepareFrames();
 }
 
 void Resources::createInstance() {
@@ -138,40 +132,8 @@ void Resources::createAllocator() {
                      string_VkResult(result));
 }
 
-void Resources::createCommandPool() {
-    VkCommandPoolCreateInfo info = {};
-    info.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-    info.pNext = nullptr;
-    info.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-    info.queueFamilyIndex =
-        device.get_queue_index(vkb::QueueType::graphics).value();
-
-    vkCreateCommandPool(device.device, &info, nullptr, &pool.pool);
-}
-
 uint32_t Resources::getGraphicsQueueIndex() const {
     return device.get_queue_index(vkb::QueueType::graphics).value();
-}
-
-void Resources::prepareFrames() {
-    VkCommandBufferAllocateInfo info = {};
-    info.commandPool = pool.pool;
-    info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-    info.commandBufferCount = 2;
-
-    VkCommandBuffer buffer_handles[2];
-
-    vkAllocateCommandBuffers(device.device, &info, buffer_handles);
-
-    for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-        frames[i].buffer.buffer = buffer_handles[i];
-        frames[i].render_finished = Fence::create(device.device, true);
-        frames[i].ready_for_render = Semaphore::create(device.device);
-    }
-}
-
-void Resources::swapFrame() {
-    frame_in_flight_index = (frame_in_flight_index + 1) % MAX_FRAMES_IN_FLIGHT;
 }
 
 vkb::Device Resources::getVKBDevice() const { return device; }
@@ -183,9 +145,5 @@ VkQueue Resources::getGraphicsQueue() const { return graphics_queue; }
 VkQueue Resources::getPresentationQueue() const { return presentation_queue; }
 
 VmaAllocator Resources::getAllocator() const { return allocator; }
-
-FrameData& Resources::getFrameInFlight() {
-    return frames[frame_in_flight_index];
-}
 
 }  // namespace Graphics

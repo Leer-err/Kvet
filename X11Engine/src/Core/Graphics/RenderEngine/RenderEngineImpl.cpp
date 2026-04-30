@@ -12,6 +12,7 @@
 // #include "Context.h"
 #include "CloudsData.h"
 #include "CommandBuffer.h"
+#include "Fence.h"
 #include "GraphicsCommunicationManager.h"
 #include "GraphicsResources.h"
 // #include "RenderEnviroment.h"
@@ -25,7 +26,16 @@
 namespace Graphics {
 
 RenderEngineImpl::RenderEngineImpl() {
-    init();
+    frame_in_flight_index = 0;
+
+    for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+        auto& frame_in_flight = frames_in_flight[i];
+        frame_in_flight.pool = CommandPool::create();
+        frame_in_flight.backbuffer_ready_for_rendering = Semaphore::create();
+        frame_in_flight.finished_processing = Fence::create(true);
+    }
+
+    reinitWindowDependentResources();
     camera_data = BufferBuilder(sizeof(CameraData))
                       .isConstantBuffer()
                       .isCPUWritable()
@@ -80,7 +90,7 @@ void RenderEngineImpl::render() {
 
     endFrame(cmd);
 
-    Resources::get().swapFrame();
+    frame_in_flight_index = (frame_in_flight_index + 1) % MAX_FRAMES_IN_FLIGHT;
 }
 
 void RenderEngineImpl::beginFrame(const CommandBuffer& cmd) {
@@ -89,21 +99,22 @@ void RenderEngineImpl::beginFrame(const CommandBuffer& cmd) {
     cmd.begin();
 }
 
-void RenderEngineImpl::endFrame() {
+void RenderEngineImpl::endFrame(const CommandBuffer& cmd) {
     ZoneScoped;
 
-    auto frame = Resources::get().getFrameInFlight();
+    auto frame_in_flight = frames_in_flight[frame_in_flight_index];
 
-    auto [backbuffer, ready_for_present] = swap_chain.getBackbuffer();
+    auto [backbuffer, ready_for_present] = swap_chain.getBackbuffer(
+        frame_in_flight.backbuffer_ready_for_rendering);
 
-    copyToBackbuffer(frame.buffer, render_target_texture, backbuffer);
-    prepareBackbufferForPresentation(frame.buffer, backbuffer);
+    copyToBackbuffer(cmd, render_target_texture, backbuffer);
+    prepareBackbufferForPresentation(cmd, backbuffer);
 
-    frame.buffer.end();
+    cmd.end();
 
-    auto command_buffer_info = frame.buffer.submit();
+    auto command_buffer_info = cmd.submit();
     auto signal = ready_for_present.submit();
-    auto wait = frame.ready_for_render.submit();
+    auto wait = frame_in_flight.backbuffer_ready_for_rendering.submit();
 
     VkSubmitInfo2 submit_info = {};
     submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO_2;
@@ -115,12 +126,12 @@ void RenderEngineImpl::endFrame() {
     submit_info.pCommandBufferInfos = &command_buffer_info;
 
     vkQueueSubmit2(Resources::get().getGraphicsQueue(), 1, &submit_info,
-                   frame.render_finished.fence);
+                   frame_in_flight.finished_processing.fence);
 
     swap_chain.present();
 }
 
-void RenderEngineImpl::init() {
+void RenderEngineImpl::reinitWindowDependentResources() {
     auto config = Config::App::get().getGraphicsConfig();
 
     width = config.render_width;
@@ -147,10 +158,11 @@ void RenderEngineImpl::init() {
 
 void RenderEngineImpl::waitRenderFinished() {
     ZoneScoped;
-    auto frame = Resources::get().getFrameInFlight();
+    auto finished_processing =
+        frames_in_flight[frame_in_flight_index].finished_processing;
 
-    frame.render_finished.wait();
-    frame.render_finished.reset();
+    finished_processing.wait();
+    finished_processing.reset();
 }
 
 void RenderEngineImpl::prepareRenderTargetForRendering(

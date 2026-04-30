@@ -12,7 +12,6 @@ class RenderEngine {
     RenderEngine();
     ~RenderEngine();
 
-    void init();
     void render();
 
     uint32_t getWidth() const;

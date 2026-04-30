@@ -12,12 +12,6 @@
 
 namespace Graphics {
 
-struct FrameData {
-    CommandBuffer buffer;
-    Semaphore ready_for_render;
-    Fence render_finished;
-};
-
 class Resources {
    public:
     static Resources& get() {
@@ -32,11 +26,7 @@ class Resources {
     VmaAllocator getAllocator() const;
     DeviceProperties getProperties() const;
 
-    FrameData& getFrameInFlight();
-
     vkb::Device getVKBDevice() const;
-
-    void swapFrame();
 
    private:
     Resources();
@@ -48,8 +38,6 @@ class Resources {
     void createInstance();
     void createDevice();
     void createQueues();
-    void createCommandPool();
-    void prepareFrames();
 
     void readProperties(const vkb::PhysicalDevice& device);
 
@@ -62,10 +50,6 @@ class Resources {
     VmaAllocator allocator;
 
     DeviceProperties properties;
-
-    CommandPool pool;
-    FrameData frames[2];
-    uint32_t frame_in_flight_index;
 
     Logger logger;
 };

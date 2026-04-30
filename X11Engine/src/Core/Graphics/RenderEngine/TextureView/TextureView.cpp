@@ -3,12 +3,11 @@
 #include <vulkan/vulkan.h>
 
 #include "GraphicsResources.h"
-#include "Image.h"
 
 namespace Graphics {
 
 TextureView TextureView::create(const Image& image) {
-    auto device = Graphics::Resources::get().getDevice();
+    auto device = Resources::get().getDevice();
 
     VkImageViewCreateInfo info = {};
     info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -22,15 +21,15 @@ TextureView TextureView::create(const Image& image) {
     VkImageView view;
     vkCreateImageView(device, &info, nullptr, &view);
 
-    TextureView resource = {};
-    resource.shader_resource = view;
-    resource.width = static_cast<uint32_t>(image.width);
-    resource.height = static_cast<uint32_t>(image.height);
-    return resource;
+    TextureView texture_view = {};
+    texture_view.shader_resource = view;
+    texture_view.width = image.width;
+    texture_view.height = image.height;
+    return texture_view;
 }
 
 void TextureView::destroy() {
-    auto device = Graphics::Resources::get().getDevice();
+    auto device = Resources::get().getDevice();
 
     vkDestroyImageView(device, shader_resource, nullptr);
 }
