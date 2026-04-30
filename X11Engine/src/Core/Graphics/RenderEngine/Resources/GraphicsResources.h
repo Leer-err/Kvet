@@ -27,6 +27,7 @@ class Resources {
 
     VkDevice getDevice() const;
     VkQueue getGraphicsQueue() const;
+    uint32_t getGraphicsQueueIndex() const;
     VkQueue getPresentationQueue() const;
     VmaAllocator getAllocator() const;
     DeviceProperties getProperties() const;

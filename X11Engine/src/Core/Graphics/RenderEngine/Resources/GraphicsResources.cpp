@@ -149,6 +149,10 @@ void Resources::createCommandPool() {
     vkCreateCommandPool(device.device, &info, nullptr, &pool.pool);
 }
 
+uint32_t Resources::getGraphicsQueueIndex() const {
+    return device.get_queue_index(vkb::QueueType::graphics).value();
+}
+
 void Resources::prepareFrames() {
     VkCommandBufferAllocateInfo info = {};
     info.commandPool = pool.pool;

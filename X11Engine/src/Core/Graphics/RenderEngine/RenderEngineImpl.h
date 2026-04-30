@@ -7,8 +7,11 @@
 // #include "RenderTarget.h"
 #include "CloudsRenderer.h"
 #include "CommandBuffer.h"
+#include "CommandPool.h"
+#include "Fence.h"
 #include "RenderEnviroment.h"
 #include "RenderTarget.h"
+#include "Semaphore.h"
 #include "StarRenderer.h"
 #include "SwapChain.h"
 // #include "Texture.h"
@@ -16,6 +19,15 @@
 namespace Graphics {
 
 class RenderEngineImpl {
+    static constexpr size_t MAX_FRAMES_IN_FLIGHT = 2;
+
+    struct FrameInFlight {
+        CommandPool pool;
+
+        Semaphore backbuffer_ready_for_rendering;
+        Fence finished_processing;
+    };
+
    public:
     RenderEngineImpl();
     ~RenderEngineImpl();
@@ -56,6 +68,9 @@ class RenderEngineImpl {
 
     uint32_t width;
     uint32_t height;
+
+    FrameInFlight frames_in_flight[MAX_FRAMES_IN_FLIGHT];
+    uint32_t frame_in_flight_index;
 };
 
 }  // namespace Graphics

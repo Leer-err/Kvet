@@ -11,6 +11,7 @@
 #include "AppConfig.h"
 // #include "Context.h"
 #include "CloudsData.h"
+#include "CommandBuffer.h"
 #include "GraphicsCommunicationManager.h"
 #include "GraphicsResources.h"
 // #include "RenderEnviroment.h"
@@ -68,22 +69,23 @@ void RenderEngineImpl::endMainRenderPass(const CommandBuffer& cmd) {
 void RenderEngineImpl::render() {
     ZoneScoped;
 
-    beginFrame();
+    waitRenderFinished();
 
-    auto cmd = Resources::get().getFrameInFlight().buffer;
+    auto frame_in_flight = frames_in_flight[frame_in_flight_index];
+    auto cmd = frame_in_flight.pool.getCommandBuffer();
+
+    beginFrame(cmd);
+
     mainRenderPass(cmd);
 
-    endFrame();
+    endFrame(cmd);
 
     Resources::get().swapFrame();
 }
 
-void RenderEngineImpl::beginFrame() {
+void RenderEngineImpl::beginFrame(const CommandBuffer& cmd) {
     ZoneScoped;
 
-    waitRenderFinished();
-
-    auto cmd = Resources::get().getFrameInFlight().buffer;
     cmd.begin();
 }
 
