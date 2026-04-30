@@ -6,6 +6,7 @@
 #include <vulkan/vk_enum_string_helper.h>
 #include <vulkan/vulkan.h>
 
+#include "DeviceProperties.h"
 #include "Logger.h"
 #include "LoggerFactory.h"
 #include "Window.h"
@@ -85,22 +86,7 @@ void Resources::createDevice() {
 }
 
 void Resources::readProperties(const vkb::PhysicalDevice& device) {
-    VkPhysicalDeviceProperties device_properties;
-    vkGetPhysicalDeviceProperties(device, &device_properties);
-
-    VkPhysicalDeviceMemoryProperties memory_properties;
-    vkGetPhysicalDeviceMemoryProperties(device, &memory_properties);
-
-    size_t memory_size = 0;
-    for (uint32_t i = 0; i < memory_properties.memoryHeapCount; i++) {
-        VkDeviceSize heap_size = memory_properties.memoryHeaps[i].size;
-        VkMemoryHeapFlags flags = memory_properties.memoryHeaps[i].flags;
-
-        if (flags & VK_MEMORY_HEAP_DEVICE_LOCAL_BIT) memory_size += heap_size;
-    }
-
-    properties.device_name = device_properties.deviceName;
-    properties.memory_size = memory_size;
+    properties = DeviceProperties::readProperties(device);
 
     logger.info("Using device {}", properties.device_name);
     logger.info("Device dedicated memory {} MB",
