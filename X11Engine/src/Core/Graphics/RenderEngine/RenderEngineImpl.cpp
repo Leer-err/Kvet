@@ -36,57 +36,21 @@ RenderEngineImpl::RenderEngineImpl() {
     }
 
     reinitWindowDependentResources();
-    camera_data = BufferBuilder(sizeof(CameraData))
-                      .isConstantBuffer()
-                      .isCPUWritable()
-                      .create()
-                      .getResult();
 }
 
 RenderEngineImpl::~RenderEngineImpl() { swap_chain.destroy(); }
-
-void RenderEngineImpl::mainRenderPass(const CommandBuffer& cmd) {
-    CameraData data = {};
-    data.view_projection = Matrix::identity();
-    data.inverse_view_projection = Matrix::identity();
-    void* mapped_buffer = camera_data.map();
-    memcpy(mapped_buffer, &data, sizeof(CameraData));
-    camera_data.unmap();
-
-    auto& manager = GraphicsCommunicationManager::get();
-
-    auto stars = manager.recieve<StarsData>();
-
-    beginMainRenderPass(cmd);
-
-    if (stars) {
-        star_renderer.render(cmd, camera_data, *stars);
-    }
-
-    endMainRenderPass(cmd);
-}
-
-void RenderEngineImpl::beginMainRenderPass(const CommandBuffer& cmd) {
-    prepareRenderTargetForRendering(cmd);
-
-    cmd.bindRenderEnviroment(render_enviroment);
-}
-
-void RenderEngineImpl::endMainRenderPass(const CommandBuffer& cmd) {
-    cmd.unbindRenderEnviroment();
-}
 
 void RenderEngineImpl::render() {
     ZoneScoped;
 
     waitRenderFinished();
 
-    auto frame_in_flight = frames_in_flight[frame_in_flight_index];
-    auto cmd = frame_in_flight.pool.getCommandBuffer();
+    auto pool = frames_in_flight[frame_in_flight_index].pool;
+    auto cmd = pool.getCommandBuffer();
 
     beginFrame(cmd);
 
-    mainRenderPass(cmd);
+    render_pass.render(cmd, render_enviroment);
 
     endFrame(cmd);
 
@@ -97,6 +61,7 @@ void RenderEngineImpl::beginFrame(const CommandBuffer& cmd) {
     ZoneScoped;
 
     cmd.begin();
+    prepareRenderTargetForRendering(cmd);
 }
 
 void RenderEngineImpl::endFrame(const CommandBuffer& cmd) {

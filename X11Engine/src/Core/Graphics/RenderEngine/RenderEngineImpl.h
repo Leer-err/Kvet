@@ -10,6 +10,7 @@
 #include "CommandPool.h"
 #include "Fence.h"
 #include "RenderEnviroment.h"
+#include "RenderPass.h"
 #include "RenderTarget.h"
 #include "Semaphore.h"
 #include "StarRenderer.h"
@@ -50,21 +51,13 @@ class RenderEngineImpl {
     void prepareBackbufferForPresentation(const CommandBuffer& cmd,
                                           Image& backbuffer);
 
-    // void preRenderPass();
-    void beginMainRenderPass(const CommandBuffer& cmd);
-    void mainRenderPass(const CommandBuffer& cmd);
-    void endMainRenderPass(const CommandBuffer& cmd);
-
-    StarRenderer star_renderer;
-    // CloudsRenderer clouds_renderer;
-
     Image render_target_texture;
     RenderEnviroment render_enviroment;
     // DepthStencil default_depth_stencil_buffer;
 
-    SwapChain swap_chain;
+    RenderPass render_pass;
 
-    Buffer camera_data;
+    SwapChain swap_chain;
 
     uint32_t width;
     uint32_t height;
