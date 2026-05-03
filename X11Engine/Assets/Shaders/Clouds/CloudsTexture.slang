@@ -7,8 +7,14 @@ struct Vertex_input{
     float3 position;
 };
 
+struct CloudData
+{
+    float3 cloud_color;
+    float time;
+};
+
 [shader("vertex")]
-Vertex_Output vertex_main(in Vertex_input vertex)
+Vertex_Output vertex_main(in Vertex_input vertex, uniform CloudData* cloud)
 {
     Vertex_Output output;
     output.viewport_position = float4(vertex.position, 1);
@@ -83,17 +89,9 @@ float fbm( in float3 x, in float H)
     return t;
 }
 
-struct CloudData
-{
-    float3 cloud_color;
-    float time;
-};
-
 [shader("pixel")]
 float4 pixel_main(in Vertex_Output data, uniform CloudData* cloud)
 {
-    return float4(1,1,1,1);
-
     const float radius = 0.5;
     float distance = radius - length(data.uv) + 0.5;
     distance = clamp(distance, 0, 1);

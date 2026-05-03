@@ -5,6 +5,7 @@
 #include <VkBootstrap.h>
 #include <vulkan/vk_enum_string_helper.h>
 #include <vulkan/vulkan.h>
+#include <vulkan/vulkan_core.h>
 
 #include "DeviceProperties.h"
 #include "Logger.h"
@@ -16,6 +17,7 @@ namespace Graphics {
 constexpr int MAX_FRAMES_IN_FLIGHT = 2;
 
 Resources::Resources() : logger(LoggerFactory::getLogger("Graphics")) {
+    checkExtensions();
     createInstance();
     createDevice();
     createQueues();
@@ -31,7 +33,8 @@ void Resources::createInstance() {
                         .build();
 
     if (!inst_ret) {
-        logger.error("Vulkan instance creation failed");
+        logger.error("Vulkan instance creation failed with {}",
+                     inst_ret.error().message());
         return;
     }
     instance = inst_ret.value();
@@ -43,10 +46,12 @@ void Resources::createDevice() {
     SDL_Vulkan_CreateSurface(handle, instance.instance, nullptr, &surface);
 
     vkb::PhysicalDeviceSelector selector{instance};
-    auto phys_ret = selector.set_surface(surface)
-                        .set_minimum_version(1, 3)
-                        .require_dedicated_transfer_queue()
-                        .select();
+    auto phys_ret =
+        selector.set_surface(surface)
+            .set_minimum_version(1, 3)
+            .require_dedicated_transfer_queue()
+            .add_required_extension(VK_EXT_DESCRIPTOR_BUFFER_EXTENSION_NAME)
+            .select();
 
     if (!phys_ret) {
         logger.error("Failed to find suitable device");
@@ -61,20 +66,29 @@ void Resources::createDevice() {
         return;
     }
 
+    vkb::DeviceBuilder device_builder{phys_ret.value()};
+
     VkPhysicalDeviceVulkan12Features features12 = {};
     features12.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES;
     features12.bufferDeviceAddress = VK_TRUE;
+    device_builder.add_pNext(&features12);
+
     VkPhysicalDeviceSynchronization2FeaturesKHR synchronization_2{
         VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SYNCHRONIZATION_2_FEATURES_KHR};
     synchronization_2.synchronization2 = VK_TRUE;
+    device_builder.add_pNext(&synchronization_2);
+
     VkPhysicalDeviceDynamicRenderingFeaturesKHR dynamic_rendering_feature{};
     dynamic_rendering_feature.sType =
         VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES_KHR;
     dynamic_rendering_feature.dynamicRendering = VK_TRUE;
-    vkb::DeviceBuilder device_builder{phys_ret.value()};
-    device_builder.add_pNext(&features12);
-    device_builder.add_pNext(&synchronization_2);
     device_builder.add_pNext(&dynamic_rendering_feature);
+
+    VkPhysicalDeviceDescriptorBufferFeaturesEXT descriptor_buffer{
+        VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_BUFFER_FEATURES_EXT};
+    descriptor_buffer.descriptorBuffer = VK_TRUE;
+    device_builder.add_pNext(&descriptor_buffer);
+
     auto dev_ret = device_builder.build();
     if (!dev_ret) {
         logger.error("Failed to find suitable device");
@@ -86,11 +100,18 @@ void Resources::createDevice() {
 }
 
 void Resources::readProperties(const vkb::PhysicalDevice& device) {
-    properties = DeviceProperties::readProperties(device);
+    properties = DeviceProperties::readProperties(device.physical_device);
 
     logger.info("Using device {}", properties.device_name);
     logger.info("Device dedicated memory {} MB",
                 properties.memory_size / (1 << 20));
+}
+
+void Resources::checkExtensions() {
+    auto system_info_ret = vkb::SystemInfo::get_system_info();
+    if (!system_info_ret) {
+    }
+    auto system_info = system_info_ret.value();
 }
 
 void Resources::createQueues() {
@@ -131,5 +152,7 @@ VkQueue Resources::getGraphicsQueue() const { return graphics_queue; }
 VkQueue Resources::getPresentationQueue() const { return presentation_queue; }
 
 VmaAllocator Resources::getAllocator() const { return allocator; }
+
+DeviceProperties Resources::getProperties() const { return properties; }
 
 }  // namespace Graphics

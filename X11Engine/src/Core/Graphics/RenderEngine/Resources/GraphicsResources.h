@@ -39,6 +39,8 @@ class Resources {
     void createDevice();
     void createQueues();
 
+    void checkExtensions();
+
     void readProperties(const vkb::PhysicalDevice& device);
 
     void createAllocator();

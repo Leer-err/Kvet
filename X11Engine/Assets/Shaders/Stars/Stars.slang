@@ -13,6 +13,14 @@ struct Vertex_input{
     float3 position;
 };
 
+struct StarsData
+{
+    float time;
+    float star_density;
+    float blinking_speed;
+    float blink_strength;
+};
+
 [shader("vertex")]
 Vertex_Output vertex_main(in Vertex_input vertex, uniform CameraData* camera_data, uniform StarsData* stars_data)
 {
@@ -135,14 +143,6 @@ float remap(float value, float in_min, float in_max, float out_min, float out_ma
     
     return lerp(out_min, out_max, t);
 }
-
-struct StarsData
-{
-    float time;
-    float star_density;
-    float blinking_speed;
-    float blink_strength;
-};
 
 [shader("pixel")]
 float4 pixel_main(in Vertex_Output data, uniform CameraData* camera_data, uniform StarsData* stars_data)

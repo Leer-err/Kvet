@@ -3,6 +3,7 @@
 #include "Buffer.h"
 #include "CloudsData.h"
 #include "CommandBuffer.h"
+#include "DescriptorSet.h"
 #include "GraphicsPipeline.h"
 #include "RenderEnviroment.h"
 
@@ -10,7 +11,7 @@ namespace Graphics {
 
 class CloudsRenderer {
    public:
-    CloudsRenderer();
+    CloudsRenderer(const DescriptorSet& descriptors);
 
     void render(const CommandBuffer& command_buffer, const Buffer& camera_data,
                 const CloudsData& clouds_data);

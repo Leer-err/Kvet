@@ -2,10 +2,12 @@
 
 // #include "DepthStencil.h"
 #include <vulkan/vulkan.h>
+#include <vulkan/vulkan_core.h>
 
 #include <optional>
 #include <string>
 
+#include "DescriptorSet.h"
 #include "GraphicsPipeline.h"
 
 // #include "InputLayout.h"
@@ -21,11 +23,13 @@ class GraphicsPipelineBuilder {
     enum class Error { ShaderFileNotFound, VertexInputTypeNotSupported };
 
     GraphicsPipelineBuilder(const Shader& vertex_shader,
-                            const Shader& pixel_shader);
+                            const Shader& pixel_shader,
+                            const DescriptorSet& descriptor_layout);
     GraphicsPipelineBuilder(const std::string& vertex_shader_filename,
                             const std::string& vertex_shader_entrypoint,
                             const std::string& pixel_shader_filename,
-                            const std::string& pixel_shader_entrypoint);
+                            const std::string& pixel_shader_entrypoint,
+                            const DescriptorSet& descriptor_layout);
 
     GraphicsPipelineBuilder& setRasterizer(
         VkPipelineRasterizationStateCreateInfo rasterizer);
@@ -43,6 +47,7 @@ class GraphicsPipelineBuilder {
     Shader vertex_shader;
     Shader pixel_shader;
 
+    DescriptorSet descriptor_layout;
     VkPipelineRasterizationStateCreateInfo rasterizer;
 
     std::optional<Error> error;

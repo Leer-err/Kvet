@@ -17,7 +17,10 @@ class BufferBuilder {
     BufferBuilder& isVertexBuffer(size_t stride, size_t offset = 0);
     BufferBuilder& isIndexBuffer();
     BufferBuilder& isConstantBuffer();
-    BufferBuilder& isCPUWritable();
+    BufferBuilder& isDescriptorBuffer();
+
+    BufferBuilder& isCPUWritable(bool is_random = false);
+
     BufferBuilder& isCopySource();
     BufferBuilder& isCopyDestination();
 
@@ -32,7 +35,11 @@ class BufferBuilder {
     bool vertex_buffer;
     bool index_buffer;
     bool constant_buffer;
-    bool cpu_writable;
+    bool descriptor_buffer;
+
+    bool cpu_write_random;
+    bool cpu_write_sequential;
+
     bool copy_source;
     bool copy_target;
 };

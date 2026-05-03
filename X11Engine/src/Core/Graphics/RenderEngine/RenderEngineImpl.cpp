@@ -12,6 +12,7 @@
 // #include "Context.h"
 #include "CloudsData.h"
 #include "CommandBuffer.h"
+#include "DescriptorSet/DescriptorSet.h"
 #include "Fence.h"
 #include "GraphicsCommunicationManager.h"
 #include "GraphicsResources.h"
@@ -19,13 +20,15 @@
 #include "BufferBuilder.h"
 #include "CameraData.h"
 #include "ImageBuilder.h"
+#include "RenderPass.h"
 #include "RenderTarget.h"
 #include "StarsData.h"
 #include "SwapChain.h"
 
 namespace Graphics {
 
-RenderEngineImpl::RenderEngineImpl() {
+RenderEngineImpl::RenderEngineImpl()
+    : descriptor_set(DescriptorSet::create()), render_pass(descriptor_set) {
     frame_in_flight_index = 0;
 
     for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {

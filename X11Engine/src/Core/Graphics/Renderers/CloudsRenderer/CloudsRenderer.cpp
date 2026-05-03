@@ -14,7 +14,7 @@
 
 namespace Graphics {
 
-CloudsRenderer::CloudsRenderer() {
+CloudsRenderer::CloudsRenderer(const DescriptorSet& descriptors) {
     constexpr Vector3 screen_quad_vertices[] = {
         Vector3(-1, -1, 1), Vector3(1, -1, 1), Vector3(-1, 1, 1),
         Vector3(1, 1, 1)};
@@ -39,20 +39,6 @@ CloudsRenderer::CloudsRenderer() {
     memcpy(index_data, screen_quad_indices, sizeof(screen_quad_indices));
     quad_indices.unmap();
 
-    auto vertex_shader =
-        ShaderBuilder("./Assets/Shaders/Clouds/CloudsTexture.spv",
-                      "vertex_main", VK_SHADER_STAGE_VERTEX_BIT)
-            .create()
-            .getResult();
-    auto pixel_shader =
-        ShaderBuilder("./Assets/Shaders/Clouds/CloudsTexture.spv", "pixel_main",
-                      VK_SHADER_STAGE_FRAGMENT_BIT)
-            .create()
-            .getResult();
-
-    auto input_layout =
-        InputLayoutBuilder().addElement(VK_FORMAT_R32G32B32_SFLOAT).create();
-
     clouds_texture = ImageBuilder(VK_FORMAT_R8G8B8A8_UNORM, 512, 512)
                          .isRenderTarget()
                          .isShaderResource()
@@ -63,7 +49,10 @@ CloudsRenderer::CloudsRenderer() {
     env.clear_render_target = true;
     env.render_target_clear_value.color = {0, 0, 0, 0};
 
-    pipeline = GraphicsPipelineBuilder(vertex_shader, pixel_shader)
+    pipeline = GraphicsPipelineBuilder(
+                   "./Assets/Shaders/Clouds/CloudsTexture.spv", "vertex_main",
+                   "./Assets/Shaders/Clouds/CloudsTexture.spv", "pixel_main",
+                   descriptors)
                    .create()
                    .getResult();
 
@@ -87,9 +76,9 @@ void CloudsRenderer::render(const CommandBuffer& command_buffer,
                             const CloudsData& clouds_data) {
     command_buffer.setPipeline(pipeline);
 
-    VkDeviceAddress stars_address = clouds_data_buffer.getDeviceAddress();
-    command_buffer.pushConstants(pipeline, &stars_address,
-                                 sizeof(stars_address));
+    VkDeviceAddress clouds_address = clouds_data_buffer.getDeviceAddress();
+    command_buffer.pushConstants(pipeline, &clouds_address,
+                                 sizeof(clouds_address));
 
     command_buffer.draw(quad_vertices, quad_indices);
 }

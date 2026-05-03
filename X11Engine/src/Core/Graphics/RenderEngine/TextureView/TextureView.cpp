@@ -22,7 +22,7 @@ TextureView TextureView::create(const Image& image) {
     vkCreateImageView(device, &info, nullptr, &view);
 
     TextureView texture_view = {};
-    texture_view.shader_resource = view;
+    texture_view.view = view;
     texture_view.width = image.width;
     texture_view.height = image.height;
     return texture_view;
@@ -31,7 +31,7 @@ TextureView TextureView::create(const Image& image) {
 void TextureView::destroy() {
     auto device = Resources::get().getDevice();
 
-    vkDestroyImageView(device, shader_resource, nullptr);
+    vkDestroyImageView(device, view, nullptr);
 }
 
 }  // namespace Graphics

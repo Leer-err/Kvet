@@ -11,7 +11,7 @@ struct TextureView {
 
     void destroy();
 
-    VkImageView shader_resource;
+    VkImageView view;
     uint32_t width;
     uint32_t height;
 };

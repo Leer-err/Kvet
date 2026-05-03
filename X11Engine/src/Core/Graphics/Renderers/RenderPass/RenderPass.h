@@ -1,7 +1,8 @@
 #pragma once
 
+#include "CloudsRenderer.h"
 #include "CommandBuffer.h"
-#include "CommandPool.h"
+#include "DescriptorSet.h"
 #include "RenderEnviroment.h"
 #include "StarRenderer.h"
 
@@ -9,7 +10,7 @@ namespace Graphics {
 
 class RenderPass {
    public:
-    RenderPass();
+    RenderPass(const DescriptorSet& descriptors);
 
     void render(CommandBuffer& cmd, const RenderEnviroment& env);
 
@@ -20,6 +21,7 @@ class RenderPass {
     Buffer camera_data;
 
     StarRenderer star_renderer;
+    CloudsRenderer clouds_renderer;
 };
 
 }  // namespace Graphics

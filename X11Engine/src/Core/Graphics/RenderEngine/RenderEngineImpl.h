@@ -8,6 +8,7 @@
 #include "CloudsRenderer.h"
 #include "CommandBuffer.h"
 #include "CommandPool.h"
+#include "DescriptorSet/DescriptorSet.h"
 #include "Fence.h"
 #include "RenderEnviroment.h"
 #include "RenderPass.h"
@@ -54,6 +55,8 @@ class RenderEngineImpl {
     Image render_target_texture;
     RenderEnviroment render_enviroment;
     // DepthStencil default_depth_stencil_buffer;
+
+    DescriptorSet descriptor_set;
 
     RenderPass render_pass;
 

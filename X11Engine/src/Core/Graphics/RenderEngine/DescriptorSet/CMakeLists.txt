@@ -1,5 +1,5 @@
 target_sources(Graphics PRIVATE
-    DeviceProperties.cpp
+    DescriptorSet.cpp
 )
 
 target_include_directories(Graphics PRIVATE

@@ -5,6 +5,7 @@
 #include <cstddef>
 
 #include "Buffer.h"
+#include "ExtensionFunctions.h"
 #include "GraphicsPipeline.h"
 #include "RenderEnviroment.h"
 
@@ -63,6 +64,22 @@ void CommandBuffer::draw(const Buffer& vertex_buffer,
 
     auto index_count = index_buffer.getSize() / sizeof(uint32_t);
     vkCmdDrawIndexed(buffer, index_count, 3, 0, 0, 0);
+}
+
+void CommandBuffer::bindDescriptorSet(const GraphicsPipeline& pipeline,
+                                      const DescriptorSet& set) const {
+    VkDescriptorBufferBindingInfoEXT info;
+    info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_BUFFER_BINDING_INFO_EXT;
+    info.pNext = nullptr;
+    info.address = set.descriptors.getDeviceAddress();
+    info.usage = VK_BUFFER_USAGE_RESOURCE_DESCRIPTOR_BUFFER_BIT_EXT;
+    vkCmdBindDescriptorBuffersEXT(buffer, 1, &info);
+
+    uint32_t indices = {};
+    VkDeviceSize offsets = {};
+    vkCmdSetDescriptorBufferOffsetsEXT(buffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
+                                       pipeline.layout, 0, 1, &indices,
+                                       &offsets);
 }
 
 void CommandBuffer::bindRenderEnviroment(const RenderEnviroment& env) const {

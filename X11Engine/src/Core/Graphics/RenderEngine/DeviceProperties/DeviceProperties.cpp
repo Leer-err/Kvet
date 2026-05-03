@@ -1,6 +1,7 @@
 #include "DeviceProperties.h"
 
 #include <vulkan/vulkan.h>
+#include <vulkan/vulkan_core.h>
 
 #include <array>
 
@@ -9,8 +10,8 @@ namespace Graphics {
 DeviceProperties DeviceProperties::readProperties(VkPhysicalDevice device) {
     DeviceProperties properties;
 
-    readMemoryProperties(device, properties);
     readDeviceProperties(device, properties);
+    readMemoryProperties(device, properties);
     readFormatProperties(device, properties);
 
     return properties;
@@ -18,28 +19,27 @@ DeviceProperties DeviceProperties::readProperties(VkPhysicalDevice device) {
 
 void DeviceProperties::readDeviceProperties(VkPhysicalDevice device,
                                             DeviceProperties& properties) {
-    VkPhysicalDeviceProperties2 device_properties;
+    VkPhysicalDeviceProperties2 device_properties = {};
+    device_properties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2;
+
+    VkPhysicalDeviceDescriptorBufferPropertiesEXT buffer_properties = {};
+    buffer_properties.sType =
+        VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_BUFFER_PROPERTIES_EXT;
+    device_properties.pNext = &buffer_properties;
+
     vkGetPhysicalDeviceProperties2(device, &device_properties);
 
-    void* pNext = device_properties.pNext;
-    while (pNext) {
-        VkStructureType type = *reinterpret_cast<VkStructureType*>(pNext);
-
-        if (type !=
-            VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_PROPERTIES) {
-            pNext = reinterpret_cast<void*>(reinterpret_cast<char*>(pNext) +
-                                            sizeof(VkStructureType));
-        }
-
-        VkPhysicalDeviceDescriptorIndexingProperties* indexing_properties =
-            reinterpret_cast<VkPhysicalDeviceDescriptorIndexingProperties*>(
-                pNext);
-
-        properties.max_descriptor_set_size =
-            indexing_properties->maxDescriptorSetUpdateAfterBindSampledImages;
-    }
-
     properties.device_name = device_properties.properties.deviceName;
+
+    auto& descriptor_buffer_properties =
+        properties.descriptor_buffer_properties;
+
+    descriptor_buffer_properties.alignment =
+        buffer_properties.descriptorBufferOffsetAlignment;
+    descriptor_buffer_properties.sampler_size =
+        buffer_properties.samplerDescriptorSize;
+    descriptor_buffer_properties.texture_size =
+        buffer_properties.sampledImageDescriptorSize;
 }
 
 void DeviceProperties::readMemoryProperties(VkPhysicalDevice device,

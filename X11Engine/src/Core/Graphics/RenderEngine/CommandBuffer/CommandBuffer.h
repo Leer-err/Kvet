@@ -3,6 +3,7 @@
 #include <vulkan/vulkan.h>
 
 #include "Buffer.h"
+#include "DescriptorSet.h"
 #include "GraphicsPipeline.h"
 #include "Image.h"
 #include "RenderEnviroment.h"
@@ -25,6 +26,8 @@ struct CommandBuffer {
     void pushConstants(const GraphicsPipeline& pipeline, const void* constants,
                        size_t constant_size) const;
 
+    void bindDescriptorSet(const GraphicsPipeline& pipeline,
+                           const DescriptorSet& set) const;
     void setPipeline(const GraphicsPipeline& pipeline) const;
 
     void bindRenderEnviroment(const RenderEnviroment& env) const;
