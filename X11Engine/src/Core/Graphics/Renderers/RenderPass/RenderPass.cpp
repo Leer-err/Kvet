@@ -4,12 +4,15 @@
 #include "CameraData.h"
 #include "CloudsData.h"
 #include "CloudsRenderer.h"
+#include "DescriptorSet.h"
 #include "GraphicsCommunicationManager.h"
 
 namespace Graphics {
 
-RenderPass::RenderPass(const DescriptorSet& descriptors)
-    : star_renderer(descriptors), clouds_renderer(descriptors) {
+RenderPass::RenderPass(DescriptorSet& descriptors)
+    : star_renderer(descriptors),
+      clouds_renderer(descriptors),
+      descriptors(descriptors) {
     camera_data = BufferBuilder(sizeof(CameraData))
                       .isConstantBuffer()
                       .isCPUWritable()
@@ -27,6 +30,10 @@ void RenderPass::render(CommandBuffer& cmd, const RenderEnviroment& env) {
 
     auto& manager = GraphicsCommunicationManager::get();
 
+    CloudsData clouds_data = {};
+    clouds_data.color = {1, 0, 1};
+    clouds_renderer.preRender(cmd, camera_data, clouds_data);
+
     beginPass(cmd, env);
 
     auto stars = manager.recieve<StarsData>();
@@ -34,8 +41,6 @@ void RenderPass::render(CommandBuffer& cmd, const RenderEnviroment& env) {
         star_renderer.render(cmd, camera_data, *stars);
     }
 
-    CloudsData clouds_data = {};
-    clouds_data.color = {1, 0, 1};
     clouds_renderer.render(cmd, camera_data, clouds_data);
 
     endPass(cmd);

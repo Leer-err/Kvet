@@ -1,5 +1,5 @@
 struct Vertex_Output{
-    float4 viewport_position;
+    float4 viewport_position : SV_Position;
     float2 uv;
 };
 
@@ -11,6 +11,8 @@ struct CloudData
 {
     float3 cloud_color;
     float time;
+    float height;
+    float cloud_plane_scale;
 };
 
 [shader("vertex")]

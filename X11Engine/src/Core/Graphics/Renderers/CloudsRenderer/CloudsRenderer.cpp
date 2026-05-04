@@ -1,20 +1,24 @@
 #include "CloudsRenderer.h"
 
 #include <vulkan/vulkan.h>
+#include <vulkan/vulkan_core.h>
 
 #include <cstring>
 
 #include "BufferBuilder.h"
 #include "CloudsData.h"
+#include "DescriptorSet.h"
 #include "GraphicsPipelineBuilder.h"
 #include "ImageBuilder.h"
 #include "InputLayoutBuilder.h"
 #include "ShaderBuilder.h"
+#include "TextureView.h"
 #include "Vector3.h"
 
 namespace Graphics {
 
-CloudsRenderer::CloudsRenderer(const DescriptorSet& descriptors) {
+CloudsRenderer::CloudsRenderer(DescriptorSet& descriptors)
+    : descriptors(descriptors) {
     constexpr Vector3 screen_quad_vertices[] = {
         Vector3(-1, -1, 1), Vector3(1, -1, 1), Vector3(-1, 1, 1),
         Vector3(1, 1, 1)};
@@ -44,17 +48,25 @@ CloudsRenderer::CloudsRenderer(const DescriptorSet& descriptors) {
                          .isShaderResource()
                          .create()
                          .getResult();
+    descriptors.addImage(TextureView::create(clouds_texture));
 
     env.render_target = RenderTarget::create(clouds_texture);
     env.clear_render_target = true;
     env.render_target_clear_value.color = {0, 0, 0, 0};
 
-    pipeline = GraphicsPipelineBuilder(
-                   "./Assets/Shaders/Clouds/CloudsTexture.spv", "vertex_main",
-                   "./Assets/Shaders/Clouds/CloudsTexture.spv", "pixel_main",
-                   descriptors)
-                   .create()
-                   .getResult();
+    cloud_texture_pipeline =
+        GraphicsPipelineBuilder("./Assets/Shaders/Clouds/CloudsTexture.spv",
+                                "vertex_main",
+                                "./Assets/Shaders/Clouds/CloudsTexture.spv",
+                                "pixel_main", descriptors)
+            .create()
+            .getResult();
+    cloud_pipeline =
+        GraphicsPipelineBuilder(
+            "./Assets/Shaders/Clouds/Clouds.spv", "vertex_main",
+            "./Assets/Shaders/Clouds/Clouds.spv", "pixel_main", descriptors)
+            .create()
+            .getResult();
 
     clouds_data_buffer = BufferBuilder(sizeof(CloudsData))
                              .isConstantBuffer()
@@ -65,20 +77,29 @@ CloudsRenderer::CloudsRenderer(const DescriptorSet& descriptors) {
     CloudsData data = {};
     data.color = Vector3(1, 0, 1);
     data.time = 0;
+    data.cloud_plane_scale = 1;
+    data.height = 0.6;
 
     auto data_ptr = clouds_data_buffer.map();
     memcpy(data_ptr, &data, sizeof(CloudsData));
     clouds_data_buffer.unmap();
 }
 
+struct PushConstants {
+    VkDeviceAddress camera_address;
+    VkDeviceAddress clouds_address;
+};
+
 void CloudsRenderer::render(const CommandBuffer& command_buffer,
                             const Buffer& camera_data,
                             const CloudsData& clouds_data) {
-    command_buffer.setPipeline(pipeline);
+    command_buffer.setPipeline(cloud_pipeline);
+    command_buffer.bindDescriptorSet(cloud_pipeline, descriptors);
 
-    VkDeviceAddress clouds_address = clouds_data_buffer.getDeviceAddress();
-    command_buffer.pushConstants(pipeline, &clouds_address,
-                                 sizeof(clouds_address));
+    PushConstants constants;
+    constants.clouds_address = clouds_data_buffer.getDeviceAddress();
+    constants.camera_address = camera_data.getDeviceAddress();
+    command_buffer.pushConstants(cloud_pipeline, &constants);
 
     command_buffer.draw(quad_vertices, quad_indices);
 }
@@ -95,15 +116,22 @@ void CloudsRenderer::preRender(const CommandBuffer& command_buffer,
 
     command_buffer.bindRenderEnviroment(env);
 
-    command_buffer.setPipeline(pipeline);
+    command_buffer.setPipeline(cloud_texture_pipeline);
+    command_buffer.bindDescriptorSet(cloud_texture_pipeline, descriptors);
 
-    VkDeviceAddress stars_address = clouds_data_buffer.getDeviceAddress();
-    command_buffer.pushConstants(pipeline, &stars_address,
-                                 sizeof(stars_address));
+    VkDeviceAddress clouds_address = clouds_data_buffer.getDeviceAddress();
+    command_buffer.pushConstants(cloud_texture_pipeline, &clouds_address);
 
     command_buffer.draw(quad_vertices, quad_indices);
 
     command_buffer.unbindRenderEnviroment();
+
+    auto cloud_texture_barrier = clouds_texture.createBarrier(
+        VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+        VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT,
+        VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT,
+        VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT, VK_ACCESS_2_SHADER_READ_BIT);
+    command_buffer.barrier(&cloud_texture_barrier, 1);
 }
 
 }  // namespace Graphics

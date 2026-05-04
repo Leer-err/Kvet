@@ -11,7 +11,7 @@ namespace Graphics {
 
 class CloudsRenderer {
    public:
-    CloudsRenderer(const DescriptorSet& descriptors);
+    CloudsRenderer(DescriptorSet& descriptors);
 
     void render(const CommandBuffer& command_buffer, const Buffer& camera_data,
                 const CloudsData& clouds_data);
@@ -20,10 +20,13 @@ class CloudsRenderer {
                    const Buffer& camera_data, const CloudsData& clouds_data);
 
    private:
+    DescriptorSet descriptors;
+
     Buffer quad_vertices;
     Buffer quad_indices;
 
-    GraphicsPipeline pipeline;
+    GraphicsPipeline cloud_texture_pipeline;
+    GraphicsPipeline cloud_pipeline;
     RenderEnviroment env;
 
     Image clouds_texture;

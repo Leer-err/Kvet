@@ -1,6 +1,7 @@
 #include "GraphicsPipelineBuilder.h"
 
 #include <vulkan/vulkan.h>
+#include <vulkan/vulkan_core.h>
 
 #include <array>
 #include <cstddef>
@@ -133,7 +134,16 @@ GraphicsPipelineBuilder::create() {
     renderingCI.depthAttachmentFormat = VK_FORMAT_UNDEFINED;
 
     VkPipelineColorBlendAttachmentState blendAttachment = {};
-    blendAttachment.colorWriteMask = 0xF;
+    blendAttachment.colorWriteMask =
+        VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT |
+        VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
+    blendAttachment.blendEnable = true;
+    blendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
+    blendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+    blendAttachment.colorBlendOp = VK_BLEND_OP_ADD;
+    blendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
+    blendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
+    blendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
 
     VkPipelineColorBlendStateCreateInfo colorBlendState = {};
     colorBlendState.sType =
@@ -168,6 +178,7 @@ GraphicsPipelineBuilder::create() {
     pipeline_info.pColorBlendState = &colorBlendState;
     pipeline_info.pDynamicState = &dynamicState;
     pipeline_info.layout = pipeline.layout;
+    pipeline_info.flags = VK_PIPELINE_CREATE_DESCRIPTOR_BUFFER_BIT_EXT;
 
     VkResult result = vkCreateGraphicsPipelines(
         Resources::get().getDevice(), VK_NULL_HANDLE, 1, &pipeline_info,

@@ -71,6 +71,7 @@ void Resources::createDevice() {
     VkPhysicalDeviceVulkan12Features features12 = {};
     features12.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES;
     features12.bufferDeviceAddress = VK_TRUE;
+    features12.runtimeDescriptorArray = VK_TRUE;
     device_builder.add_pNext(&features12);
 
     VkPhysicalDeviceSynchronization2FeaturesKHR synchronization_2{

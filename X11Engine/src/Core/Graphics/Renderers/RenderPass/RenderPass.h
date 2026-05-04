@@ -10,7 +10,7 @@ namespace Graphics {
 
 class RenderPass {
    public:
-    RenderPass(const DescriptorSet& descriptors);
+    RenderPass(DescriptorSet& descriptors);
 
     void render(CommandBuffer& cmd, const RenderEnviroment& env);
 
@@ -22,6 +22,8 @@ class RenderPass {
 
     StarRenderer star_renderer;
     CloudsRenderer clouds_renderer;
+
+    DescriptorSet descriptors;
 };
 
 }  // namespace Graphics

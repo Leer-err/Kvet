@@ -16,6 +16,8 @@ constexpr size_t getFormatSize(VkFormat format) {
     switch (format) {
         case VK_FORMAT_R32G32B32_SFLOAT:
             return sizeof(float) * 3;
+        case VK_FORMAT_R32G32_SFLOAT:
+            return sizeof(float) * 2;
         default:
             return 0;
     }
