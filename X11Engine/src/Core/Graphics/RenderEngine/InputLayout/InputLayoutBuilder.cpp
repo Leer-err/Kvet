@@ -1,15 +1,14 @@
 #include "InputLayoutBuilder.h"
 
+#include <spirv_reflect.h>
 #include <vulkan/vulkan.h>
 
 #include <cstddef>
 #include <cstdint>
-#include <spirv_cross.hpp>
 #include <vector>
 
 #include "InputLayout.h"
 #include "ShaderRegistry.h"
-#include "spirv_reflect.hpp"
 
 namespace Graphics {
 
@@ -97,73 +96,63 @@ InputLayoutBuilder::getElementsFromShader(
         ShaderRegistry::get().getShaderBytecode(vertex_shader_file);
     if (!shader_source) return Error::FileNotFound;
 
-    auto comp = spirv_cross::Compiler(
-        reinterpret_cast<uint32_t*>(shader_source->data()),
-        shader_source->size() / sizeof(uint32_t));
+    SpvReflectShaderModule module;
+    SpvReflectResult result = spvReflectCreateShaderModule(
+        shader_source->size(), shader_source->data(), &module);
+    if (result != SPV_REFLECT_RESULT_SUCCESS) return Error::ParseError;
 
-    auto res = comp.get_shader_resources();
+    uint32_t var_count = 0;
+    result = spvReflectEnumerateInputVariables(&module, &var_count, NULL);
+    if (result != SPV_REFLECT_RESULT_SUCCESS) return Error::ParseError;
 
-    auto result = std::vector<VkFormat>(res.stage_inputs.size());
-    for (const auto& stage_input : res.stage_inputs) {
-        auto type = comp.get_type(stage_input.base_type_id);
+    SpvReflectInterfaceVariable** input_vars =
+        (SpvReflectInterfaceVariable**)malloc(
+            var_count * sizeof(SpvReflectInterfaceVariable*));
+    result = spvReflectEnumerateInputVariables(&module, &var_count, input_vars);
+    if (result != SPV_REFLECT_RESULT_SUCCESS) return Error::ParseError;
 
-        auto element_type = parseType(type);
+    auto inputs = std::vector<VkFormat>(var_count);
+    for (int i = 0; i < var_count; i++) {
+        auto element_type = parseType(input_vars[i]->format);
         if (element_type.isError()) return element_type.getError();
 
-        auto index =
-            comp.get_decoration(stage_input.id, spv::DecorationLocation);
-
-        result[index] = element_type.getResult();
+        auto index = input_vars[i]->location;
+        inputs[index] = element_type.getResult();
     }
 
-    return result;
+    return inputs;
 }
 
 Result<VkFormat, InputLayoutBuilder::Error> InputLayoutBuilder::parseType(
-    const spirv_cross::SPIRType& type) {
-    switch (type.basetype) {
-        case spirv_cross::SPIRType::Float:
-            switch (type.vecsize) {
-                case 4:
-                    return VK_FORMAT_R32G32B32A32_SFLOAT;
-                case 3:
-                    return VK_FORMAT_R32G32B32_SFLOAT;
-                case 2:
-                    return VK_FORMAT_R32G32_SFLOAT;
-                case 1:
-                    return VK_FORMAT_R32_SFLOAT;
-                default:
-                    return Error::UnsupportedElementSize;
-            };
-        case spirv_cross::SPIRType::Int:
-            switch (type.vecsize) {
-                case 4:
-                    return VK_FORMAT_R32G32B32A32_SINT;
-                case 3:
-                    return VK_FORMAT_R32G32B32_SINT;
-                case 2:
-                    return VK_FORMAT_R32G32_SINT;
-                case 1:
-                    return VK_FORMAT_R32_SINT;
-                default:
-                    return Error::UnsupportedElementSize;
-            };
-        case spirv_cross::SPIRType::UInt:
-            switch (type.vecsize) {
-                case 4:
-                    return VK_FORMAT_R32G32B32A32_UINT;
-                case 3:
-                    return VK_FORMAT_R32G32B32_UINT;
-                case 2:
-                    return VK_FORMAT_R32G32_UINT;
-                case 1:
-                    return VK_FORMAT_R32_UINT;
-                default:
-                    return Error::UnsupportedElementSize;
-            };
+    const SpvReflectFormat& type) {
+    switch (type) {
+        case SPV_REFLECT_FORMAT_R32_SFLOAT:
+            return VK_FORMAT_R32_SFLOAT;
+        case SPV_REFLECT_FORMAT_R32G32_SFLOAT:
+            return VK_FORMAT_R32G32_SFLOAT;
+        case SPV_REFLECT_FORMAT_R32G32B32_SFLOAT:
+            return VK_FORMAT_R32G32B32_SFLOAT;
+        case SPV_REFLECT_FORMAT_R32G32B32A32_SFLOAT:
+            return VK_FORMAT_R32G32B32A32_SFLOAT;
+        case SPV_REFLECT_FORMAT_R32_SINT:
+            return VK_FORMAT_R32_SINT;
+        case SPV_REFLECT_FORMAT_R32G32_SINT:
+            return VK_FORMAT_R32G32_SINT;
+        case SPV_REFLECT_FORMAT_R32G32B32_SINT:
+            return VK_FORMAT_R32G32B32_SINT;
+        case SPV_REFLECT_FORMAT_R32G32B32A32_SINT:
+            return VK_FORMAT_R32G32B32A32_SINT;
+        case SPV_REFLECT_FORMAT_R32_UINT:
+            return VK_FORMAT_R32_UINT;
+        case SPV_REFLECT_FORMAT_R32G32_UINT:
+            return VK_FORMAT_R32G32_UINT;
+        case SPV_REFLECT_FORMAT_R32G32B32_UINT:
+            return VK_FORMAT_R32G32B32_UINT;
+        case SPV_REFLECT_FORMAT_R32G32B32A32_UINT:
+            return VK_FORMAT_R32G32B32A32_UINT;
         default:
-            return Error::UnsupportedElementType;
-    };
+            return Error::UnsupportedElementFormat;
+    }
 }
 
 Result<size_t, InputLayoutBuilder::Error>
@@ -173,18 +162,24 @@ InputLayoutBuilder::getPushConstantsFromShader(
         ShaderRegistry::get().getShaderBytecode(vertex_shader_file);
     if (!shader_source) return Error::FileNotFound;
 
-    auto comp = spirv_cross::Compiler(
-        reinterpret_cast<uint32_t*>(shader_source->data()),
-        shader_source->size() / sizeof(uint32_t));
+    SpvReflectShaderModule module;
+    SpvReflectResult result = spvReflectCreateShaderModule(
+        shader_source->size(), shader_source->data(), &module);
+    if (result != SPV_REFLECT_RESULT_SUCCESS) return Error::ParseError;
 
-    auto res = comp.get_shader_resources();
+    uint32_t var_count = 0;
+    result = spvReflectEnumeratePushConstantBlocks(&module, &var_count, NULL);
+    if (result != SPV_REFLECT_RESULT_SUCCESS) return Error::ParseError;
+
+    SpvReflectBlockVariable** push_vars = (SpvReflectBlockVariable**)malloc(
+        var_count * sizeof(SpvReflectBlockVariable*));
+    result =
+        spvReflectEnumeratePushConstantBlocks(&module, &var_count, push_vars);
+    if (result != SPV_REFLECT_RESULT_SUCCESS) return Error::ParseError;
 
     size_t size = 0;
-
-    for (const auto& push_constant : res.push_constant_buffers) {
-        auto type = comp.get_type(push_constant.base_type_id);
-
-        size += comp.get_declared_struct_size(type);
+    for (int i = 0; i < var_count; i++) {
+        size += push_vars[i]->size;
     }
 
     return size;

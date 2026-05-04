@@ -22,6 +22,6 @@
 [submodule "X11Engine/src/Dependencies/VulkanMemoryAllocator"]
 	path = X11Engine/src/Dependencies/VulkanMemoryAllocator
 	url = https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator.git
-[submodule "X11Engine/src/Dependencies/SPIRV-Cross"]
-	path = X11Engine/src/Dependencies/SPIRV-Cross
-	url = https://github.com/KhronosGroup/SPIRV-Cross.git
+[submodule "X11Engine/src/Dependencies/SPIRV-Reflect"]
+	path = X11Engine/src/Dependencies/SPIRV-Reflect
+	url = https://github.com/KhronosGroup/SPIRV-Reflect.git

@@ -74,8 +74,7 @@ GraphicsPipelineBuilder::create() {
         switch (input_layout_result.getError()) {
             case InputLayoutBuilder::Error::FileNotFound:
                 return Error::ShaderFileNotFound;
-            case InputLayoutBuilder::Error::UnsupportedElementSize:
-            case InputLayoutBuilder::Error::UnsupportedElementType:
+            case InputLayoutBuilder::Error::UnsupportedElementFormat:
                 return Error::VertexInputTypeNotSupported;
         }
     }

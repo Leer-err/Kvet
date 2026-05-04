@@ -19,8 +19,7 @@ target_link_libraries(Graphics
         vulkan-interface
         vulkan-allocator
         vk-bootstrap::vk-bootstrap
-        spirv-cross-core
-        spirv-cross-reflect
+        SPIRV-Reflect
 )
 
 add_subdirectory(RenderEngine)

@@ -1,9 +1,9 @@
 #pragma once
 
+#include <spirv_reflect.h>
 #include <vulkan/vulkan.h>
 
 #include <optional>
-#include <spirv_cross.hpp>
 #include <vector>
 
 #include "InputLayout.h"
@@ -15,8 +15,8 @@ class InputLayoutBuilder {
    public:
     enum class Error {
         FileNotFound,
-        UnsupportedElementType,
-        UnsupportedElementSize
+        ParseError,
+        UnsupportedElementFormat,
     };
 
     InputLayoutBuilder(const std::string& vertex_shader_file);
@@ -35,7 +35,7 @@ class InputLayoutBuilder {
     Result<size_t, Error> getPushConstantsFromShader(
         const std::string& vertex_shader_file);
 
-    Result<VkFormat, Error> parseType(const spirv_cross::SPIRType& type);
+    Result<VkFormat, Error> parseType(const SpvReflectFormat& type);
 
     std::string vertex_shader_file;
 

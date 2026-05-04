@@ -200,6 +200,13 @@ target_link_libraries(vulkan-allocator
 		vulkan-interface
 )
 
-# SPIRV-Cross
+# SPIRV-Reflect
 
-add_subdirectory(SPIRV-Cross EXCLUDE_FROM_ALL)
+add_library(SPIRV-Reflect STATIC)
+target_sources(SPIRV-Reflect 
+	PRIVATE
+		${CMAKE_CURRENT_SOURCE_DIR}/SPIRV-Reflect/spirv_reflect.c
+)
+target_include_directories(SPIRV-Reflect PUBLIC
+	${CMAKE_CURRENT_SOURCE_DIR}/SPIRV-Reflect/
+)
