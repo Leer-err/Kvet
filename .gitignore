@@ -365,4 +365,5 @@ FodyWeavers.xsd
 
 X11Engine/Assets/*
 !X11Engine/Assets/Shaders/
+!X11Engine/Assets/CMakeLists.txt
 /.vscode

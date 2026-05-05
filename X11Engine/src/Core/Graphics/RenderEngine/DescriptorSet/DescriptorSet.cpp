@@ -115,6 +115,4 @@ void DescriptorSet::addSampler(const Sampler& sampler) {
     descriptors.unmap();
 }
 
-// void DescriptorSet::addBuffer(const Buffer& buffer) {}
-
 }  // namespace Graphics
