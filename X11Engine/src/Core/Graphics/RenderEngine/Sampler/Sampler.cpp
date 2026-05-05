@@ -27,7 +27,8 @@ Sampler Sampler::anisotropic(float anisotropy) {
     return sampler;
 }
 
-VkSampler createSampler(VkFilter filter, bool anisotropic, float anisotropy) {
+VkSampler Sampler::createSampler(VkFilter filter, bool anisotropic,
+                                 float anisotropy) {
     VkSamplerMipmapMode mipmap_mode;
     switch (filter) {
         case VK_FILTER_NEAREST:

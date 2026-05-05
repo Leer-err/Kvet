@@ -13,7 +13,6 @@ struct DescriptorSet {
 
     void addImage(const TextureView& texture);
     void addSampler(const Sampler& texture);
-    // void addBuffer(const Buffer& texture);
 
     Buffer descriptors;
     size_t current_texture_index;
@@ -22,7 +21,8 @@ struct DescriptorSet {
     size_t texture_descriptor_size;
     size_t sampler_descriptor_size;
 
-    // Buffer buffer_descriptors;
+    size_t texture_descriptors_offset;
+    size_t sampler_descriptors_offset;
 
     VkDescriptorSetLayout layout;
 };

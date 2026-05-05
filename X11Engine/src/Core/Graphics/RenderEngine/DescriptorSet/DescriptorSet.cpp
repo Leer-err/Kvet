@@ -11,9 +11,11 @@
 
 namespace Graphics {
 
-constexpr auto CONSTANT_BUFFER_BINDING_INDEX = 0;
-constexpr auto TEXTURE_BINDING_INDEX = 1;
-constexpr auto SAMPLER_BINDING_INDEX = 2;
+constexpr auto TEXTURE_BINDING_INDEX = 0;
+constexpr auto SAMPLER_BINDING_INDEX = 1;
+
+constexpr auto MAX_TEXTURE_DESCRIPTORS_COUNT = 1000;
+constexpr auto MAX_SAMPLE_DESCRIPTORS_COUNT = 1000;
 
 DescriptorSet DescriptorSet::create() {
     DescriptorSet set = {};
@@ -24,30 +26,24 @@ DescriptorSet DescriptorSet::create() {
     auto device = Resources::get().getDevice();
     auto device_properties = Resources::get().getProperties();
 
-    VkDescriptorSetLayoutBinding bindings[3] = {};
-    bindings[CONSTANT_BUFFER_BINDING_INDEX].descriptorType =
-        VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-    bindings[CONSTANT_BUFFER_BINDING_INDEX].binding =
-        CONSTANT_BUFFER_BINDING_INDEX;
-    bindings[CONSTANT_BUFFER_BINDING_INDEX].stageFlags =
-        VK_SHADER_STAGE_ALL_GRAPHICS;
-    bindings[CONSTANT_BUFFER_BINDING_INDEX].descriptorCount = 1000;
-
+    VkDescriptorSetLayoutBinding bindings[2] = {};
     bindings[TEXTURE_BINDING_INDEX].descriptorType =
         VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
     bindings[TEXTURE_BINDING_INDEX].binding = TEXTURE_BINDING_INDEX;
     bindings[TEXTURE_BINDING_INDEX].stageFlags = VK_SHADER_STAGE_ALL_GRAPHICS;
-    bindings[TEXTURE_BINDING_INDEX].descriptorCount = 1000;
+    bindings[TEXTURE_BINDING_INDEX].descriptorCount =
+        MAX_TEXTURE_DESCRIPTORS_COUNT;
 
     bindings[SAMPLER_BINDING_INDEX].descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER;
     bindings[SAMPLER_BINDING_INDEX].binding = SAMPLER_BINDING_INDEX;
     bindings[SAMPLER_BINDING_INDEX].stageFlags = VK_SHADER_STAGE_ALL_GRAPHICS;
-    bindings[SAMPLER_BINDING_INDEX].descriptorCount = 1000;
+    bindings[SAMPLER_BINDING_INDEX].descriptorCount =
+        MAX_SAMPLE_DESCRIPTORS_COUNT;
 
     VkDescriptorSetLayoutCreateInfo info = {};
     info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
     info.flags = VK_DESCRIPTOR_SET_LAYOUT_CREATE_DESCRIPTOR_BUFFER_BIT_EXT;
-    info.bindingCount = 3;
+    info.bindingCount = 2;
     info.pBindings = bindings;
     vkCreateDescriptorSetLayout(device, &info, nullptr, &set.layout);
 
@@ -55,6 +51,13 @@ DescriptorSet DescriptorSet::create() {
     vkGetDescriptorSetLayoutSizeEXT(device, set.layout, &set_size);
     auto alignment = device_properties.descriptor_buffer_properties.alignment;
     set_size = (set_size + alignment - 1) & ~(alignment - 1);
+
+    vkGetDescriptorSetLayoutBindingOffsetEXT(device, set.layout,
+                                             TEXTURE_BINDING_INDEX,
+                                             &set.texture_descriptors_offset);
+    vkGetDescriptorSetLayoutBindingOffsetEXT(device, set.layout,
+                                             SAMPLER_BINDING_INDEX,
+                                             &set.sampler_descriptors_offset);
 
     set.current_sampler_index = 0;
     set.current_texture_index = 0;
@@ -70,15 +73,12 @@ DescriptorSet DescriptorSet::create() {
 void DescriptorSet::addImage(const TextureView& texture) {
     auto device = Resources::get().getDevice();
 
-    size_t binding_offset;
-    vkGetDescriptorSetLayoutBindingOffsetEXT(
-        device, layout, SAMPLER_BINDING_INDEX, &binding_offset);
-
     auto descriptors_ptr = descriptors.map();
 
-    char* binding_ptr = static_cast<char*>(descriptors_ptr) + binding_offset;
+    char* binding_ptr =
+        static_cast<char*>(descriptors_ptr) + texture_descriptors_offset;
     char* element_ptr =
-        binding_ptr + (current_texture_index * sampler_descriptor_size);
+        binding_ptr + (current_texture_index * texture_descriptor_size);
     current_texture_index++;
 
     VkDescriptorImageInfo image_descriptor_info = {};
@@ -90,7 +90,7 @@ void DescriptorSet::addImage(const TextureView& texture) {
     info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_GET_INFO_EXT;
     info.type = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
     info.data.pSampledImage = &image_descriptor_info;
-    vkGetDescriptorEXT(device, &info, sampler_descriptor_size, element_ptr);
+    vkGetDescriptorEXT(device, &info, texture_descriptor_size, element_ptr);
 
     descriptors.unmap();
 }
@@ -98,13 +98,10 @@ void DescriptorSet::addImage(const TextureView& texture) {
 void DescriptorSet::addSampler(const Sampler& sampler) {
     auto device = Resources::get().getDevice();
 
-    size_t binding_offset;
-    vkGetDescriptorSetLayoutBindingOffsetEXT(
-        device, layout, SAMPLER_BINDING_INDEX, &binding_offset);
-
     auto descriptors_ptr = descriptors.map();
 
-    char* binding_ptr = static_cast<char*>(descriptors_ptr) + binding_offset;
+    char* binding_ptr =
+        static_cast<char*>(descriptors_ptr) + sampler_descriptors_offset;
     char* element_ptr =
         binding_ptr + (current_sampler_index * sampler_descriptor_size);
     current_sampler_index++;

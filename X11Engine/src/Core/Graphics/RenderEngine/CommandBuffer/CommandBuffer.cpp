@@ -68,9 +68,8 @@ void CommandBuffer::draw(const Buffer& vertex_buffer,
 
 void CommandBuffer::bindDescriptorSet(const GraphicsPipeline& pipeline,
                                       const DescriptorSet& set) const {
-    VkDescriptorBufferBindingInfoEXT info;
+    VkDescriptorBufferBindingInfoEXT info = {};
     info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_BUFFER_BINDING_INFO_EXT;
-    info.pNext = nullptr;
     info.address = set.descriptors.getDeviceAddress();
     info.usage = VK_BUFFER_USAGE_RESOURCE_DESCRIPTOR_BUFFER_BIT_EXT;
     vkCmdBindDescriptorBuffersEXT(buffer, 1, &info);

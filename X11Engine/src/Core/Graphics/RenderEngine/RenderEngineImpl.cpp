@@ -116,7 +116,7 @@ void RenderEngineImpl::reinitWindowDependentResources() {
         RenderTarget::create(render_target_texture);
     render_enviroment.clear_render_target = true;
     render_enviroment.render_target_clear_value =
-        VkClearValue{.color = {0, 0, 0, 0}};
+        VkClearValue{.color = {0, 0, 0, 1}};
 }
 
 void RenderEngineImpl::waitRenderFinished() {

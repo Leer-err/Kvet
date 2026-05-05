@@ -54,7 +54,6 @@ class RenderEngineImpl {
 
     Image render_target_texture;
     RenderEnviroment render_enviroment;
-    // DepthStencil default_depth_stencil_buffer;
 
     DescriptorSet descriptor_set;
 

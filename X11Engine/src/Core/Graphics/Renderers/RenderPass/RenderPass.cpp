@@ -22,8 +22,9 @@ RenderPass::RenderPass(DescriptorSet& descriptors)
 
 void RenderPass::render(CommandBuffer& cmd, const RenderEnviroment& env) {
     CameraData data = {};
-    data.view_projection = Matrix::identity();
-    data.inverse_view_projection = Matrix::identity();
+    data.view_projection = Matrix::projection(1.04, 16.f / 9, 1000, 1);
+    data.view_projection.m[1][1] *= -1;
+    data.inverse_view_projection = data.view_projection.inverse();
     void* mapped_buffer = camera_data.map();
     memcpy(mapped_buffer, &data, sizeof(CameraData));
     camera_data.unmap();

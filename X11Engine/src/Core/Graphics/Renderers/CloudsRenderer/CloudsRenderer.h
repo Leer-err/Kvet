@@ -22,6 +22,7 @@ class CloudsRenderer {
    private:
     DescriptorSet descriptors;
 
+    Buffer cloud_plane_vertices;
     Buffer quad_vertices;
     Buffer quad_indices;
 

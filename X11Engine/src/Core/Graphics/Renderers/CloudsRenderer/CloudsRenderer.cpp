@@ -11,19 +11,43 @@
 #include "GraphicsPipelineBuilder.h"
 #include "ImageBuilder.h"
 #include "InputLayoutBuilder.h"
+#include "Sampler.h"
 #include "ShaderBuilder.h"
 #include "TextureView.h"
+#include "Vector2.h"
 #include "Vector3.h"
 
 namespace Graphics {
 
+struct Vertex {
+    Vector3 vertex_position;
+    Vector2 uv;
+};
+
 CloudsRenderer::CloudsRenderer(DescriptorSet& descriptors)
     : descriptors(descriptors) {
+    constexpr Vertex cloud_plane_vertex_data[] = {
+        {Vector3(-1, 0, -1), Vector2(0, 0)},
+        {Vector3(-1, 0, 1), Vector2(0, 1)},
+        {Vector3(1, 0, -1), Vector2(1, 0)},
+        {Vector3(1, 0, 1), Vector2(1, 1)}};
+
     constexpr Vector3 screen_quad_vertices[] = {
         Vector3(-1, -1, 1), Vector3(1, -1, 1), Vector3(-1, 1, 1),
         Vector3(1, 1, 1)};
 
     constexpr uint32_t screen_quad_indices[] = {0, 1, 2, 1, 3, 2};
+
+    cloud_plane_vertices =
+        Graphics::BufferBuilder(sizeof(cloud_plane_vertex_data))
+            .isVertexBuffer(sizeof(Vector3))
+            .isCPUWritable()
+            .create()
+            .getResult();
+    auto cloud_plane_data = cloud_plane_vertices.map();
+    memcpy(cloud_plane_data, cloud_plane_vertex_data,
+           sizeof(cloud_plane_vertex_data));
+    cloud_plane_vertices.unmap();
 
     quad_vertices = Graphics::BufferBuilder(sizeof(screen_quad_vertices))
                         .isVertexBuffer(sizeof(Vector3))
@@ -49,6 +73,7 @@ CloudsRenderer::CloudsRenderer(DescriptorSet& descriptors)
                          .create()
                          .getResult();
     descriptors.addImage(TextureView::create(clouds_texture));
+    descriptors.addSampler(Sampler::point());
 
     env.render_target = RenderTarget::create(clouds_texture);
     env.clear_render_target = true;
@@ -78,8 +103,8 @@ CloudsRenderer::CloudsRenderer(DescriptorSet& descriptors)
     CloudsData data = {};
     data.color = Vector3(1, 0, 1);
     data.time = 0;
-    data.cloud_plane_scale = 1;
-    data.height = 0.6;
+    data.cloud_plane_scale = 1000;
+    data.height = 100;
 
     auto data_ptr = clouds_data_buffer.map();
     memcpy(data_ptr, &data, sizeof(CloudsData));
@@ -102,7 +127,7 @@ void CloudsRenderer::render(const CommandBuffer& command_buffer,
     constants.camera_address = camera_data.getDeviceAddress();
     command_buffer.pushConstants(cloud_pipeline, &constants);
 
-    command_buffer.draw(quad_vertices, quad_indices);
+    command_buffer.draw(cloud_plane_vertices, quad_indices);
 }
 
 void CloudsRenderer::preRender(const CommandBuffer& command_buffer,

@@ -19,7 +19,7 @@ struct Vertex_Output{
 
 struct Vertex_input{
     float3 position;
-    // float2 uv;
+    float2 uv;
 };
 
 struct PushConstants{
@@ -39,19 +39,18 @@ Vertex_Output vertex_main(Vertex_input vertex)
     vertex_position.xz = vertex_position.xz * constants.cloud_data->cloud_plane_scale;
     vertex_position.y = constants.cloud_data->height;
     output.viewport_position = mul(constants.camera_data->view_projection, vertex_position);
-    // output.uv = vertex.uv;
+    output.uv = vertex.uv;
 
     return output;
 }
 
+[[vk::binding(0, 0)]]
+Texture2D clouds;
 [[vk::binding(1, 0)]]
-Texture2D clouds[];
-[[vk::binding(2, 0)]]
-SamplerState clouds_sampler[];
+SamplerState clouds_sampler;
 
 [shader("pixel")]
 float4 pixel_main(in Vertex_Output data)
-{    
-    return float4(1,1,1,1);
-    return clouds[0].Sample(clouds_sampler[0], data.uv);
+{
+    return clouds.Sample(clouds_sampler, data.uv);
 }
