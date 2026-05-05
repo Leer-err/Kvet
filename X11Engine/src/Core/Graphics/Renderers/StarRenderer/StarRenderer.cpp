@@ -60,9 +60,11 @@ StarRenderer::StarRenderer(const DescriptorSet& descriptors) {
                             .getResult();
 }
 
-void StarRenderer::render(const CommandBuffer& command_buffer,
+void StarRenderer::render(const FrameData& frame_data,
                           const Buffer& camera_data,
                           const StarsData& stars_data) {
+    auto command_buffer = frame_data.cmd;
+
     auto stars_data_ptr = stars_data_buffer.map();
     memcpy(stars_data_ptr, &stars_data, sizeof(stars_data));
     stars_data_buffer.unmap();

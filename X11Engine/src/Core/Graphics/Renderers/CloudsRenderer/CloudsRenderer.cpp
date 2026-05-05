@@ -116,9 +116,11 @@ struct PushConstants {
     VkDeviceAddress clouds_address;
 };
 
-void CloudsRenderer::render(const CommandBuffer& command_buffer,
+void CloudsRenderer::render(const FrameData& frame_data,
                             const Buffer& camera_data,
                             const CloudsData& clouds_data) {
+    auto command_buffer = frame_data.cmd;
+
     command_buffer.setPipeline(cloud_pipeline);
     command_buffer.bindDescriptorSet(cloud_pipeline, descriptors);
 
@@ -130,9 +132,11 @@ void CloudsRenderer::render(const CommandBuffer& command_buffer,
     command_buffer.draw(cloud_plane_vertices, quad_indices);
 }
 
-void CloudsRenderer::preRender(const CommandBuffer& command_buffer,
+void CloudsRenderer::preRender(const FrameData& frame_data,
                                const Buffer& camera_data,
                                const CloudsData& clouds_data) {
+    auto command_buffer = frame_data.cmd;
+
     auto render_target_barrier = clouds_texture.createBarrier(
         VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_PIPELINE_STAGE_2_NONE,
         VK_ACCESS_2_NONE, VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT,

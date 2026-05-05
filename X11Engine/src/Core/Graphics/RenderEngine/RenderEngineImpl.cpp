@@ -13,6 +13,7 @@
 #include "CommandBuffer.h"
 #include "DescriptorSet/DescriptorSet.h"
 #include "Fence.h"
+#include "FrameData.h"
 #include "GraphicsResources.h"
 // #include "RenderEnviroment.h"
 #include "ImageBuilder.h"
@@ -48,7 +49,12 @@ void RenderEngineImpl::render() {
 
     beginFrame(cmd);
 
-    render_pass.render(cmd, render_enviroment);
+    FrameData data = {};
+    data.cmd = cmd;
+    data.env = render_enviroment;
+    data.set = descriptor_set;
+
+    render_pass.render(data);
 
     endFrame(cmd);
 

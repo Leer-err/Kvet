@@ -20,7 +20,7 @@ RenderPass::RenderPass(DescriptorSet& descriptors)
                       .getResult();
 }
 
-void RenderPass::render(CommandBuffer& cmd, const RenderEnviroment& env) {
+void RenderPass::render(const FrameData& frame_data) {
     CameraData data = {};
     data.view_projection = Matrix::projection(1.04, 16.f / 9, 1000, 1);
     data.view_projection.m[1][1] *= -1;
@@ -33,27 +33,26 @@ void RenderPass::render(CommandBuffer& cmd, const RenderEnviroment& env) {
 
     CloudsData clouds_data = {};
     clouds_data.color = {1, 0, 1};
-    clouds_renderer.preRender(cmd, camera_data, clouds_data);
+    clouds_renderer.preRender(frame_data, camera_data, clouds_data);
 
-    beginPass(cmd, env);
+    beginPass(frame_data);
 
     auto stars = manager.recieve<StarsData>();
     if (stars) {
-        star_renderer.render(cmd, camera_data, *stars);
+        star_renderer.render(frame_data, camera_data, *stars);
     }
 
-    clouds_renderer.render(cmd, camera_data, clouds_data);
+    clouds_renderer.render(frame_data, camera_data, clouds_data);
 
-    endPass(cmd);
+    endPass(frame_data);
 }
 
-void RenderPass::beginPass(const CommandBuffer& cmd,
-                           const RenderEnviroment& env) {
-    cmd.bindRenderEnviroment(env);
+void RenderPass::beginPass(const FrameData& frame_data) {
+    frame_data.cmd.bindRenderEnviroment(frame_data.env);
 }
 
-void RenderPass::endPass(const CommandBuffer& cmd) {
-    cmd.unbindRenderEnviroment();
+void RenderPass::endPass(const FrameData& frame_data) {
+    frame_data.cmd.unbindRenderEnviroment();
 }
 
 }  // namespace Graphics
