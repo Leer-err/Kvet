@@ -24,7 +24,8 @@ GraphicsPipelineBuilder::GraphicsPipelineBuilder(
     const std::string& pixel_shader_entrypoint,
     const DescriptorSet& descriptor_layout)
     : rasterizer(Graphics::Rasterizer::fill()),
-      descriptor_layout(descriptor_layout) {
+      descriptor_layout(descriptor_layout),
+      render_target_format(VK_FORMAT_R8G8B8A8_SRGB) {
     auto vertex_shader_result =
         createShader(vertex_shader_filename, vertex_shader_entrypoint,
                      VK_SHADER_STAGE_VERTEX_BIT);
@@ -51,7 +52,8 @@ GraphicsPipelineBuilder::GraphicsPipelineBuilder(
     : vertex_shader(vertex_shader),
       pixel_shader(pixel_shader),
       rasterizer(Graphics::Rasterizer::fill()),
-      descriptor_layout(descriptor_layout) {}
+      descriptor_layout(descriptor_layout),
+      render_target_format(VK_FORMAT_R8G8B8A8_SRGB) {}
 
 static VkPipelineShaderStageCreateInfo getStageInfo(const Shader& shader) {
     VkPipelineShaderStageCreateInfo stage_info = {};
@@ -61,6 +63,12 @@ static VkPipelineShaderStageCreateInfo getStageInfo(const Shader& shader) {
     stage_info.pName = shader.entrypoint.c_str();
 
     return stage_info;
+}
+
+GraphicsPipelineBuilder& GraphicsPipelineBuilder::setRenderTargetFormat(
+    VkFormat format) {
+    render_target_format = format;
+    return *this;
 }
 
 Result<GraphicsPipeline, GraphicsPipelineBuilder::Error>
@@ -126,7 +134,6 @@ GraphicsPipelineBuilder::create() {
     depthStencilState.depthWriteEnable = VK_TRUE;
     depthStencilState.depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL;
 
-    VkFormat render_target_format = VK_FORMAT_R8G8B8A8_SRGB;
     VkPipelineRenderingCreateInfo renderingCI = {};
     renderingCI.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO;
     renderingCI.colorAttachmentCount = 1;

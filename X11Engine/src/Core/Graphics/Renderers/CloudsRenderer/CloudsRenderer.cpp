@@ -59,6 +59,7 @@ CloudsRenderer::CloudsRenderer(DescriptorSet& descriptors)
                                 "vertex_main",
                                 "./Assets/Shaders/Clouds/CloudsTexture.spv",
                                 "pixel_main", descriptors)
+            .setRenderTargetFormat(VK_FORMAT_R8G8B8A8_UNORM)
             .create()
             .getResult();
     cloud_pipeline =

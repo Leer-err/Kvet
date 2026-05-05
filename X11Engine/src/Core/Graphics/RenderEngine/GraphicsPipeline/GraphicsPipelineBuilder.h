@@ -34,6 +34,8 @@ class GraphicsPipelineBuilder {
     GraphicsPipelineBuilder& setRasterizer(
         VkPipelineRasterizationStateCreateInfo rasterizer);
 
+    GraphicsPipelineBuilder& setRenderTargetFormat(VkFormat format);
+
     Result<GraphicsPipeline, Error> create();
 
    private:
@@ -47,6 +49,7 @@ class GraphicsPipelineBuilder {
     Shader vertex_shader;
     Shader pixel_shader;
 
+    VkFormat render_target_format;
     DescriptorSet descriptor_layout;
     VkPipelineRasterizationStateCreateInfo rasterizer;
 
