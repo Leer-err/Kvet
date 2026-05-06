@@ -1,6 +1,5 @@
 target_sources(Graphics PRIVATE
     RenderEngine.cpp
-    RenderEngineImpl.cpp
 )
 
 target_include_directories(Graphics PUBLIC

@@ -2,7 +2,7 @@
 #include "Engine.h"
 
 int main(int argc, char* argv[]) {
-    Core::init();
+    if (Core::init() == false) return -1;
 
     Engine::Engine::get().run();
 }

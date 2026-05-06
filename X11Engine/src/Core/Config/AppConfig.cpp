@@ -8,6 +8,8 @@ namespace Config {
 App::App() { loadDefaults(); }
 
 void App::loadDefaults() {
+    name = "Name";
+
     graphics.render_width = 1280;
     graphics.render_height = 720;
 
@@ -19,8 +21,10 @@ void App::loadDefaults() {
     window.state = Config::Window::State::Windowed;
 }
 
-Graphics App::getGraphicsConfig() { return graphics; }
+Graphics App::getGraphicsConfig() const { return graphics; }
 
-Window App::getWindowConfig() { return window; }
+Window App::getWindowConfig() const { return window; }
+
+std::string App::getName() const { return name; }
 
 };  // namespace Config

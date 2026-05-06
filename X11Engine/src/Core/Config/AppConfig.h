@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 #include "GraphicsConfig.h"
 #include "WindowConfig.h"
 
@@ -12,8 +14,9 @@ class App {
         return instance;
     }
 
-    Graphics getGraphicsConfig();
-    Window getWindowConfig();
+    Graphics getGraphicsConfig() const;
+    Window getWindowConfig() const;
+    std::string getName() const;
 
    private:
     App();
@@ -24,6 +27,8 @@ class App {
     App& operator=(App&&) = delete;
 
     void loadDefaults();
+
+    std::string name;
 
     Graphics graphics;
     Window window;

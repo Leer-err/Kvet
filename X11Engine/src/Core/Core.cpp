@@ -5,9 +5,11 @@
 
 namespace Core {
 
-void init() {
+bool init() {
     Window::get().init();
-    Graphics::init();
+    if (Graphics::init() == false) return false;
+
+    return true;
 }
 
 }  // namespace Core

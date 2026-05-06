@@ -2,6 +2,6 @@
 
 namespace Graphics {
 
-void init();
+bool init();
 
 }
