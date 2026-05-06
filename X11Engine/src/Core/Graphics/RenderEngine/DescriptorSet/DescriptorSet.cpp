@@ -2,8 +2,10 @@
 
 #include <vulkan/vulkan_core.h>
 
+#include "APIData.h"
 #include "Buffer.h"
 #include "BufferBuilder.h"
+#include "DeviceProperties.h"
 #include "ExtensionFunctions.h"
 #include "GraphicsResources.h"
 #include "Sampler.h"
@@ -11,53 +13,25 @@
 
 namespace Graphics {
 
-constexpr auto TEXTURE_BINDING_INDEX = 0;
-constexpr auto SAMPLER_BINDING_INDEX = 1;
+DescriptorSet DescriptorSet::create(const APIData& api_data) {
+    auto& device = api_data.device;
+    auto& layout = api_data.descriptor_layout;
+    auto& descriptor_properties =
+        api_data.properties.descriptor_buffer_properties;
 
-constexpr auto MAX_TEXTURE_DESCRIPTORS_COUNT = 1000;
-constexpr auto MAX_SAMPLE_DESCRIPTORS_COUNT = 1000;
-
-DescriptorSet DescriptorSet::create() {
     DescriptorSet set = {};
-    auto descriptor_properties =
-        Resources::get().getProperties().descriptor_buffer_properties;
     set.texture_descriptor_size = descriptor_properties.texture_size;
     set.sampler_descriptor_size = descriptor_properties.sampler_size;
-    auto device = Resources::get().getDevice();
-    auto device_properties = Resources::get().getProperties();
-
-    VkDescriptorSetLayoutBinding bindings[2] = {};
-    bindings[TEXTURE_BINDING_INDEX].descriptorType =
-        VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
-    bindings[TEXTURE_BINDING_INDEX].binding = TEXTURE_BINDING_INDEX;
-    bindings[TEXTURE_BINDING_INDEX].stageFlags = VK_SHADER_STAGE_ALL_GRAPHICS;
-    bindings[TEXTURE_BINDING_INDEX].descriptorCount =
-        MAX_TEXTURE_DESCRIPTORS_COUNT;
-
-    bindings[SAMPLER_BINDING_INDEX].descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER;
-    bindings[SAMPLER_BINDING_INDEX].binding = SAMPLER_BINDING_INDEX;
-    bindings[SAMPLER_BINDING_INDEX].stageFlags = VK_SHADER_STAGE_ALL_GRAPHICS;
-    bindings[SAMPLER_BINDING_INDEX].descriptorCount =
-        MAX_SAMPLE_DESCRIPTORS_COUNT;
-
-    VkDescriptorSetLayoutCreateInfo info = {};
-    info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-    info.flags = VK_DESCRIPTOR_SET_LAYOUT_CREATE_DESCRIPTOR_BUFFER_BIT_EXT;
-    info.bindingCount = 2;
-    info.pBindings = bindings;
-    vkCreateDescriptorSetLayout(device, &info, nullptr, &set.layout);
 
     size_t set_size;
-    vkGetDescriptorSetLayoutSizeEXT(device, set.layout, &set_size);
-    auto alignment = device_properties.descriptor_buffer_properties.alignment;
+    vkGetDescriptorSetLayoutSizeEXT(device, layout, &set_size);
+    auto alignment = descriptor_properties.alignment;
     set_size = (set_size + alignment - 1) & ~(alignment - 1);
 
-    vkGetDescriptorSetLayoutBindingOffsetEXT(device, set.layout,
-                                             TEXTURE_BINDING_INDEX,
-                                             &set.texture_descriptors_offset);
-    vkGetDescriptorSetLayoutBindingOffsetEXT(device, set.layout,
-                                             SAMPLER_BINDING_INDEX,
-                                             &set.sampler_descriptors_offset);
+    vkGetDescriptorSetLayoutBindingOffsetEXT(
+        device, layout, TEXTURE_BINDING_INDEX, &set.texture_descriptors_offset);
+    vkGetDescriptorSetLayoutBindingOffsetEXT(
+        device, layout, SAMPLER_BINDING_INDEX, &set.sampler_descriptors_offset);
 
     set.current_sampler_index = 0;
     set.current_texture_index = 0;

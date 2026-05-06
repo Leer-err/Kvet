@@ -4,7 +4,6 @@
 #include <thread>
 #include <tracy/Tracy.hpp>
 
-#include "RenderEngine.h"
 #include "Scene.h"
 #include "Window.h"
 
@@ -82,7 +81,7 @@ void Engine::update(float delta_time) {
 
     GraphicsCommunicationManager::get().flush();
 
-    renderer.render();
+    // renderer.render();
 
     // Overlay::Overlay::get().draw();
 

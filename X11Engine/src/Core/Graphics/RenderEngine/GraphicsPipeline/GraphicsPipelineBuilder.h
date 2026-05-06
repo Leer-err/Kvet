@@ -24,12 +24,12 @@ class GraphicsPipelineBuilder {
 
     GraphicsPipelineBuilder(const Shader& vertex_shader,
                             const Shader& pixel_shader,
-                            const DescriptorSet& descriptor_layout);
+                            VkDescriptorSetLayout descriptor_layout);
     GraphicsPipelineBuilder(const std::string& vertex_shader_filename,
                             const std::string& vertex_shader_entrypoint,
                             const std::string& pixel_shader_filename,
                             const std::string& pixel_shader_entrypoint,
-                            const DescriptorSet& descriptor_layout);
+                            VkDescriptorSetLayout descriptor_layout);
 
     GraphicsPipelineBuilder& setRasterizer(
         VkPipelineRasterizationStateCreateInfo rasterizer);
@@ -50,7 +50,7 @@ class GraphicsPipelineBuilder {
     Shader pixel_shader;
 
     VkFormat render_target_format;
-    DescriptorSet descriptor_layout;
+    VkDescriptorSetLayout descriptor_layout;
     VkPipelineRasterizationStateCreateInfo rasterizer;
 
     std::optional<Error> error;

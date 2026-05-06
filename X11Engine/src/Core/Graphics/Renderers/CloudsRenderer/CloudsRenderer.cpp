@@ -24,8 +24,7 @@ struct Vertex {
     Vector2 uv;
 };
 
-CloudsRenderer::CloudsRenderer(DescriptorSet& descriptors)
-    : descriptors(descriptors) {
+CloudsRenderer::CloudsRenderer(const EngineData& engine_data) {
     constexpr Vertex cloud_plane_vertex_data[] = {
         {Vector3(-1, 0, -1), Vector2(0, 0)},
         {Vector3(-1, 0, 1), Vector2(0, 1)},
@@ -72,7 +71,7 @@ CloudsRenderer::CloudsRenderer(DescriptorSet& descriptors)
                          .isShaderResource()
                          .create()
                          .getResult();
-    descriptors.addImage(TextureView::create(clouds_texture));
+    engine_data.descriptor_set.addImage(TextureView::create(clouds_texture));
     descriptors.addSampler(Sampler::point());
 
     env.render_target = RenderTarget::create(clouds_texture);
@@ -83,7 +82,7 @@ CloudsRenderer::CloudsRenderer(DescriptorSet& descriptors)
         GraphicsPipelineBuilder("./Assets/Shaders/Clouds/CloudsTexture.spv",
                                 "vertex_main",
                                 "./Assets/Shaders/Clouds/CloudsTexture.spv",
-                                "pixel_main", descriptors)
+                                "pixel_main", engine_data.descriptor_layout)
             .setRenderTargetFormat(VK_FORMAT_R8G8B8A8_UNORM)
             .create()
             .getResult();

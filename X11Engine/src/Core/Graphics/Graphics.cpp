@@ -1,10 +1,10 @@
 #include "Graphics.h"
 
 #include "AppConfig.h"
-#include "EngineData.h"
 #include "ExtensionFunctions.h"
 #include "GraphicsResources.h"
 #include "LoggerFactory.h"
+#include "Queue.h"
 #include "Result.h"
 #include "SDL3/SDL_vulkan.h"
 #include "VkBootstrap.h"
@@ -33,11 +33,8 @@ static Result<vkb::Instance, Error> createInstance(const Config::App& config) {
     return inst_ret.value();
 };
 
-static Result<vkb::Device, Error> createDevice(const vkb::Instance& instance) {
-    VkSurfaceKHR surface;
-    auto handle = Window::get().getHandle();
-    SDL_Vulkan_CreateSurface(handle, instance.instance, nullptr, &surface);
-
+static Result<vkb::Device, Error> createDevice(const vkb::Instance& instance,
+                                               VkSurfaceKHR surface) {
     vkb::PhysicalDeviceSelector selector{instance};
     auto phys_ret =
         selector.set_surface(surface)
@@ -137,7 +134,10 @@ bool init() {
     }
     auto instance = instance_result.getResult();
 
-    auto device_result = createDevice(instance);
+    VkSurfaceKHR surface;
+    auto handle = Window::get().getHandle();
+    SDL_Vulkan_CreateSurface(handle, instance.instance, nullptr, &surface);
+    auto device_result = createDevice(instance, surface);
     if (device_result.isError()) {
         printError(device_result.getError());
         return false;

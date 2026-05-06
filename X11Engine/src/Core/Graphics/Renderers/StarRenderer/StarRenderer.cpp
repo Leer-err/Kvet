@@ -21,7 +21,7 @@ struct Constants {
     VkDeviceAddress stars_data;
 };
 
-StarRenderer::StarRenderer(const DescriptorSet& descriptors) {
+StarRenderer::StarRenderer(const EngineData& engine_data) {
     constexpr Vector3 screen_quad_vertices[] = {
         Vector3(-1, -1, 1), Vector3(1, -1, 1), Vector3(-1, 1, 1),
         Vector3(1, 1, 1)};
@@ -46,10 +46,10 @@ StarRenderer::StarRenderer(const DescriptorSet& descriptors) {
     memcpy(index_data, screen_quad_indices, sizeof(screen_quad_indices));
     quad_indices.unmap();
 
-    pipeline = GraphicsPipelineBuilder("./Assets/Shaders/Stars/Stars.spv",
-                                       "vertex_main",
-                                       "./Assets/Shaders/Stars/Stars.spv",
-                                       "pixel_main", descriptors)
+    pipeline = GraphicsPipelineBuilder(
+                   "./Assets/Shaders/Stars/Stars.spv", "vertex_main",
+                   "./Assets/Shaders/Stars/Stars.spv", "pixel_main",
+                   engine_data.descriptor_layout)
                    .create()
                    .getResult();
 

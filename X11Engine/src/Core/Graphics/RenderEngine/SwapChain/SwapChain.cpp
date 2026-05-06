@@ -4,16 +4,16 @@
 
 #include <cstdint>
 
-#include "GraphicsResources.h"
+#include "Queue.h"
 #include "Semaphore.h"
 #include "VkBootstrap.h"
 
 namespace Graphics {
 
-SwapChain::SwapChain(uint32_t width, uint32_t height,
-                     Config::BufferingMode buffering_mode) {
-    auto device = Graphics::Resources::get().getVKBDevice();
-
+SwapChain::SwapChain(vkb::Device device, Queue presentation_queue,
+                     uint32_t width, uint32_t height,
+                     Config::BufferingMode buffering_mode)
+    : device(device), queue(presentation_queue) {
     vkb::SwapchainBuilder swapchain_builder{device};
 
     swap_chain_size = 2;
@@ -62,9 +62,6 @@ SwapChain::SwapChain(uint32_t width, uint32_t height,
 }
 
 void SwapChain::destroy() {
-    auto device = Resources::get().getDevice();
-    vkDeviceWaitIdle(device);
-
     vkDestroySwapchainKHR(device, swap_chain, nullptr);
 
     for (int i = 0; i < swap_chain_size; i++) {
@@ -73,27 +70,21 @@ void SwapChain::destroy() {
 }
 
 void SwapChain::present() {
-    auto device = Resources::get().getDevice();
-
-    VkSwapchainKHR swap_chains[] = {swap_chain};
     VkPresentInfoKHR info = {};
     info.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
     info.pNext = nullptr;
     info.waitSemaphoreCount = 1;
     info.pWaitSemaphores = &semaphores[image_index].semaphore;
     info.swapchainCount = 1;
-    info.pSwapchains = swap_chains;
+    info.pSwapchains = &swap_chain.swapchain;
     info.pImageIndices = &image_index;
     info.pResults = nullptr;
 
-    auto queue = Resources::get().getPresentationQueue();
-    vkQueuePresentKHR(queue, &info);
+    vkQueuePresentKHR(queue.queue, &info);
 }
 
 SwapChain::BackBuffer SwapChain::getBackbuffer(
     const Semaphore& ready_for_render) {
-    auto device = Resources::get().getDevice();
-
     vkAcquireNextImageKHR(device, swap_chain, UINT64_MAX,
                           ready_for_render.semaphore, VK_NULL_HANDLE,
                           &image_index);

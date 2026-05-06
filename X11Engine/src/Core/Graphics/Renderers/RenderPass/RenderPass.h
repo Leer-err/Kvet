@@ -9,7 +9,7 @@ namespace Graphics {
 
 class RenderPass {
    public:
-    RenderPass(DescriptorSet& descriptors);
+    RenderPass(const EngineData& engine_data);
 
     void render(const FrameData& frame_data);
 
@@ -21,8 +21,6 @@ class RenderPass {
 
     StarRenderer star_renderer;
     CloudsRenderer clouds_renderer;
-
-    DescriptorSet descriptors;
 };
 
 }  // namespace Graphics

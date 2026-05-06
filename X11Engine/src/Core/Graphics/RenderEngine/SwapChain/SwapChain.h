@@ -2,9 +2,11 @@
 
 #include <VkBootstrap.h>
 #include <vulkan/vulkan.h>
+#include <vulkan/vulkan_core.h>
 
 #include "GraphicsConfig.h"
 #include "Image.h"
+#include "Queue.h"
 #include "Semaphore.h"
 
 namespace Graphics {
@@ -17,8 +19,8 @@ class SwapChain {
     };
 
     SwapChain() = default;
-    SwapChain(uint32_t width, uint32_t height,
-              Config::BufferingMode buffering_mode);
+    SwapChain(vkb::Device device, Queue presentation_queue, uint32_t width,
+              uint32_t height, Config::BufferingMode buffering_mode);
 
     void destroy();
 
@@ -28,6 +30,9 @@ class SwapChain {
 
    private:
     static constexpr size_t SWAP_CHAIN_MAX_SIZE = 3;
+
+    vkb::Device device;
+    Queue queue;
 
     vkb::Swapchain swap_chain;
 

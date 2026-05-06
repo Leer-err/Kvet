@@ -2,6 +2,9 @@
 
 #include <vulkan/vulkan.h>
 
+#include <cstddef>
+
+#include "APIData.h"
 #include "Buffer.h"
 #include "Sampler.h"
 #include "TextureView.h"
@@ -9,7 +12,7 @@
 namespace Graphics {
 
 struct DescriptorSet {
-    static DescriptorSet create();
+    static DescriptorSet create(const APIData& api_data);
 
     void addImage(const TextureView& texture);
     void addSampler(const Sampler& texture);
@@ -23,8 +26,6 @@ struct DescriptorSet {
 
     size_t texture_descriptors_offset;
     size_t sampler_descriptors_offset;
-
-    VkDescriptorSetLayout layout;
 };
 
 }  // namespace Graphics

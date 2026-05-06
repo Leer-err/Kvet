@@ -9,7 +9,7 @@ namespace Graphics {
 
 class StarRenderer {
    public:
-    StarRenderer(const DescriptorSet& descriptors);
+    StarRenderer(const EngineData& engine_data);
 
     void render(const FrameData& frame_data, const Buffer& camera_data,
                 const StarsData& stars_data);

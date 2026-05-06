@@ -4,7 +4,7 @@
 #include <chrono>
 #include <thread>
 
-#include "RenderEngine.h"
+#include "IRenderEngine.h"
 
 // #include "Scene.h"
 // #include "World.h"
@@ -56,7 +56,7 @@ class Engine {
 
     float fps;
 
-    Graphics::RenderEngine renderer;
+    Graphics::IRenderEngine* renderer;
     // std::shared_ptr<PhysicsFactory> physics;
     // std::shared_ptr<AnimationRegistry> animation_registry;
 };

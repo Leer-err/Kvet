@@ -9,10 +9,8 @@
 
 namespace Graphics {
 
-RenderPass::RenderPass(DescriptorSet& descriptors)
-    : star_renderer(descriptors),
-      clouds_renderer(descriptors),
-      descriptors(descriptors) {
+RenderPass::RenderPass(const EngineData& engine_data)
+    : star_renderer(engine_data), clouds_renderer(engine_data) {
     camera_data = BufferBuilder(sizeof(CameraData))
                       .isConstantBuffer()
                       .isCPUWritable()

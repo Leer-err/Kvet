@@ -1,8 +1,8 @@
 #include "RenderEngine.h"
 
 #include <vulkan/vulkan.h>
+#include <vulkan/vulkan_core.h>
 
-#include <cstring>
 #include <tracy/Tracy.hpp>
 
 // #include "AppConfig.h"
@@ -11,7 +11,9 @@
 #include "AppConfig.h"
 // #include "Context.h"
 #include "CommandBuffer.h"
-#include "DescriptorSet/DescriptorSet.h"
+#include "DescriptorSet.h"
+#include "DeviceProperties.h"
+#include "EngineData.h"
 #include "Fence.h"
 #include "FrameData.h"
 #include "GraphicsResources.h"
@@ -20,13 +22,28 @@
 #include "RenderPass.h"
 #include "RenderTarget.h"
 #include "SwapChain.h"
+#include "VkBootstrap.h"
 
 namespace Graphics {
 
-RenderEngine::RenderEngine()
-    : descriptor_set(DescriptorSet::create()), render_pass(descriptor_set) {
-    frame_in_flight_index = 0;
-
+RenderEngine::RenderEngine(const vkb::Instance& instance,
+                           const vkb::Device& device,
+                           const Queue& graphics_queue,
+                           const Queue& presentation_queue,
+                           const VmaAllocator& allocator, VkSurfaceKHR surface)
+    : instance(instance),
+      device(device),
+      graphics_queue(graphics_queue),
+      presentation_queue(presentation_queue),
+      surface(surface),
+      data({device.device,
+            DeviceProperties::readProperties(device.physical_device),
+            createDescriptorLayout(), , allocator}),
+      descriptor_set(
+          DescriptorSet::create(device, data.descriptor_layout, data.properties,
+                                SAMPLER_BINDING_INDEX, TEXTURE_BINDING_INDEX)),
+      render_pass(data),
+      frame_in_flight_index(0) {
     for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
         auto& frame_in_flight = frames_in_flight[i];
         frame_in_flight.pool = CommandPool::create();
@@ -38,6 +55,8 @@ RenderEngine::RenderEngine()
 }
 
 RenderEngine::~RenderEngine() {
+    vkDeviceWaitIdle(device);
+
     swap_chain.destroy();
     vkb::destroy_device(device);
     vkb::destroy_surface(instance, surface);
@@ -111,8 +130,8 @@ void RenderEngine::reinitWindowDependentResources() {
     width = config.render_width;
     height = config.render_height;
 
-    swap_chain = SwapChain(config.render_width, config.render_height,
-                           config.buffering_mode);
+    swap_chain = SwapChain(device, presentation_queue, config.render_width,
+                           config.render_height, config.buffering_mode);
 
     render_target_texture =
         ImageBuilder(VK_FORMAT_R8G8B8A8_SRGB, config.render_width,
@@ -177,6 +196,33 @@ void RenderEngine::prepareBackbufferForPresentation(const CommandBuffer& cmd,
         VK_ACCESS_2_NONE);
 
     cmd.barrier(&render_finished, 1);
+}
+
+VkDescriptorSetLayout RenderEngine::createDescriptorLayout() {
+    VkDescriptorSetLayoutBinding bindings[2] = {};
+    bindings[TEXTURE_BINDING_INDEX].descriptorType =
+        VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
+    bindings[TEXTURE_BINDING_INDEX].binding = TEXTURE_BINDING_INDEX;
+    bindings[TEXTURE_BINDING_INDEX].stageFlags = VK_SHADER_STAGE_ALL_GRAPHICS;
+    bindings[TEXTURE_BINDING_INDEX].descriptorCount =
+        MAX_TEXTURE_DESCRIPTORS_COUNT;
+
+    bindings[SAMPLER_BINDING_INDEX].descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER;
+    bindings[SAMPLER_BINDING_INDEX].binding = SAMPLER_BINDING_INDEX;
+    bindings[SAMPLER_BINDING_INDEX].stageFlags = VK_SHADER_STAGE_ALL_GRAPHICS;
+    bindings[SAMPLER_BINDING_INDEX].descriptorCount =
+        MAX_SAMPLE_DESCRIPTORS_COUNT;
+
+    VkDescriptorSetLayoutCreateInfo info = {};
+    info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+    info.flags = VK_DESCRIPTOR_SET_LAYOUT_CREATE_DESCRIPTOR_BUFFER_BIT_EXT;
+    info.bindingCount = 2;
+    info.pBindings = bindings;
+
+    VkDescriptorSetLayout layout;
+    vkCreateDescriptorSetLayout(device, &info, nullptr, &layout);
+
+    return layout;
 }
 
 uint32_t RenderEngine::getWidth() const { return width; }

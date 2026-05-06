@@ -1,7 +1,6 @@
 #include "GraphicsPipelineBuilder.h"
 
 #include <vulkan/vulkan.h>
-#include <vulkan/vulkan_core.h>
 
 #include <array>
 #include <cstddef>
@@ -22,7 +21,7 @@ GraphicsPipelineBuilder::GraphicsPipelineBuilder(
     const std::string& vertex_shader_entrypoint,
     const std::string& pixel_shader_filename,
     const std::string& pixel_shader_entrypoint,
-    const DescriptorSet& descriptor_layout)
+    VkDescriptorSetLayout descriptor_layout)
     : rasterizer(Graphics::Rasterizer::fill()),
       descriptor_layout(descriptor_layout),
       render_target_format(VK_FORMAT_R8G8B8A8_SRGB) {
@@ -48,7 +47,7 @@ GraphicsPipelineBuilder::GraphicsPipelineBuilder(
 
 GraphicsPipelineBuilder::GraphicsPipelineBuilder(
     const Shader& vertex_shader, const Shader& pixel_shader,
-    const DescriptorSet& descriptor_layout)
+    VkDescriptorSetLayout descriptor_layout)
     : vertex_shader(vertex_shader),
       pixel_shader(pixel_shader),
       rasterizer(Graphics::Rasterizer::fill()),
@@ -206,7 +205,7 @@ void GraphicsPipelineBuilder::createPipelineLayout(GraphicsPipeline& pipeline,
     VkPipelineLayoutCreateInfo pipelineLayoutCI = {};
     pipelineLayoutCI.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
     pipelineLayoutCI.setLayoutCount = 1;
-    pipelineLayoutCI.pSetLayouts = &descriptor_layout.layout;
+    pipelineLayoutCI.pSetLayouts = &descriptor_layout;
 
     if (layout.push_constants_size != 0) {
         pipelineLayoutCI.pushConstantRangeCount = 1;

@@ -4,6 +4,7 @@
 #include "CloudsData.h"
 #include "CommandBuffer.h"
 #include "DescriptorSet.h"
+#include "EngineData.h"
 #include "FrameData.h"
 #include "GraphicsPipeline.h"
 #include "RenderEnviroment.h"
@@ -12,7 +13,7 @@ namespace Graphics {
 
 class CloudsRenderer {
    public:
-    CloudsRenderer(DescriptorSet& descriptors);
+    CloudsRenderer(const EngineData& engine_data);
 
     void render(const FrameData& frame_data, const Buffer& camera_data,
                 const CloudsData& clouds_data);
@@ -21,8 +22,6 @@ class CloudsRenderer {
                    const CloudsData& clouds_data);
 
    private:
-    DescriptorSet descriptors;
-
     Buffer cloud_plane_vertices;
     Buffer quad_vertices;
     Buffer quad_indices;
