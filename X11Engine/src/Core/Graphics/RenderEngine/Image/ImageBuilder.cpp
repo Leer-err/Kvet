@@ -3,13 +3,14 @@
 #include <vk_mem_alloc.h>
 #include <vulkan/vulkan.h>
 
-#include "GraphicsResources.h"
 #include "Image.h"
 
 namespace Graphics {
 
-ImageBuilder::ImageBuilder(VkFormat format, uint32_t width, uint32_t height)
-    : format(format),
+ImageBuilder::ImageBuilder(const APIData& api_data, VkFormat format,
+                           uint32_t width, uint32_t height)
+    : api_data(api_data),
+      format(format),
       width(width),
       height(height),
       shader_resource(false),
@@ -74,10 +75,11 @@ Result<Image, ImageError> ImageBuilder::create() {
 
     VkImage image;
     VmaAllocation allocation;
-    vmaCreateImage(Resources::get().getAllocator(), &image_info, &alloc_info,
-                   &image, &allocation, nullptr);
+    vmaCreateImage(api_data.allocator, &image_info, &alloc_info, &image,
+                   &allocation, nullptr);
 
     auto result = Image{};
+    result.api_data = api_data;
     result.image = image;
     result.allocation = allocation;
     result.layout = VK_IMAGE_LAYOUT_UNDEFINED;

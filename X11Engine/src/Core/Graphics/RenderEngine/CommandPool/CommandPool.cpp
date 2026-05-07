@@ -2,29 +2,36 @@
 
 #include <vulkan/vulkan.h>
 
-#include "GraphicsResources.h"
-
 namespace Graphics {
 
-CommandPool CommandPool::create() {
-    auto device = Resources::get().getDevice();
-    auto queue = Resources::get().getGraphicsQueueIndex();
-
+CommandPool::CommandPool(const APIData& api_data, uint32_t queue_index) {
     VkCommandPoolCreateInfo info = {};
     info.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
     info.pNext = nullptr;
     info.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-    info.queueFamilyIndex = queue;
+    info.queueFamilyIndex = queue_index;
 
     CommandPool pool = {};
-    vkCreateCommandPool(device, &info, nullptr, &pool.pool);
+    pool.api_data = api_data;
+    vkCreateCommandPool(api_data.device, &info, nullptr, &pool.pool);
+    return pool;
+}
+
+CommandPool::~CommandPool(const APIData& api_data, uint32_t queue_index) {
+    VkCommandPoolCreateInfo info = {};
+    info.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+    info.pNext = nullptr;
+    info.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+    info.queueFamilyIndex = queue_index;
+
+    CommandPool pool = {};
+    pool.api_data = api_data;
+    vkCreateCommandPool(api_data.device, &info, nullptr, &pool.pool);
     return pool;
 }
 
 void CommandPool::destroy() {
-    auto device = Resources::get().getDevice();
-
-    vkDestroyCommandPool(device, pool, nullptr);
+    vkDestroyCommandPool(api_data.device, pool, nullptr);
 }
 
 CommandBuffer CommandPool::getCommandBuffer() {
@@ -49,17 +56,13 @@ CommandBuffer CommandPool::createCommandBuffer() {
     info.commandBufferCount = 1;
 
     CommandBuffer buffer = {};
-
-    auto device = Resources::get().getDevice();
-    vkAllocateCommandBuffers(device, &info, &buffer.buffer);
+    vkAllocateCommandBuffers(api_data.device, &info, &buffer.buffer);
 
     return buffer;
 }
 
 void CommandPool::reset() {
-    auto device = Resources::get().getDevice();
-
-    vkResetCommandPool(device, pool, 0);
+    vkResetCommandPool(api_data.device, pool, 0);
 
     unused_buffer_index = 0;
 }

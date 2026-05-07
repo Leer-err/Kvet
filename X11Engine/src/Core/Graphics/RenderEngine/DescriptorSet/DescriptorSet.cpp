@@ -7,7 +7,6 @@
 #include "BufferBuilder.h"
 #include "DeviceProperties.h"
 #include "ExtensionFunctions.h"
-#include "GraphicsResources.h"
 #include "Sampler.h"
 #include "TextureView.h"
 
@@ -33,9 +32,10 @@ DescriptorSet DescriptorSet::create(const APIData& api_data) {
     vkGetDescriptorSetLayoutBindingOffsetEXT(
         device, layout, SAMPLER_BINDING_INDEX, &set.sampler_descriptors_offset);
 
+    set.api_data = api_data;
     set.current_sampler_index = 0;
     set.current_texture_index = 0;
-    set.descriptors = BufferBuilder(set_size)
+    set.descriptors = BufferBuilder(api_data, set_size)
                           .isDescriptorBuffer()
                           .isCPUWritable(true)
                           .create()
@@ -45,8 +45,6 @@ DescriptorSet DescriptorSet::create(const APIData& api_data) {
 }
 
 void DescriptorSet::addImage(const TextureView& texture) {
-    auto device = Resources::get().getDevice();
-
     auto descriptors_ptr = descriptors.map();
 
     char* binding_ptr =
@@ -64,14 +62,13 @@ void DescriptorSet::addImage(const TextureView& texture) {
     info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_GET_INFO_EXT;
     info.type = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
     info.data.pSampledImage = &image_descriptor_info;
-    vkGetDescriptorEXT(device, &info, texture_descriptor_size, element_ptr);
+    vkGetDescriptorEXT(api_data.device, &info, texture_descriptor_size,
+                       element_ptr);
 
     descriptors.unmap();
 }
 
 void DescriptorSet::addSampler(const Sampler& sampler) {
-    auto device = Resources::get().getDevice();
-
     auto descriptors_ptr = descriptors.map();
 
     char* binding_ptr =
@@ -84,7 +81,8 @@ void DescriptorSet::addSampler(const Sampler& sampler) {
     info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_GET_INFO_EXT;
     info.type = VK_DESCRIPTOR_TYPE_SAMPLER;
     info.data.pSampler = &sampler.sampler;
-    vkGetDescriptorEXT(device, &info, sampler_descriptor_size, element_ptr);
+    vkGetDescriptorEXT(api_data.device, &info, sampler_descriptor_size,
+                       element_ptr);
 
     descriptors.unmap();
 }

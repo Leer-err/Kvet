@@ -7,6 +7,7 @@
 #include <optional>
 #include <string>
 
+#include "APIData.h"
 #include "DescriptorSet.h"
 #include "GraphicsPipeline.h"
 
@@ -22,10 +23,12 @@ class GraphicsPipelineBuilder {
    public:
     enum class Error { ShaderFileNotFound, VertexInputTypeNotSupported };
 
-    GraphicsPipelineBuilder(const Shader& vertex_shader,
+    GraphicsPipelineBuilder(const APIData& api_data,
+                            const Shader& vertex_shader,
                             const Shader& pixel_shader,
                             VkDescriptorSetLayout descriptor_layout);
-    GraphicsPipelineBuilder(const std::string& vertex_shader_filename,
+    GraphicsPipelineBuilder(const APIData& api_data,
+                            const std::string& vertex_shader_filename,
                             const std::string& vertex_shader_entrypoint,
                             const std::string& pixel_shader_filename,
                             const std::string& pixel_shader_entrypoint,
@@ -45,6 +48,8 @@ class GraphicsPipelineBuilder {
     Result<Shader, GraphicsPipelineBuilder::Error> createShader(
         const std::string& filename, const std::string& entrypoint,
         VkShaderStageFlagBits stage);
+
+    const APIData& api_data;
 
     Shader vertex_shader;
     Shader pixel_shader;

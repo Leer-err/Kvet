@@ -2,17 +2,17 @@
 
 #include <vulkan/vulkan.h>
 
-#include "GraphicsResources.h"
+#include "APIData.h"
 
 namespace Graphics {
 
-Semaphore Semaphore::create() {
-    auto device = Resources::get().getDevice();
-    return create(device);
+Semaphore Semaphore::create(const APIData& api_data) {
+    return create(api_data.device);
 }
 
 Semaphore Semaphore::create(VkDevice device) {
     Semaphore semaphore;
+    semaphore.device = device;
 
     VkSemaphoreCreateInfo info = {};
     info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
@@ -24,10 +24,7 @@ Semaphore Semaphore::create(VkDevice device) {
     return semaphore;
 }
 
-void Semaphore::destroy() {
-    auto device = Resources::get().getDevice();
-    vkDestroySemaphore(device, semaphore, nullptr);
-}
+void Semaphore::destroy() { vkDestroySemaphore(device, semaphore, nullptr); }
 
 VkSemaphoreSubmitInfo Semaphore::submit() const {
     VkSemaphoreSubmitInfo info = {};

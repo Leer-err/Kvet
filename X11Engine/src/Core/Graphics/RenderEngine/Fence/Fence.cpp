@@ -2,13 +2,12 @@
 
 #include <vulkan/vulkan.h>
 
-#include "GraphicsResources.h"
+#include "APIData.h"
 
 namespace Graphics {
 
-Fence Fence::create(bool is_signaled) {
-    auto device = Resources::get().getDevice();
-    return create(device, is_signaled);
+Fence Fence::create(const APIData& api_data, bool is_signaled) {
+    return create(api_data.device, is_signaled);
 }
 
 Fence Fence::create(VkDevice device, bool is_signaled) {
@@ -24,13 +23,9 @@ Fence Fence::create(VkDevice device, bool is_signaled) {
     return fence;
 }
 
-void Fence::reset() {
-    auto device = Resources::get().getDevice();
-    vkResetFences(device, 1, &fence);
-}
+void Fence::reset() { vkResetFences(device, 1, &fence); }
 
 void Fence::wait() {
-    auto device = Resources::get().getDevice();
     auto result = vkWaitForFences(device, 1, &fence, true, UINT64_MAX);
 }
 

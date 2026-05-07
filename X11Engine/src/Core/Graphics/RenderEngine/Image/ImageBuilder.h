@@ -4,6 +4,7 @@
 
 #include <cstdint>
 
+#include "APIData.h"
 #include "Image.h"
 #include "Result.h"
 
@@ -17,7 +18,8 @@ enum class ImageError {
 
 class ImageBuilder {
    public:
-    ImageBuilder(VkFormat format, uint32_t width, uint32_t height);
+    ImageBuilder(const APIData& api_data, VkFormat format, uint32_t width,
+                 uint32_t height);
 
     ImageBuilder& isShaderResource();
     ImageBuilder& isRenderTarget();
@@ -29,6 +31,8 @@ class ImageBuilder {
     Result<Image, ImageError> create();
 
    private:
+    const APIData& api_data;
+
     VkFormat format;
     uint32_t width;
     uint32_t height;

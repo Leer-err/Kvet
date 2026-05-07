@@ -35,15 +35,17 @@ RenderEngine::RenderEngine(const vkb::Instance& instance,
       device(device),
       graphics_queue(graphics_queue),
       presentation_queue(presentation_queue),
+      allocator(allocator),
       surface(surface),
-      data({device.device,
-            DeviceProperties::readProperties(device.physical_device),
-            createDescriptorLayout(), , allocator}),
-      descriptor_set(
-          DescriptorSet::create(device, data.descriptor_layout, data.properties,
-                                SAMPLER_BINDING_INDEX, TEXTURE_BINDING_INDEX)),
-      render_pass(data),
       frame_in_flight_index(0) {
+    api_data.device = device;
+    api_data.allocator = allocator;
+    api_data.properties =
+        DeviceProperties::readProperties(device.physical_device);
+    api_data.descriptor_layout = createDescriptorLayout();
+
+    engine_data.descriptor_set = DescriptorSet::create(api_data);
+
     for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
         auto& frame_in_flight = frames_in_flight[i];
         frame_in_flight.pool = CommandPool::create();
@@ -76,9 +78,8 @@ void RenderEngine::render() {
     FrameData data = {};
     data.cmd = cmd;
     data.env = render_enviroment;
-    data.set = descriptor_set;
 
-    render_pass.render(data);
+    render_pass->render(data);
 
     endFrame(cmd);
 

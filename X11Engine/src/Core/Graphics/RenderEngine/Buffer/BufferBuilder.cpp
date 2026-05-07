@@ -3,16 +3,15 @@
 #include <vk_mem_alloc.h>
 #include <vulkan/vulkan.h>
 
-#include <utility>
-
+#include "APIData.h"
 #include "Buffer.h"
-#include "GraphicsResources.h"
 #include "Result.h"
 
 namespace Graphics {
 
-BufferBuilder::BufferBuilder(size_t size)
-    : size(size),
+BufferBuilder::BufferBuilder(const APIData& api_data, size_t size)
+    : api_data(api_data),
+      size(size),
       stride(0),
       offset(0),
       shader_resource(false),
@@ -101,8 +100,8 @@ Result<Buffer, BufferError> BufferBuilder::create() {
 
     VkBuffer buffer;
     VmaAllocation allocation;
-    vmaCreateBuffer(Resources::get().getAllocator(), &buffer_info, &alloc_info,
-                    &buffer, &allocation, nullptr);
+    vmaCreateBuffer(api_data.allocator, &buffer_info, &alloc_info, &buffer,
+                    &allocation, nullptr);
 
     auto result = Buffer{};
     result.buffer = buffer;

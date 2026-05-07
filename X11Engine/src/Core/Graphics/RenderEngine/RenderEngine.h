@@ -6,8 +6,10 @@
 #include <vulkan/vulkan_core.h>
 
 #include <cstdint>
+#include <memory>
 
 // #include "RenderTarget.h"
+#include "APIData.h"
 #include "CloudsRenderer.h"
 #include "CommandBuffer.h"
 #include "CommandPool.h"
@@ -71,16 +73,13 @@ class RenderEngine final : public IRenderEngine {
     VmaAllocator allocator;
     VkSurfaceKHR surface;
 
-    DeviceProperties properties;
-
-    EngineData data;
+    APIData api_data;
+    EngineData engine_data;
 
     Image render_target_texture;
     RenderEnviroment render_enviroment;
 
-    DescriptorSet descriptor_set;
-
-    RenderPass render_pass;
+    std::unique_ptr<RenderPass> render_pass;
 
     SwapChain swap_chain;
 

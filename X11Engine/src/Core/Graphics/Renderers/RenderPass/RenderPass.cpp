@@ -1,5 +1,6 @@
 #include "RenderPass.h"
 
+#include "APIData.h"
 #include "BufferBuilder.h"
 #include "CameraData.h"
 #include "CloudsData.h"
@@ -9,7 +10,7 @@
 
 namespace Graphics {
 
-RenderPass::RenderPass(const EngineData& engine_data)
+RenderPass::RenderPass(const APIData& api_data, const EngineData& engine_data)
     : star_renderer(engine_data), clouds_renderer(engine_data) {
     camera_data = BufferBuilder(sizeof(CameraData))
                       .isConstantBuffer()

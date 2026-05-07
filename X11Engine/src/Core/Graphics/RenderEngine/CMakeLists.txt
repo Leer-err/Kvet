@@ -6,7 +6,6 @@ target_include_directories(Graphics PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-add_subdirectory(Resources)
 add_subdirectory(Image)
 add_subdirectory(SwapChain)
 add_subdirectory(Shader)

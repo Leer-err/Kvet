@@ -7,9 +7,7 @@
 namespace Graphics {
 
 void Image::destroy() {
-    Resources::get().getAllocator();
-
-    vmaDestroyImage(Resources::get().getAllocator(), image, allocation);
+    vmaDestroyImage(api_data.allocator, image, allocation);
 }
 
 VkImageMemoryBarrier2 Image::createBarrier(VkImageLayout new_layout,

@@ -8,8 +8,6 @@
 namespace Graphics {
 
 struct Image {
-    void destroy();
-
     VkImageMemoryBarrier2 createBarrier(VkImageLayout new_layout,
                                         VkPipelineStageFlags2 src_stages,
                                         VkAccessFlags2 src_access,

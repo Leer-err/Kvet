@@ -2,6 +2,7 @@
 
 #include <cstddef>
 
+#include "APIData.h"
 #include "Buffer.h"
 #include "Result.h"
 
@@ -11,7 +12,7 @@ enum class BufferError { NoDataForImmutableResource, WriteFromGPUAndCPU };
 
 class BufferBuilder {
    public:
-    BufferBuilder(size_t size);
+    BufferBuilder(const APIData& api_data, size_t size);
 
     BufferBuilder& isShaderResource();
     BufferBuilder& isVertexBuffer(size_t stride, size_t offset = 0);
@@ -27,6 +28,8 @@ class BufferBuilder {
     Result<Buffer, BufferError> create();
 
    private:
+    const APIData& api_data;
+
     size_t size;
     size_t stride;
     size_t offset;

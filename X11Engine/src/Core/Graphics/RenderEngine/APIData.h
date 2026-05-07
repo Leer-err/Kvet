@@ -22,4 +22,5 @@ struct APIData {
 
     VmaAllocator allocator;
 };
+
 }  // namespace Graphics

@@ -24,7 +24,8 @@ struct Vertex {
     Vector2 uv;
 };
 
-CloudsRenderer::CloudsRenderer(const EngineData& engine_data) {
+CloudsRenderer::CloudsRenderer(const APIData& api_data,
+                               EngineData& engine_data) {
     constexpr Vertex cloud_plane_vertex_data[] = {
         {Vector3(-1, 0, -1), Vector2(0, 0)},
         {Vector3(-1, 0, 1), Vector2(0, 1)},
@@ -72,7 +73,7 @@ CloudsRenderer::CloudsRenderer(const EngineData& engine_data) {
                          .create()
                          .getResult();
     engine_data.descriptor_set.addImage(TextureView::create(clouds_texture));
-    descriptors.addSampler(Sampler::point());
+    engine_data.descriptor_set.addSampler(Sampler::point());
 
     env.render_target = RenderTarget::create(clouds_texture);
     env.clear_render_target = true;
@@ -82,16 +83,16 @@ CloudsRenderer::CloudsRenderer(const EngineData& engine_data) {
         GraphicsPipelineBuilder("./Assets/Shaders/Clouds/CloudsTexture.spv",
                                 "vertex_main",
                                 "./Assets/Shaders/Clouds/CloudsTexture.spv",
-                                "pixel_main", engine_data.descriptor_layout)
+                                "pixel_main", api_data.descriptor_layout)
             .setRenderTargetFormat(VK_FORMAT_R8G8B8A8_UNORM)
             .create()
             .getResult();
-    cloud_pipeline =
-        GraphicsPipelineBuilder(
-            "./Assets/Shaders/Clouds/Clouds.spv", "vertex_main",
-            "./Assets/Shaders/Clouds/Clouds.spv", "pixel_main", descriptors)
-            .create()
-            .getResult();
+    cloud_pipeline = GraphicsPipelineBuilder(
+                         "./Assets/Shaders/Clouds/Clouds.spv", "vertex_main",
+                         "./Assets/Shaders/Clouds/Clouds.spv", "pixel_main",
+                         api_data.descriptor_layout)
+                         .create()
+                         .getResult();
 
     clouds_data_buffer = BufferBuilder(sizeof(CloudsData))
                              .isConstantBuffer()

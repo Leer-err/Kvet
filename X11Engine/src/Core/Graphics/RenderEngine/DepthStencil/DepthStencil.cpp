@@ -2,14 +2,11 @@
 
 #include <vulkan/vulkan.h>
 
-#include "GraphicsResources.h"
 #include "Image.h"
 
 namespace Graphics {
 
-DepthStencil DepthStencil::create(const Image& image) {
-    auto device = Resources::get().getDevice();
-
+DepthStencil DepthStencil::create(const APIData& api_data, const Image& image) {
     VkImageViewCreateInfo info = {};
 
     info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -23,13 +20,13 @@ DepthStencil DepthStencil::create(const Image& image) {
     DepthStencil result = {};
     result.width = image.width;
     result.height = image.height;
-    vkCreateImageView(device, &info, nullptr, &result.depth_stencil);
+    result.device = api_data.device;
+    vkCreateImageView(api_data.device, &info, nullptr, &result.depth_stencil);
 
     return result;
 }
 
 void DepthStencil::destroy() {
-    auto device = Resources::get().getDevice();
     vkDestroyImageView(device, depth_stencil, nullptr);
 }
 

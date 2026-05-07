@@ -1,5 +1,6 @@
 #pragma once
 
+#include "APIData.h"
 #include "Buffer.h"
 #include "CloudsData.h"
 #include "CommandBuffer.h"
@@ -13,7 +14,7 @@ namespace Graphics {
 
 class CloudsRenderer {
    public:
-    CloudsRenderer(const EngineData& engine_data);
+    CloudsRenderer(const APIData& api_data, EngineData& engine_data);
 
     void render(const FrameData& frame_data, const Buffer& camera_data,
                 const CloudsData& clouds_data);

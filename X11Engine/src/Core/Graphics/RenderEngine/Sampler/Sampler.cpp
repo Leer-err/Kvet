@@ -2,33 +2,32 @@
 
 #include <vulkan/vulkan.h>
 
-#include "GraphicsResources.h"
-
 namespace Graphics {
 
-Sampler Sampler::point() {
+Sampler Sampler::point(const APIData& api_data) {
     Sampler sampler = {};
-    sampler.sampler = createSampler(VK_FILTER_NEAREST, false, 0);
+    sampler.sampler = createSampler(api_data, VK_FILTER_NEAREST, false, 0);
 
     return sampler;
 }
 
-Sampler Sampler::linear() {
+Sampler Sampler::linear(const APIData& api_data) {
     Sampler sampler = {};
-    sampler.sampler = createSampler(VK_FILTER_LINEAR, false, 0);
+    sampler.sampler = createSampler(api_data, VK_FILTER_LINEAR, false, 0);
 
     return sampler;
 }
 
-Sampler Sampler::anisotropic(float anisotropy) {
+Sampler Sampler::anisotropic(const APIData& api_data, float anisotropy) {
     Sampler sampler = {};
-    sampler.sampler = createSampler(VK_FILTER_LINEAR, true, anisotropy);
+    sampler.sampler =
+        createSampler(api_data, VK_FILTER_LINEAR, true, anisotropy);
 
     return sampler;
 }
 
-VkSampler Sampler::createSampler(VkFilter filter, bool anisotropic,
-                                 float anisotropy) {
+VkSampler Sampler::createSampler(const APIData& api_data, VkFilter filter,
+                                 bool anisotropic, float anisotropy) {
     VkSamplerMipmapMode mipmap_mode;
     switch (filter) {
         case VK_FILTER_NEAREST:
@@ -52,9 +51,8 @@ VkSampler Sampler::createSampler(VkFilter filter, bool anisotropic,
     info.addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
     info.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
 
-    auto device = Resources::get().getDevice();
     VkSampler sampler = {};
-    vkCreateSampler(device, &info, nullptr, &sampler);
+    vkCreateSampler(api_data.device, &info, nullptr, &sampler);
 
     return sampler;
 }

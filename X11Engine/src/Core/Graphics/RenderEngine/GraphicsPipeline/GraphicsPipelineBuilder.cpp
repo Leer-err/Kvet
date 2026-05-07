@@ -2,11 +2,9 @@
 
 #include <vulkan/vulkan.h>
 
-#include <array>
 #include <cstddef>
 
 #include "GraphicsPipeline.h"
-#include "GraphicsResources.h"
 #include "InputLayout.h"
 #include "InputLayoutBuilder.h"
 #include "Rasterizer.h"
@@ -17,12 +15,13 @@
 namespace Graphics {
 
 GraphicsPipelineBuilder::GraphicsPipelineBuilder(
-    const std::string& vertex_shader_filename,
+    const APIData& api_data, const std::string& vertex_shader_filename,
     const std::string& vertex_shader_entrypoint,
     const std::string& pixel_shader_filename,
     const std::string& pixel_shader_entrypoint,
     VkDescriptorSetLayout descriptor_layout)
-    : rasterizer(Graphics::Rasterizer::fill()),
+    : api_data(api_data),
+      rasterizer(Graphics::Rasterizer::fill()),
       descriptor_layout(descriptor_layout),
       render_target_format(VK_FORMAT_R8G8B8A8_SRGB) {
     auto vertex_shader_result =
@@ -46,9 +45,10 @@ GraphicsPipelineBuilder::GraphicsPipelineBuilder(
 }
 
 GraphicsPipelineBuilder::GraphicsPipelineBuilder(
-    const Shader& vertex_shader, const Shader& pixel_shader,
-    VkDescriptorSetLayout descriptor_layout)
-    : vertex_shader(vertex_shader),
+    const APIData& api_data, const Shader& vertex_shader,
+    const Shader& pixel_shader, VkDescriptorSetLayout descriptor_layout)
+    : api_data(api_data),
+      vertex_shader(vertex_shader),
       pixel_shader(pixel_shader),
       rasterizer(Graphics::Rasterizer::fill()),
       descriptor_layout(descriptor_layout),
@@ -186,10 +186,11 @@ GraphicsPipelineBuilder::create() {
     pipeline_info.layout = pipeline.layout;
     pipeline_info.flags = VK_PIPELINE_CREATE_DESCRIPTOR_BUFFER_BIT_EXT;
 
-    VkResult result = vkCreateGraphicsPipelines(
-        Resources::get().getDevice(), VK_NULL_HANDLE, 1, &pipeline_info,
-        nullptr, &pipeline.pipeline);
+    VkResult result =
+        vkCreateGraphicsPipelines(api_data.device, VK_NULL_HANDLE, 1,
+                                  &pipeline_info, nullptr, &pipeline.pipeline);
 
+    pipeline.device = api_data.device;
     return pipeline;
 }
 
@@ -212,9 +213,8 @@ void GraphicsPipelineBuilder::createPipelineLayout(GraphicsPipeline& pipeline,
         pipelineLayoutCI.pPushConstantRanges = &constants;
     }
 
-    auto result =
-        vkCreatePipelineLayout(Resources::get().getDevice(), &pipelineLayoutCI,
-                               nullptr, &pipeline.layout);
+    auto result = vkCreatePipelineLayout(api_data.device, &pipelineLayoutCI,
+                                         nullptr, &pipeline.layout);
 }
 
 Result<Shader, GraphicsPipelineBuilder::Error>

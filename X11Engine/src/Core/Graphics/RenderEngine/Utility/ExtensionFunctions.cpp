@@ -1,7 +1,5 @@
 #include "ExtensionFunctions.h"
 
-#include "GraphicsResources.h"
-
 namespace Graphics {
 
 PFN_vkGetDescriptorSetLayoutSizeEXT vkGetDescriptorSetLayoutSizeEXT;
@@ -13,9 +11,7 @@ PFN_vkGetDescriptorEXT vkGetDescriptorEXT;
 PFN_vkCmdBindDescriptorBufferEmbeddedSamplersEXT
     vkCmdBindDescriptorBufferEmbeddedSamplersEXT;
 
-void loadExtensionFunctions() {
-    auto device = Resources::get().getDevice();
-
+void loadExtensionFunctions(VkDevice device) {
     vkGetDescriptorSetLayoutSizeEXT =
         reinterpret_cast<PFN_vkGetDescriptorSetLayoutSizeEXT>(
             vkGetDeviceProcAddr(device, "vkGetDescriptorSetLayoutSizeEXT"));
