@@ -7,16 +7,13 @@
 #include <string>
 #include <vector>
 
-#include "GraphicsResources.h"
+#include "Device.h"
 
 namespace Graphics {
 
-ShaderRegistry::ShaderRegistry() {}
-ShaderRegistry::~ShaderRegistry() {
-    for (auto& [filename, module] : shader_modules) {
-        vkDestroyShaderModule(Resources::get().getDevice(), module, nullptr);
-    }
-}
+ShaderRegistry::ShaderRegistry(const Device& device) : device(device) {}
+
+ShaderRegistry::~ShaderRegistry() {}
 
 std::optional<VkShaderModule> ShaderRegistry::getModule(
     const std::string& filename) {
@@ -45,15 +42,9 @@ std::optional<VkShaderModule> ShaderRegistry::loadModule(
     auto shader_bytecode = readFile(filename);
     if (shader_bytecode == std::nullopt) return std::nullopt;
 
-    VkShaderModuleCreateInfo info = {};
-    info.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-    info.pCode = reinterpret_cast<const uint32_t*>(shader_bytecode->data());
-    info.codeSize = shader_bytecode->size();
-
-    VkShaderModule module = {};
-    if (vkCreateShaderModule(Resources::get().getDevice(), &info, nullptr,
-                             &module) != VK_SUCCESS)
-        return std::nullopt;
+    auto module = device.createShader(
+        reinterpret_cast<uint32_t*>(shader_bytecode->data()),
+        shader_bytecode->size());
 
     shader_modules.emplace(filename, module);
     shader_sources.emplace(filename, std::move(*shader_bytecode));

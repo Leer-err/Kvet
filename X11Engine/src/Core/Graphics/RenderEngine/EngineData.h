@@ -1,11 +1,16 @@
 #pragma once
 
 #include "DescriptorSet.h"
+#include "Device.h"
+#include "ShaderRegistry.h"
 
 namespace Graphics {
 
 struct EngineData {
-    DescriptorSet descriptor_set;
+    Device& device;
+
+    DescriptorSet& descriptor_set;
+    ShaderRegistry& shader_registry;
 };
 
 }  // namespace Graphics

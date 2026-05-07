@@ -7,6 +7,12 @@
 
 namespace Graphics {
 
+enum class ImageError {
+    UnsupportedFormat,
+    NoDataForImmutableResource,
+    WriteFromGPUAndCPU
+};
+
 struct Image {
     VkImageMemoryBarrier2 createBarrier(VkImageLayout new_layout,
                                         VkPipelineStageFlags2 src_stages,

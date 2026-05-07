@@ -25,10 +25,10 @@ constexpr size_t getFormatSize(VkFormat format) {
     return 0;
 }
 
-InputLayoutBuilder::InputLayoutBuilder(const std::string& vertex_shader_file)
-    : vertex_shader_file(vertex_shader_file) {}
-
-InputLayoutBuilder::InputLayoutBuilder() : elements() {}
+InputLayoutBuilder::InputLayoutBuilder(ShaderRegistry& shader_registry,
+                                       const std::string& vertex_shader_file)
+    : shader_registry(shader_registry),
+      vertex_shader_file(vertex_shader_file) {}
 
 InputLayoutBuilder::~InputLayoutBuilder() {}
 
@@ -94,8 +94,7 @@ Result<InputLayout, InputLayoutBuilder::Error> InputLayoutBuilder::create() {
 Result<std::vector<VkFormat>, InputLayoutBuilder::Error>
 InputLayoutBuilder::getElementsFromShader(
     const std::string& vertex_shader_file) {
-    auto shader_source =
-        ShaderRegistry::get().getShaderBytecode(vertex_shader_file);
+    auto shader_source = shader_registry.getShaderBytecode(vertex_shader_file);
     if (!shader_source) return Error::FileNotFound;
 
     SpvReflectShaderModule module;
@@ -160,8 +159,7 @@ Result<VkFormat, InputLayoutBuilder::Error> InputLayoutBuilder::parseType(
 Result<size_t, InputLayoutBuilder::Error>
 InputLayoutBuilder::getPushConstantsFromShader(
     const std::string& vertex_shader_file) {
-    auto shader_source =
-        ShaderRegistry::get().getShaderBytecode(vertex_shader_file);
+    auto shader_source = shader_registry.getShaderBytecode(vertex_shader_file);
     if (!shader_source) return Error::FileNotFound;
 
     SpvReflectShaderModule module;

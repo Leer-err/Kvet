@@ -2,8 +2,8 @@
 
 #include <VkBootstrap.h>
 #include <vulkan/vulkan.h>
-#include <vulkan/vulkan_core.h>
 
+#include "Device.h"
 #include "GraphicsConfig.h"
 #include "Image.h"
 #include "Queue.h"
@@ -19,7 +19,7 @@ class SwapChain {
     };
 
     SwapChain() = default;
-    SwapChain(vkb::Device device, Queue presentation_queue, uint32_t width,
+    SwapChain(const Device& device, Queue presentation_queue, uint32_t width,
               uint32_t height, Config::BufferingMode buffering_mode);
 
     void destroy();
@@ -31,7 +31,6 @@ class SwapChain {
    private:
     static constexpr size_t SWAP_CHAIN_MAX_SIZE = 3;
 
-    vkb::Device device;
     Queue queue;
 
     vkb::Swapchain swap_chain;

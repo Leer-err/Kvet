@@ -4,8 +4,9 @@
 #include <vk_mem_alloc.h>
 #include <vulkan/vulkan.h>
 
-#include "APIData.h"
 namespace Graphics {
+
+enum class BufferError { NoDataForImmutableResource, WriteFromGPUAndCPU };
 
 struct Buffer {
     VkBuffer buffer;

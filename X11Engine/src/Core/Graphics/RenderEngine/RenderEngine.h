@@ -1,19 +1,13 @@
 #pragma once
 
-// #include "DepthStencil.h"
-// #include "RenderTarget.h"
 #include <vulkan/vulkan.h>
-#include <vulkan/vulkan_core.h>
 
 #include <cstdint>
 #include <memory>
 
-// #include "RenderTarget.h"
-#include "APIData.h"
-#include "CloudsRenderer.h"
 #include "CommandBuffer.h"
 #include "CommandPool.h"
-#include "DescriptorSet/DescriptorSet.h"
+#include "DescriptorSet.h"
 #include "DeviceProperties.h"
 #include "EngineData.h"
 #include "Fence.h"
@@ -21,8 +15,8 @@
 #include "Queue.h"
 #include "RenderEnviroment.h"
 #include "RenderPass.h"
-#include "RenderTarget.h"
 #include "Semaphore.h"
+#include "ShaderRegistry.h"
 #include "StarRenderer.h"
 #include "SwapChain.h"
 #include "VkBootstrap.h"
@@ -52,9 +46,9 @@ class RenderEngine final : public IRenderEngine {
     uint32_t getWidth() const;
     uint32_t getHeight() const;
 
-   private:
-    VkDescriptorSetLayout createDescriptorLayout();
+    EngineData getEngineData();
 
+   private:
     void beginFrame(const CommandBuffer& cmd);
     void endFrame(const CommandBuffer& cmd);
 
@@ -67,14 +61,13 @@ class RenderEngine final : public IRenderEngine {
                                           Image& backbuffer);
 
     vkb::Instance instance;
-    vkb::Device device;
+    Device device;
     Queue graphics_queue;
     Queue presentation_queue;
-    VmaAllocator allocator;
     VkSurfaceKHR surface;
 
-    APIData api_data;
-    EngineData engine_data;
+    DescriptorSet descriptor_set;
+    ShaderRegistry shader_registry;
 
     Image render_target_texture;
     RenderEnviroment render_enviroment;

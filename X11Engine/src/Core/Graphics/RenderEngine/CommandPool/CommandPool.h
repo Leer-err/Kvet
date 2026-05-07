@@ -4,15 +4,14 @@
 
 #include <vector>
 
-#include "APIData.h"
 #include "CommandBuffer.h"
+#include "EngineData.h"
 
 namespace Graphics {
 
 class CommandPool {
    public:
-    CommandPool(const APIData& api_data, uint32_t queue_index);
-    ~CommandPool();
+    CommandPool(const EngineData& engine_data, uint32_t queue_index);
 
     CommandBuffer getCommandBuffer();
     CommandBuffer createCommandBuffer();
@@ -20,6 +19,8 @@ class CommandPool {
     void reset();
 
    private:
+    const EngineData& engine_data;
+
     VkCommandPool pool;
     std::vector<CommandBuffer> command_buffers;
     uint32_t unused_buffer_index;

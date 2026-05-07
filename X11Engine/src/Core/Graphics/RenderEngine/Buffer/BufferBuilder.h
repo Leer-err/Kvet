@@ -2,17 +2,15 @@
 
 #include <cstddef>
 
-#include "APIData.h"
 #include "Buffer.h"
+#include "Device.h"
 #include "Result.h"
 
 namespace Graphics {
 
-enum class BufferError { NoDataForImmutableResource, WriteFromGPUAndCPU };
-
 class BufferBuilder {
    public:
-    BufferBuilder(const APIData& api_data, size_t size);
+    BufferBuilder(const Device& device, size_t size);
 
     BufferBuilder& isShaderResource();
     BufferBuilder& isVertexBuffer(size_t stride, size_t offset = 0);
@@ -28,23 +26,10 @@ class BufferBuilder {
     Result<Buffer, BufferError> create();
 
    private:
-    const APIData& api_data;
+    const Device& device;
 
-    size_t size;
-    size_t stride;
-    size_t offset;
-
-    bool shader_resource;
-    bool vertex_buffer;
-    bool index_buffer;
-    bool constant_buffer;
-    bool descriptor_buffer;
-
-    bool cpu_write_random;
-    bool cpu_write_sequential;
-
-    bool copy_source;
-    bool copy_target;
+    VkBufferCreateInfo buffer_info;
+    VmaAllocationCreateInfo alloc_info;
 };
 
 }  // namespace Graphics

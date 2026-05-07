@@ -8,6 +8,7 @@
 
 #include "InputLayout.h"
 #include "Result.h"
+#include "ShaderRegistry.h"
 
 namespace Graphics {
 
@@ -19,7 +20,8 @@ class InputLayoutBuilder {
         UnsupportedElementFormat,
     };
 
-    InputLayoutBuilder(const std::string& vertex_shader_file);
+    InputLayoutBuilder(ShaderRegistry& shader_registry,
+                       const std::string& vertex_shader_file);
 
     InputLayoutBuilder();
     ~InputLayoutBuilder();
@@ -36,6 +38,8 @@ class InputLayoutBuilder {
         const std::string& vertex_shader_file);
 
     Result<VkFormat, Error> parseType(const SpvReflectFormat& type);
+
+    ShaderRegistry& shader_registry;
 
     std::string vertex_shader_file;
 

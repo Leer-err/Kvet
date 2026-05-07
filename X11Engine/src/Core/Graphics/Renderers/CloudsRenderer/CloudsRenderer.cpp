@@ -1,7 +1,6 @@
 #include "CloudsRenderer.h"
 
 #include <vulkan/vulkan.h>
-#include <vulkan/vulkan_core.h>
 
 #include <cstring>
 
@@ -13,7 +12,6 @@
 #include "InputLayoutBuilder.h"
 #include "Sampler.h"
 #include "ShaderBuilder.h"
-#include "TextureView.h"
 #include "Vector2.h"
 #include "Vector3.h"
 

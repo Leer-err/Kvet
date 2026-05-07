@@ -79,7 +79,6 @@ Result<Image, ImageError> ImageBuilder::create() {
                    &allocation, nullptr);
 
     auto result = Image{};
-    result.api_data = api_data;
     result.image = image;
     result.allocation = allocation;
     result.layout = VK_IMAGE_LAYOUT_UNDEFINED;

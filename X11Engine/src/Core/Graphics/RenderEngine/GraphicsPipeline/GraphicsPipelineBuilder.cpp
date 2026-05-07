@@ -4,6 +4,7 @@
 
 #include <cstddef>
 
+#include "EngineData.h"
 #include "GraphicsPipeline.h"
 #include "InputLayout.h"
 #include "InputLayoutBuilder.h"
@@ -15,14 +16,12 @@
 namespace Graphics {
 
 GraphicsPipelineBuilder::GraphicsPipelineBuilder(
-    const APIData& api_data, const std::string& vertex_shader_filename,
+    EngineData& engine_data, const std::string& vertex_shader_filename,
     const std::string& vertex_shader_entrypoint,
     const std::string& pixel_shader_filename,
-    const std::string& pixel_shader_entrypoint,
-    VkDescriptorSetLayout descriptor_layout)
-    : api_data(api_data),
+    const std::string& pixel_shader_entrypoint)
+    : engine_data(engine_data),
       rasterizer(Graphics::Rasterizer::fill()),
-      descriptor_layout(descriptor_layout),
       render_target_format(VK_FORMAT_R8G8B8A8_SRGB) {
     auto vertex_shader_result =
         createShader(vertex_shader_filename, vertex_shader_entrypoint,
@@ -43,16 +42,6 @@ GraphicsPipelineBuilder::GraphicsPipelineBuilder(
     vertex_shader = vertex_shader_result.getResult();
     pixel_shader = pixel_shader_result.getResult();
 }
-
-GraphicsPipelineBuilder::GraphicsPipelineBuilder(
-    const APIData& api_data, const Shader& vertex_shader,
-    const Shader& pixel_shader, VkDescriptorSetLayout descriptor_layout)
-    : api_data(api_data),
-      vertex_shader(vertex_shader),
-      pixel_shader(pixel_shader),
-      rasterizer(Graphics::Rasterizer::fill()),
-      descriptor_layout(descriptor_layout),
-      render_target_format(VK_FORMAT_R8G8B8A8_SRGB) {}
 
 static VkPipelineShaderStageCreateInfo getStageInfo(const Shader& shader) {
     VkPipelineShaderStageCreateInfo stage_info = {};
@@ -76,7 +65,8 @@ GraphicsPipelineBuilder::create() {
     if (error) return *error;
 
     auto input_layout_result =
-        InputLayoutBuilder(vertex_shader.filename).create();
+        InputLayoutBuilder(engine_data.shader_registry, vertex_shader.filename)
+            .create();
 
     if (input_layout_result.isError()) {
         switch (input_layout_result.getError()) {
@@ -186,12 +176,7 @@ GraphicsPipelineBuilder::create() {
     pipeline_info.layout = pipeline.layout;
     pipeline_info.flags = VK_PIPELINE_CREATE_DESCRIPTOR_BUFFER_BIT_EXT;
 
-    VkResult result =
-        vkCreateGraphicsPipelines(api_data.device, VK_NULL_HANDLE, 1,
-                                  &pipeline_info, nullptr, &pipeline.pipeline);
-
-    pipeline.device = api_data.device;
-    return pipeline;
+    return engine_data.device.createGraphicsPipeline(pipeline_info);
 }
 
 void GraphicsPipelineBuilder::createPipelineLayout(GraphicsPipeline& pipeline,
@@ -222,7 +207,7 @@ GraphicsPipelineBuilder::createShader(const std::string& filename,
                                       const std::string& entrypoint,
                                       VkShaderStageFlagBits stage) {
     auto shader_build_result =
-        ShaderBuilder(filename, entrypoint, stage).create();
+        ShaderBuilder(engine_data, filename, entrypoint, stage).create();
 
     if (shader_build_result.isOk()) return shader_build_result.getResult();
 

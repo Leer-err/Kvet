@@ -7,24 +7,23 @@
 #include <unordered_map>
 #include <vector>
 
+#include "Device.h"
+
 namespace Graphics {
 
 class ShaderRegistry {
    public:
-    static ShaderRegistry& get() {
-        static ShaderRegistry instance;
-        return instance;
-    }
+    ShaderRegistry(const Device& device);
+    ~ShaderRegistry();
 
     std::optional<VkShaderModule> getModule(const std::string& name);
     std::optional<std::vector<char>> getShaderBytecode(const std::string& name);
 
    private:
-    ShaderRegistry();
-    ~ShaderRegistry();
-
     std::optional<VkShaderModule> loadModule(const std::string& filename);
     std::optional<std::vector<char>> readFile(const std::string& filename);
+
+    const Device& device;
 
     std::unordered_map<std::string, VkShaderModule> shader_modules;
     std::unordered_map<std::string, std::vector<char>> shader_sources;

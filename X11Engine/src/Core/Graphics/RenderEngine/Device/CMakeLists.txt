@@ -1,5 +1,5 @@
 target_sources(Graphics PRIVATE
-    RenderTarget.cpp
+    Device.cpp
 )
 
 target_include_directories(Graphics PRIVATE

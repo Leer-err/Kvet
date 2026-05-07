@@ -16,11 +16,10 @@
 #include "EngineData.h"
 #include "Fence.h"
 #include "FrameData.h"
-#include "GraphicsResources.h"
 // #include "RenderEnviroment.h"
 #include "ImageBuilder.h"
 #include "RenderPass.h"
-#include "RenderTarget.h"
+#include "ShaderRegistry.h"
 #include "SwapChain.h"
 #include "VkBootstrap.h"
 
@@ -32,20 +31,13 @@ RenderEngine::RenderEngine(const vkb::Instance& instance,
                            const Queue& presentation_queue,
                            const VmaAllocator& allocator, VkSurfaceKHR surface)
     : instance(instance),
-      device(device),
+      device(device, allocator),
+      shader_registry(this->device),
+      descriptor_set(this->device, this->device.getDeviceProperties()),
       graphics_queue(graphics_queue),
       presentation_queue(presentation_queue),
-      allocator(allocator),
       surface(surface),
       frame_in_flight_index(0) {
-    api_data.device = device;
-    api_data.allocator = allocator;
-    api_data.properties =
-        DeviceProperties::readProperties(device.physical_device);
-    api_data.descriptor_layout = createDescriptorLayout();
-
-    engine_data.descriptor_set = DescriptorSet::create(api_data);
-
     for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
         auto& frame_in_flight = frames_in_flight[i];
         frame_in_flight.pool = CommandPool::create();
@@ -57,10 +49,9 @@ RenderEngine::RenderEngine(const vkb::Instance& instance,
 }
 
 RenderEngine::~RenderEngine() {
-    vkDeviceWaitIdle(device);
+    device.waitIdle();
 
     swap_chain.destroy();
-    vkb::destroy_device(device);
     vkb::destroy_surface(instance, surface);
     vkb::destroy_instance(instance);
 }
@@ -119,7 +110,7 @@ void RenderEngine::endFrame(const CommandBuffer& cmd) {
     submit_info.commandBufferInfoCount = 1;
     submit_info.pCommandBufferInfos = &command_buffer_info;
 
-    vkQueueSubmit2(Resources::get().getGraphicsQueue(), 1, &submit_info,
+    vkQueueSubmit2(graphics_queue.queue, 1, &submit_info,
                    frame_in_flight.finished_processing.fence);
 
     swap_chain.present();
@@ -135,7 +126,7 @@ void RenderEngine::reinitWindowDependentResources() {
                            config.render_height, config.buffering_mode);
 
     render_target_texture =
-        ImageBuilder(VK_FORMAT_R8G8B8A8_SRGB, config.render_width,
+        ImageBuilder(device, VK_FORMAT_R8G8B8A8_SRGB, config.render_width,
                      config.render_height)
             .isCopySource()
             .isRenderTarget()
@@ -144,7 +135,7 @@ void RenderEngine::reinitWindowDependentResources() {
 
     render_enviroment = RenderEnviroment{};
     render_enviroment.render_target =
-        RenderTarget::create(render_target_texture);
+        device.createRenderTarget(render_target_texture);
     render_enviroment.clear_render_target = true;
     render_enviroment.render_target_clear_value =
         VkClearValue{.color = {0, 0, 0, 1}};
@@ -199,31 +190,8 @@ void RenderEngine::prepareBackbufferForPresentation(const CommandBuffer& cmd,
     cmd.barrier(&render_finished, 1);
 }
 
-VkDescriptorSetLayout RenderEngine::createDescriptorLayout() {
-    VkDescriptorSetLayoutBinding bindings[2] = {};
-    bindings[TEXTURE_BINDING_INDEX].descriptorType =
-        VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
-    bindings[TEXTURE_BINDING_INDEX].binding = TEXTURE_BINDING_INDEX;
-    bindings[TEXTURE_BINDING_INDEX].stageFlags = VK_SHADER_STAGE_ALL_GRAPHICS;
-    bindings[TEXTURE_BINDING_INDEX].descriptorCount =
-        MAX_TEXTURE_DESCRIPTORS_COUNT;
-
-    bindings[SAMPLER_BINDING_INDEX].descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER;
-    bindings[SAMPLER_BINDING_INDEX].binding = SAMPLER_BINDING_INDEX;
-    bindings[SAMPLER_BINDING_INDEX].stageFlags = VK_SHADER_STAGE_ALL_GRAPHICS;
-    bindings[SAMPLER_BINDING_INDEX].descriptorCount =
-        MAX_SAMPLE_DESCRIPTORS_COUNT;
-
-    VkDescriptorSetLayoutCreateInfo info = {};
-    info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-    info.flags = VK_DESCRIPTOR_SET_LAYOUT_CREATE_DESCRIPTOR_BUFFER_BIT_EXT;
-    info.bindingCount = 2;
-    info.pBindings = bindings;
-
-    VkDescriptorSetLayout layout;
-    vkCreateDescriptorSetLayout(device, &info, nullptr, &layout);
-
-    return layout;
+EngineData RenderEngine::getEngineData() {
+    return EngineData{device, descriptor_set, shader_registry};
 }
 
 uint32_t RenderEngine::getWidth() const { return width; }

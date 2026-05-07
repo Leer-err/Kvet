@@ -62,7 +62,7 @@ void CommandBuffer::draw(const Buffer& vertex_buffer,
     vkCmdBindVertexBuffers(buffer, 0, 1, &vertex_buffer.buffer,
                            &vertex_buffer_offset);
 
-    auto index_count = index_buffer.getSize() / sizeof(uint32_t);
+    auto index_count = index_buffer.size / sizeof(uint32_t);
     vkCmdDrawIndexed(buffer, index_count, 3, 0, 0, 0);
 }
 
@@ -70,7 +70,7 @@ void CommandBuffer::bindDescriptorSet(const GraphicsPipeline& pipeline,
                                       const DescriptorSet& set) const {
     VkDescriptorBufferBindingInfoEXT info = {};
     info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_BUFFER_BINDING_INFO_EXT;
-    info.address = set.descriptors.getDeviceAddress();
+    info.address = set.getDescriptors();
     info.usage = VK_BUFFER_USAGE_RESOURCE_DESCRIPTOR_BUFFER_BIT_EXT;
     vkCmdBindDescriptorBuffersEXT(buffer, 1, &info);
 
@@ -84,13 +84,13 @@ void CommandBuffer::bindDescriptorSet(const GraphicsPipeline& pipeline,
 void CommandBuffer::bindRenderEnviroment(const RenderEnviroment& env) const {
     VkRenderingInfo render_info = {};
     render_info.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
-    render_info.renderArea.extent.width = env.render_target.width;
-    render_info.renderArea.extent.height = env.render_target.height;
+    render_info.renderArea.extent.width = env.width;
+    render_info.renderArea.extent.height = env.height;
     render_info.layerCount = 1;
 
     VkRenderingAttachmentInfo colorAttachmentInfo = {};
     colorAttachmentInfo.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
-    colorAttachmentInfo.imageView = env.render_target.render_target;
+    colorAttachmentInfo.imageView = env.render_target;
     colorAttachmentInfo.imageLayout = VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL;
     colorAttachmentInfo.loadOp = VK_ATTACHMENT_LOAD_OP_LOAD;
     colorAttachmentInfo.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
@@ -124,15 +124,15 @@ void CommandBuffer::bindRenderEnviroment(const RenderEnviroment& env) const {
     vkCmdBeginRendering(buffer, &render_info);
 
     VkViewport viewport = {};
-    viewport.width = static_cast<float>(env.render_target.width);
-    viewport.height = static_cast<float>(env.render_target.height);
+    viewport.width = static_cast<float>(env.width);
+    viewport.height = static_cast<float>(env.height);
     viewport.minDepth = 0.0f;
     viewport.maxDepth = 1.0f;
     vkCmdSetViewport(buffer, 0, 1, &viewport);
 
     VkRect2D scissor = {};
-    scissor.extent.width = static_cast<uint32_t>(env.render_target.width);
-    scissor.extent.height = static_cast<uint32_t>(env.render_target.height);
+    scissor.extent.width = static_cast<uint32_t>(env.width);
+    scissor.extent.height = static_cast<uint32_t>(env.height);
     vkCmdSetScissor(buffer, 0, 1, &scissor);
 }
 

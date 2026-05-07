@@ -2,13 +2,7 @@
 
 #include <vulkan/vulkan.h>
 
-#include "GraphicsResources.h"
-
 namespace Graphics {
-
-void Image::destroy() {
-    vmaDestroyImage(api_data.allocator, image, allocation);
-}
 
 VkImageMemoryBarrier2 Image::createBarrier(VkImageLayout new_layout,
                                            VkPipelineStageFlags2 src_stages,

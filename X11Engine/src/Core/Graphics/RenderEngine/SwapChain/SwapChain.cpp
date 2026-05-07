@@ -10,12 +10,10 @@
 
 namespace Graphics {
 
-SwapChain::SwapChain(vkb::Device device, Queue presentation_queue,
+SwapChain::SwapChain(const Device& device, Queue presentation_queue,
                      uint32_t width, uint32_t height,
                      Config::BufferingMode buffering_mode)
-    : device(device), queue(presentation_queue) {
-    vkb::SwapchainBuilder swapchain_builder{device};
-
+    : queue(presentation_queue) {
     swap_chain_size = 2;
     VkPresentModeKHR mode;
     switch (buffering_mode) {
@@ -37,17 +35,10 @@ SwapChain::SwapChain(vkb::Device device, Queue presentation_queue,
     VkSurfaceFormatKHR format = {};
     format.format = VK_FORMAT_R8G8B8A8_SRGB;
     format.colorSpace = VK_COLORSPACE_SRGB_NONLINEAR_KHR;
-    swapchain_builder.set_desired_format(format);
-    swapchain_builder.add_fallback_present_mode(mode);
-    swapchain_builder.set_desired_min_image_count(swap_chain_size);
-    swapchain_builder.set_image_usage_flags(
+
+    swap_chain = device.createSwapChain(
+        format, mode, swap_chain_size,
         VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT);
-
-    auto swap_ret = swapchain_builder.build();
-    if (!swap_ret) {
-    }
-
-    swap_chain = swap_ret.value();
 
     auto swap_cahin_images = swap_chain.get_images().value();
     swap_chain_size = swap_cahin_images.size();
@@ -57,16 +48,16 @@ SwapChain::SwapChain(vkb::Device device, Queue presentation_queue,
         image.format = format.format;
 
         images[i] = image;
-        semaphores[i] = Semaphore::create();
+        semaphores[i] = device.createSemaphore();
     }
 }
 
 void SwapChain::destroy() {
-    vkDestroySwapchainKHR(device, swap_chain, nullptr);
+    vkb::destroy_swapchain(swap_chain);
 
-    for (int i = 0; i < swap_chain_size; i++) {
-        semaphores[i].destroy();
-    }
+    // for (int i = 0; i < swap_chain_size; i++) {
+    //     semaphores[i].destroy();
+    // }
 }
 
 void SwapChain::present() {
@@ -85,7 +76,7 @@ void SwapChain::present() {
 
 SwapChain::BackBuffer SwapChain::getBackbuffer(
     const Semaphore& ready_for_render) {
-    vkAcquireNextImageKHR(device, swap_chain, UINT64_MAX,
+    vkAcquireNextImageKHR(swap_chain.device, swap_chain, UINT64_MAX,
                           ready_for_render.semaphore, VK_NULL_HANDLE,
                           &image_index);
 

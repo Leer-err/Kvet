@@ -1,8 +1,9 @@
 #include "Graphics.h"
 
+#include <vk_mem_alloc.h>
+
 #include "AppConfig.h"
 #include "ExtensionFunctions.h"
-#include "GraphicsResources.h"
 #include "LoggerFactory.h"
 #include "Queue.h"
 #include "Result.h"

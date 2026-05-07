@@ -4,34 +4,9 @@
 
 namespace Graphics {
 
-CommandPool::CommandPool(const APIData& api_data, uint32_t queue_index) {
-    VkCommandPoolCreateInfo info = {};
-    info.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-    info.pNext = nullptr;
-    info.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-    info.queueFamilyIndex = queue_index;
-
-    CommandPool pool = {};
-    pool.api_data = api_data;
-    vkCreateCommandPool(api_data.device, &info, nullptr, &pool.pool);
-    return pool;
-}
-
-CommandPool::~CommandPool(const APIData& api_data, uint32_t queue_index) {
-    VkCommandPoolCreateInfo info = {};
-    info.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-    info.pNext = nullptr;
-    info.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-    info.queueFamilyIndex = queue_index;
-
-    CommandPool pool = {};
-    pool.api_data = api_data;
-    vkCreateCommandPool(api_data.device, &info, nullptr, &pool.pool);
-    return pool;
-}
-
-void CommandPool::destroy() {
-    vkDestroyCommandPool(api_data.device, pool, nullptr);
+CommandPool::CommandPool(const EngineData& engine_data, uint32_t queue_index)
+    : engine_data(engine_data) {
+    engine_data.device.createCommandPool(queue_index);
 }
 
 CommandBuffer CommandPool::getCommandBuffer() {
@@ -56,13 +31,13 @@ CommandBuffer CommandPool::createCommandBuffer() {
     info.commandBufferCount = 1;
 
     CommandBuffer buffer = {};
-    vkAllocateCommandBuffers(api_data.device, &info, &buffer.buffer);
+    buffer.buffer = engine_data.device.createCommandBuffer(pool);
 
     return buffer;
 }
 
 void CommandPool::reset() {
-    vkResetCommandPool(api_data.device, pool, 0);
+    engine_data.device.resetCommandPool(pool);
 
     unused_buffer_index = 0;
 }

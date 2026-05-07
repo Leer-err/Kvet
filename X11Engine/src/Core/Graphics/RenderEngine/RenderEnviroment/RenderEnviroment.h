@@ -2,14 +2,16 @@
 
 #include <vulkan/vulkan.h>
 
-#include <optional>
+#include <cstdint>
 
-#include "RenderTarget.h"
 
 namespace Graphics {
 
 struct RenderEnviroment {
-    RenderTarget render_target;
+    uint32_t width;
+    uint32_t height;
+
+    VkImageView render_target;
     bool clear_render_target;
     VkClearValue render_target_clear_value;
 

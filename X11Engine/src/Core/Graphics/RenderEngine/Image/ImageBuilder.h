@@ -10,12 +10,6 @@
 
 namespace Graphics {
 
-enum class ImageError {
-    UnsupportedFormat,
-    NoDataForImmutableResource,
-    WriteFromGPUAndCPU
-};
-
 class ImageBuilder {
    public:
     ImageBuilder(const APIData& api_data, VkFormat format, uint32_t width,
