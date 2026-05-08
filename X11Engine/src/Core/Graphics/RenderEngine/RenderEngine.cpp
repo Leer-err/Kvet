@@ -1,27 +1,25 @@
 #include "RenderEngine.h"
 
+#include <VkBootstrap.h>
 #include <vulkan/vulkan.h>
-#include <vulkan/vulkan_core.h>
 
 #include <tracy/Tracy.hpp>
-
 // #include "AppConfig.h"
 // #include "Context.h"
 // #include "Format.h"
 #include "AppConfig.h"
 // #include "Context.h"
 #include "CommandBuffer.h"
+#include "CommandPool.h"
 #include "DescriptorSet.h"
 #include "DeviceProperties.h"
 #include "EngineData.h"
-#include "Fence.h"
 #include "FrameData.h"
 // #include "RenderEnviroment.h"
 #include "ImageBuilder.h"
 #include "RenderPass.h"
 #include "ShaderRegistry.h"
 #include "SwapChain.h"
-#include "VkBootstrap.h"
 
 namespace Graphics {
 
@@ -37,15 +35,13 @@ RenderEngine::RenderEngine(const vkb::Instance& instance,
       graphics_queue(graphics_queue),
       presentation_queue(presentation_queue),
       surface(surface),
+      frames_in_flight(FrameInFlight(this->device, graphics_queue.index),
+                       FrameInFlight(this->device, graphics_queue.index)),
       frame_in_flight_index(0) {
-    for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-        auto& frame_in_flight = frames_in_flight[i];
-        frame_in_flight.pool = CommandPool::create();
-        frame_in_flight.backbuffer_ready_for_rendering = Semaphore::create();
-        frame_in_flight.finished_processing = Fence::create(true);
-    }
-
     reinitWindowDependentResources();
+
+    EngineData data = getEngineData();
+    render_pass = std::make_unique<RenderPass>(data);
 }
 
 RenderEngine::~RenderEngine() {
@@ -66,9 +62,8 @@ void RenderEngine::render() {
 
     beginFrame(cmd);
 
-    FrameData data = {};
-    data.cmd = cmd;
-    data.env = render_enviroment;
+    FrameData data = {
+        .cmd = cmd, .env = render_enviroment, .descriptor_set = descriptor_set};
 
     render_pass->render(data);
 
@@ -111,7 +106,7 @@ void RenderEngine::endFrame(const CommandBuffer& cmd) {
     submit_info.pCommandBufferInfos = &command_buffer_info;
 
     vkQueueSubmit2(graphics_queue.queue, 1, &submit_info,
-                   frame_in_flight.finished_processing.fence);
+                   frame_in_flight.finished_processing);
 
     swap_chain.present();
 }
@@ -126,14 +121,16 @@ void RenderEngine::reinitWindowDependentResources() {
                            config.render_height, config.buffering_mode);
 
     render_target_texture =
-        ImageBuilder(device, VK_FORMAT_R8G8B8A8_SRGB, config.render_width,
-                     config.render_height)
+        ImageBuilder(getEngineData(), VK_FORMAT_R8G8B8A8_SRGB,
+                     config.render_width, config.render_height)
             .isCopySource()
             .isRenderTarget()
             .create()
             .getResult();
 
     render_enviroment = RenderEnviroment{};
+    render_enviroment.width = width;
+    render_enviroment.height = height;
     render_enviroment.render_target =
         device.createRenderTarget(render_target_texture);
     render_enviroment.clear_render_target = true;
@@ -146,8 +143,8 @@ void RenderEngine::waitRenderFinished() {
     auto finished_processing =
         frames_in_flight[frame_in_flight_index].finished_processing;
 
-    finished_processing.wait();
-    finished_processing.reset();
+    device.waitFence(finished_processing);
+    device.resetFence(finished_processing);
 }
 
 void RenderEngine::prepareRenderTargetForRendering(const CommandBuffer& cmd) {

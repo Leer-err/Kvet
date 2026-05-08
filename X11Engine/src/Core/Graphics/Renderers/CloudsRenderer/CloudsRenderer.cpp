@@ -22,8 +22,7 @@ struct Vertex {
     Vector2 uv;
 };
 
-CloudsRenderer::CloudsRenderer(const APIData& api_data,
-                               EngineData& engine_data) {
+CloudsRenderer::CloudsRenderer(const EngineData& engine_data) {
     constexpr Vertex cloud_plane_vertex_data[] = {
         {Vector3(-1, 0, -1), Vector2(0, 0)},
         {Vector3(-1, 0, 1), Vector2(0, 1)},
@@ -37,66 +36,71 @@ CloudsRenderer::CloudsRenderer(const APIData& api_data,
     constexpr uint32_t screen_quad_indices[] = {0, 1, 2, 1, 3, 2};
 
     cloud_plane_vertices =
-        Graphics::BufferBuilder(sizeof(cloud_plane_vertex_data))
+        BufferBuilder(engine_data, sizeof(cloud_plane_vertex_data))
             .isVertexBuffer(sizeof(Vector3))
             .isCPUWritable()
             .create()
             .getResult();
-    auto cloud_plane_data = cloud_plane_vertices.map();
+    auto cloud_plane_data = engine_data.device.map(cloud_plane_vertices);
     memcpy(cloud_plane_data, cloud_plane_vertex_data,
            sizeof(cloud_plane_vertex_data));
-    cloud_plane_vertices.unmap();
+    engine_data.device.unmap(cloud_plane_vertices);
 
-    quad_vertices = Graphics::BufferBuilder(sizeof(screen_quad_vertices))
+    quad_vertices = BufferBuilder(engine_data, sizeof(screen_quad_vertices))
                         .isVertexBuffer(sizeof(Vector3))
                         .isCPUWritable()
                         .create()
                         .getResult();
-    auto vertex_data = quad_vertices.map();
+    auto vertex_data = engine_data.device.map(quad_vertices);
     memcpy(vertex_data, screen_quad_vertices, sizeof(screen_quad_vertices));
-    quad_vertices.unmap();
+    engine_data.device.unmap(quad_vertices);
 
-    quad_indices = Graphics::BufferBuilder(sizeof(screen_quad_indices))
+    quad_indices = BufferBuilder(engine_data, sizeof(screen_quad_indices))
                        .isIndexBuffer()
                        .isCPUWritable()
                        .create()
                        .getResult();
-    auto index_data = quad_indices.map();
+    auto index_data = engine_data.device.map(quad_indices);
     memcpy(index_data, screen_quad_indices, sizeof(screen_quad_indices));
-    quad_indices.unmap();
+    engine_data.device.unmap(quad_indices);
 
-    clouds_texture = ImageBuilder(VK_FORMAT_R8G8B8A8_UNORM, 512, 512)
-                         .isRenderTarget()
-                         .isShaderResource()
-                         .create()
-                         .getResult();
-    engine_data.descriptor_set.addImage(TextureView::create(clouds_texture));
-    engine_data.descriptor_set.addSampler(Sampler::point());
+    clouds_texture =
+        ImageBuilder(engine_data, VK_FORMAT_R8G8B8A8_UNORM, 512, 512)
+            .isRenderTarget()
+            .isShaderResource()
+            .create()
+            .getResult();
+    engine_data.descriptor_set.addImage(
+        engine_data.device.createRenderTarget(clouds_texture));
+    engine_data.descriptor_set.addSampler(Sampler::point(engine_data));
 
-    env.render_target = RenderTarget::create(clouds_texture);
+    env.width = 512;
+    env.height = 512;
+    env.render_target = engine_data.device.createRenderTarget(clouds_texture);
     env.clear_render_target = true;
     env.render_target_clear_value.color = {0, 0, 0, 0};
 
     cloud_texture_pipeline =
-        GraphicsPipelineBuilder("./Assets/Shaders/Clouds/CloudsTexture.spv",
-                                "vertex_main",
-                                "./Assets/Shaders/Clouds/CloudsTexture.spv",
-                                "pixel_main", api_data.descriptor_layout)
+        GraphicsPipelineBuilder(
+            engine_data, "./Assets/Shaders/Clouds/CloudsTexture.spv",
+            "vertex_main", "./Assets/Shaders/Clouds/CloudsTexture.spv",
+            "pixel_main")
             .setRenderTargetFormat(VK_FORMAT_R8G8B8A8_UNORM)
             .create()
             .getResult();
-    cloud_pipeline = GraphicsPipelineBuilder(
-                         "./Assets/Shaders/Clouds/Clouds.spv", "vertex_main",
-                         "./Assets/Shaders/Clouds/Clouds.spv", "pixel_main",
-                         api_data.descriptor_layout)
-                         .create()
-                         .getResult();
+    cloud_pipeline =
+        GraphicsPipelineBuilder(
+            engine_data, "./Assets/Shaders/Clouds/Clouds.spv", "vertex_main",
+            "./Assets/Shaders/Clouds/Clouds.spv", "pixel_main")
+            .create()
+            .getResult();
 
-    clouds_data_buffer = BufferBuilder(sizeof(CloudsData))
+    clouds_data_buffer = BufferBuilder(engine_data, sizeof(CloudsData))
                              .isConstantBuffer()
                              .isCPUWritable()
                              .create()
                              .getResult();
+    push_constants.clouds_address = clouds_data_buffer.device_address;
 
     CloudsData data = {};
     data.color = Vector3(1, 0, 1);
@@ -104,34 +108,24 @@ CloudsRenderer::CloudsRenderer(const APIData& api_data,
     data.cloud_plane_scale = 1000;
     data.height = 100;
 
-    auto data_ptr = clouds_data_buffer.map();
+    auto data_ptr = engine_data.device.map(clouds_data_buffer);
     memcpy(data_ptr, &data, sizeof(CloudsData));
-    clouds_data_buffer.unmap();
+    engine_data.device.unmap(clouds_data_buffer);
 }
 
-struct PushConstants {
-    VkDeviceAddress camera_address;
-    VkDeviceAddress clouds_address;
-};
-
 void CloudsRenderer::render(const FrameData& frame_data,
-                            const Buffer& camera_data,
                             const CloudsData& clouds_data) {
     auto command_buffer = frame_data.cmd;
 
     command_buffer.setPipeline(cloud_pipeline);
-    command_buffer.bindDescriptorSet(cloud_pipeline, descriptors);
+    command_buffer.bindDescriptorSet(cloud_pipeline, frame_data.descriptor_set);
 
-    PushConstants constants;
-    constants.clouds_address = clouds_data_buffer.getDeviceAddress();
-    constants.camera_address = camera_data.getDeviceAddress();
-    command_buffer.pushConstants(cloud_pipeline, &constants);
+    command_buffer.pushConstants(cloud_pipeline, &push_constants);
 
     command_buffer.draw(cloud_plane_vertices, quad_indices);
 }
 
 void CloudsRenderer::preRender(const FrameData& frame_data,
-                               const Buffer& camera_data,
                                const CloudsData& clouds_data) {
     auto command_buffer = frame_data.cmd;
 
@@ -145,10 +139,11 @@ void CloudsRenderer::preRender(const FrameData& frame_data,
     command_buffer.bindRenderEnviroment(env);
 
     command_buffer.setPipeline(cloud_texture_pipeline);
-    command_buffer.bindDescriptorSet(cloud_texture_pipeline, descriptors);
+    command_buffer.bindDescriptorSet(cloud_texture_pipeline,
+                                     frame_data.descriptor_set);
 
-    VkDeviceAddress clouds_address = clouds_data_buffer.getDeviceAddress();
-    command_buffer.pushConstants(cloud_texture_pipeline, &clouds_address);
+    command_buffer.pushConstants(cloud_texture_pipeline,
+                                 &clouds_data_buffer.device_address);
 
     command_buffer.draw(quad_vertices, quad_indices);
 
@@ -160,6 +155,10 @@ void CloudsRenderer::preRender(const FrameData& frame_data,
         VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT,
         VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT, VK_ACCESS_2_SHADER_READ_BIT);
     command_buffer.barrier(&cloud_texture_barrier, 1);
+}
+
+void CloudsRenderer::setCameraData(VkDeviceAddress camera_data) {
+    push_constants.camera_address = camera_data;
 }
 
 }  // namespace Graphics

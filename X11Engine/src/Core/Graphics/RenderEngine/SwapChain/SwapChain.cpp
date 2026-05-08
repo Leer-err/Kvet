@@ -10,9 +10,8 @@
 
 namespace Graphics {
 
-SwapChain::SwapChain(const Device& device, Queue presentation_queue,
-                     uint32_t width, uint32_t height,
-                     Config::BufferingMode buffering_mode)
+SwapChain::SwapChain(Device& device, Queue presentation_queue, uint32_t width,
+                     uint32_t height, Config::BufferingMode buffering_mode)
     : queue(presentation_queue) {
     swap_chain_size = 2;
     VkPresentModeKHR mode;

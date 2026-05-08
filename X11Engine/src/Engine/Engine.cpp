@@ -4,12 +4,13 @@
 #include <thread>
 #include <tracy/Tracy.hpp>
 
+#include "Graphics.h"
 #include "Scene.h"
 #include "Window.h"
 
 // #include "GameInputConfigReader.h"
 // #include "Overlay.h"
-// #include "PhysicalInput.h"
+#include "PhysicalInput.h"
 // #include "ScriptLoader.h"
 // #include "ScriptSandbox.h"
 #include "GraphicsCommunicationManager.h"
@@ -37,6 +38,8 @@ void Engine::run() {
     // input_config_reader.read(
     //     "E:\\repos\\X11Engine\\X11Engine\\src\\Data\\Input\\Config.json",
     //     GameInputContext::get());
+
+    renderer = Graphics::getRenderEngine();
 
     main_loop_thread = std::thread([this]() { mainLoopWorker(); });
 
@@ -73,19 +76,14 @@ void Engine::update(float delta_time) {
 
     fps = 1.f / delta_time;
 
-    // PhysicalInput::get().saveState();
+    Input::PhysicalInput::get().saveState();
 
-    // Graphics::RenderEngine::get().beginFrame();
-
-    Scene::get().update(delta_time);
+    // Scene::get().update(delta_time);
 
     GraphicsCommunicationManager::get().flush();
-
-    // renderer.render();
+    renderer->render();
 
     // Overlay::Overlay::get().draw();
-
-    // Graphics::RenderEngine::get().endFrame();
 
     FrameMark;
 }

@@ -2,10 +2,13 @@
 
 #include <vk_mem_alloc.h>
 
+#include <memory>
+
 #include "AppConfig.h"
 #include "ExtensionFunctions.h"
 #include "LoggerFactory.h"
 #include "Queue.h"
+#include "RenderEngine.h"
 #include "Result.h"
 #include "SDL3/SDL_vulkan.h"
 #include "VkBootstrap.h"
@@ -20,6 +23,8 @@ enum class Error {
     QueueCreationFailed,
     AllocatorCreationFailed
 };
+
+static RenderEngine* render_engine = nullptr;
 
 static Result<vkb::Instance, Error> createInstance(const Config::App& config) {
     vkb::InstanceBuilder builder;
@@ -167,9 +172,14 @@ bool init() {
     }
     auto allocator = allocator_result.getResult();
 
-    loadExtensionFunctions();
+    loadExtensionFunctions(device);
+
+    render_engine = new RenderEngine(instance, device, graphics_queue,
+                                     presentation_queue, allocator, surface);
 
     return true;
 }
+
+IRenderEngine* getRenderEngine() { return render_engine; }
 
 }  // namespace Graphics

@@ -10,7 +10,7 @@ struct FrameData {
     CommandBuffer cmd;
     RenderEnviroment env;
 
-    DescriptorSet set;
+    DescriptorSet& descriptor_set;
 };
 
 }  // namespace Graphics

@@ -4,7 +4,7 @@
 
 namespace Graphics {
 
-void loadExtensionFunctions();
+void loadExtensionFunctions(VkDevice device);
 
 extern PFN_vkGetDescriptorSetLayoutSizeEXT vkGetDescriptorSetLayoutSizeEXT;
 extern PFN_vkGetDescriptorSetLayoutBindingOffsetEXT

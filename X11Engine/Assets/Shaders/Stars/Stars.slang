@@ -149,7 +149,7 @@ float4 pixel_main(in Vertex_Output data, uniform CameraData* camera_data, unifor
 {
     float3 noise_position = normalize(data.position);
     float noise = 1 - voronoi3d(noise_position * stars_data.star_density).x;
-    float stars = step(0.95, noise);
+    float stars = step(0.9, noise);
 
     float blink_offset = stars_data.time * stars_data.blinking_speed;
     float brightness_noise = fbm((noise_position * 10 + blink_offset) , 0.5);

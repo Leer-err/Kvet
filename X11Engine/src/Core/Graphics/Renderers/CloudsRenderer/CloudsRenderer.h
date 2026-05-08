@@ -1,6 +1,7 @@
 #pragma once
 
-#include "APIData.h"
+#include <vulkan/vulkan_core.h>
+
 #include "Buffer.h"
 #include "CloudsData.h"
 #include "CommandBuffer.h"
@@ -13,14 +14,18 @@
 namespace Graphics {
 
 class CloudsRenderer {
+    struct PushConstants {
+        VkDeviceAddress camera_address;
+        VkDeviceAddress clouds_address;
+    };
+
    public:
-    CloudsRenderer(const APIData& api_data, EngineData& engine_data);
+    CloudsRenderer(const EngineData& engine_data);
 
-    void render(const FrameData& frame_data, const Buffer& camera_data,
-                const CloudsData& clouds_data);
+    void render(const FrameData& frame_data, const CloudsData& clouds_data);
+    void preRender(const FrameData& frame_data, const CloudsData& clouds_data);
 
-    void preRender(const FrameData& frame_data, const Buffer& camera_data,
-                   const CloudsData& clouds_data);
+    void setCameraData(VkDeviceAddress camera_data);
 
    private:
     Buffer cloud_plane_vertices;
@@ -33,6 +38,8 @@ class CloudsRenderer {
 
     Image clouds_texture;
     Buffer clouds_data_buffer;
+
+    PushConstants push_constants;
 };
 
 }  // namespace Graphics

@@ -8,9 +8,9 @@
 #include "CommandBuffer.h"
 #include "CommandPool.h"
 #include "DescriptorSet.h"
+#include "Device.h"
 #include "DeviceProperties.h"
 #include "EngineData.h"
-#include "Fence.h"
 #include "IRenderEngine.h"
 #include "Queue.h"
 #include "RenderEnviroment.h"
@@ -28,10 +28,15 @@ class RenderEngine final : public IRenderEngine {
     static constexpr size_t MAX_FRAMES_IN_FLIGHT = 2;
 
     struct FrameInFlight {
+        FrameInFlight(Device& device, uint32_t queue_index)
+            : pool(device, queue_index),
+              backbuffer_ready_for_rendering(device.createSemaphore()),
+              finished_processing(device.createFence(true)) {}
+
         CommandPool pool;
 
         Semaphore backbuffer_ready_for_rendering;
-        Fence finished_processing;
+        VkFence finished_processing;
     };
 
    public:

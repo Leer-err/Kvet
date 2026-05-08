@@ -1,6 +1,5 @@
 #pragma once
 
-#include "APIData.h"
 #include "CloudsRenderer.h"
 #include "DescriptorSet.h"
 #include "FrameData.h"
@@ -10,7 +9,7 @@ namespace Graphics {
 
 class RenderPass {
    public:
-    RenderPass(const APIData& api_data, const EngineData& engine_data);
+    RenderPass(EngineData engine_data);
 
     void render(const FrameData& frame_data);
 
@@ -18,7 +17,11 @@ class RenderPass {
     void beginPass(const FrameData& frame_data);
     void endPass(const FrameData& frame_data);
 
-    Buffer camera_data;
+    void updateCameraBuffer();
+
+    EngineData engine_data;
+
+    Buffer camera_data_buffer;
 
     StarRenderer star_renderer;
     CloudsRenderer clouds_renderer;

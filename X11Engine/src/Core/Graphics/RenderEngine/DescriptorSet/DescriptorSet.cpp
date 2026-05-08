@@ -10,7 +10,7 @@
 
 namespace Graphics {
 
-DescriptorSet::DescriptorSet(const Device& device,
+DescriptorSet::DescriptorSet(Device& device,
                              const DeviceProperties& device_properties)
     : device(device) {
     auto& descriptor_properties =
@@ -20,6 +20,8 @@ DescriptorSet::DescriptorSet(const Device& device,
 
     texture_descriptor_size = descriptor_properties.texture_size;
     sampler_descriptor_size = descriptor_properties.sampler_size;
+    texture_descriptors_offset = descriptor_layout.texture_descriptors_offset;
+    sampler_descriptors_offset = descriptor_layout.sampler_descriptors_offset;
 
     size_t set_size = descriptor_layout.layout_size;
     auto alignment = descriptor_properties.alignment;
@@ -27,11 +29,18 @@ DescriptorSet::DescriptorSet(const Device& device,
 
     current_sampler_index = 0;
     current_texture_index = 0;
-    descriptors = BufferBuilder(device, set_size)
-                      .isDescriptorBuffer()
-                      .isCPUWritable(true)
-                      .create()
-                      .getResult();
+
+    VkBufferCreateInfo buffer_info = {};
+    buffer_info.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+    buffer_info.size = set_size;
+    buffer_info.usage |= VK_BUFFER_USAGE_RESOURCE_DESCRIPTOR_BUFFER_BIT_EXT |
+                         VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT;
+
+    VmaAllocationCreateInfo alloc_info = {};
+    alloc_info.usage = VMA_MEMORY_USAGE_AUTO;
+    alloc_info.flags |= VMA_ALLOCATION_CREATE_HOST_ACCESS_RANDOM_BIT;
+
+    descriptors = device.createBuffer(buffer_info, alloc_info).getResult();
 }
 
 void DescriptorSet::addImage(const VkImageView& texture) {
@@ -57,7 +66,7 @@ void DescriptorSet::addImage(const VkImageView& texture) {
     device.unmap(descriptors);
 }
 
-void DescriptorSet::addSampler(const Sampler& sampler) {
+void DescriptorSet::addSampler(const VkSampler& sampler) {
     auto descriptors_ptr = device.map(descriptors);
 
     char* binding_ptr =
@@ -69,7 +78,7 @@ void DescriptorSet::addSampler(const Sampler& sampler) {
     VkDescriptorGetInfoEXT info{};
     info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_GET_INFO_EXT;
     info.type = VK_DESCRIPTOR_TYPE_SAMPLER;
-    info.data.pSampler = &sampler.sampler;
+    info.data.pSampler = &sampler;
     device.writeDescriptor(info, sampler_descriptor_size, element_ptr);
 
     device.unmap(descriptors);

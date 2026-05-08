@@ -2,7 +2,6 @@
 
 #include <VkBootstrap.h>
 #include <vulkan/vulkan.h>
-#include <vulkan/vulkan_core.h>
 
 #include <cstddef>
 #include <cstdint>
@@ -12,6 +11,7 @@
 #include "DeviceProperties.h"
 #include "GraphicsPipeline.h"
 #include "Image.h"
+#include "Logger.h"
 #include "Result.h"
 #include "Semaphore.h"
 
@@ -24,46 +24,44 @@ class Device {
 
     vkb::Swapchain createSwapChain(VkSurfaceFormatKHR format,
                                    VkPresentModeKHR present_mode,
-                                   size_t image_count,
-                                   VkImageUsageFlags flags) const;
+                                   size_t image_count, VkImageUsageFlags flags);
 
     Result<Image, ImageError> createImage(
         const VkImageCreateInfo& image_info,
-        const VmaAllocationCreateInfo& alloc_info) const;
+        const VmaAllocationCreateInfo& alloc_info);
 
     Result<Buffer, BufferError> createBuffer(
         const VkBufferCreateInfo& buffer_info,
-        const VmaAllocationCreateInfo& alloc_info) const;
+        const VmaAllocationCreateInfo& alloc_info);
 
     void* map(const Buffer& buffer) const;
     void unmap(const Buffer& buffer) const;
 
-    VkCommandPool createCommandPool(uint32_t queue_index) const;
+    VkCommandPool createCommandPool(uint32_t queue_index);
     void resetCommandPool(VkCommandPool pool) const;
-    VkCommandBuffer createCommandBuffer(VkCommandPool pool) const;
+    VkCommandBuffer createCommandBuffer(VkCommandPool pool);
 
-    VkImageView createDepthStencil(const Image& image) const;
-    VkImageView createRenderTarget(const Image& image) const;
+    VkImageView createDepthStencil(const Image& image);
+    VkImageView createRenderTarget(const Image& image);
 
     DescriptorLayout getDescriptorLayout() const;
 
     DeviceProperties getDeviceProperties() const;
 
-    VkFence createFence(bool is_signaled) const;
-    void waitFence(VkFence fence) const;
+    VkFence createFence(bool is_signaled);
+    void waitFence(VkFence fence);
     void resetFence(VkFence fence) const;
 
     VkShaderModule createShader(const uint32_t* shader_data,
-                                size_t shader_data_size) const;
+                                size_t shader_data_size);
 
-    VkPipelineLayout createPipelineLayout(
-        const VkGraphicsPipelineCreateInfo& pipeline_info) const;
+    VkPipelineLayout createPipelineLayout(size_t push_constants_size);
     GraphicsPipeline createGraphicsPipeline(
-        const VkGraphicsPipelineCreateInfo& pipeline_info) const;
+        const VkGraphicsPipelineCreateInfo& pipeline_info);
 
-    VkSampler createSampler(const VkSamplerCreateInfo& sampler_info) const;
+    VkSampler createSampler(const VkSamplerCreateInfo& sampler_info);
 
-    Semaphore createSemaphore() const;
+    Semaphore createSemaphore();
 
     void writeDescriptor(const VkDescriptorGetInfoEXT& info,
                          size_t descriptor_size, void* dst) const;
@@ -81,6 +79,8 @@ class Device {
 
     DescriptorLayout descriptor_layout;
     DeviceProperties properties;
+
+    Logger logger;
 };
 
 }  // namespace Graphics

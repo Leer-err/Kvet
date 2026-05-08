@@ -4,62 +4,54 @@
 
 #include <cstring>
 
-#include "APIData.h"
 #include "BufferBuilder.h"
-#include "CameraData.h"
 #include "CommandBuffer.h"
+#include "EngineData.h"
 #include "GraphicsPipelineBuilder.h"
-#include "InputLayoutBuilder.h"
-#include "Shader.h"
-#include "ShaderBuilder.h"
 #include "StarsData.h"
 #include "Vector3.h"
 
 namespace Graphics {
 
-struct Constants {
-    VkDeviceAddress camera_data;
-    VkDeviceAddress stars_data;
-};
-
-StarRenderer::StarRenderer(const APIData& api_data,
-                           const EngineData& engine_data) {
+StarRenderer::StarRenderer(const EngineData& engine_data)
+    : engine_data(engine_data) {
     constexpr Vector3 screen_quad_vertices[] = {
         Vector3(-1, -1, 1), Vector3(1, -1, 1), Vector3(-1, 1, 1),
         Vector3(1, 1, 1)};
 
     constexpr uint32_t screen_quad_indices[] = {0, 1, 2, 1, 3, 2};
 
-    quad_vertices = BufferBuilder(sizeof(screen_quad_vertices))
+    quad_vertices = BufferBuilder(engine_data, sizeof(screen_quad_vertices))
                         .isVertexBuffer(sizeof(Vector3))
                         .isCPUWritable()
                         .create()
                         .getResult();
-    auto vertex_data = quad_vertices.map();
+    auto vertex_data = engine_data.device.map(quad_vertices);
     memcpy(vertex_data, screen_quad_vertices, sizeof(screen_quad_vertices));
-    quad_vertices.unmap();
+    engine_data.device.unmap(quad_vertices);
 
-    quad_indices = BufferBuilder(sizeof(screen_quad_indices))
+    quad_indices = BufferBuilder(engine_data, sizeof(screen_quad_indices))
                        .isIndexBuffer()
                        .isCPUWritable()
                        .create()
                        .getResult();
-    auto index_data = quad_indices.map();
+    auto index_data = engine_data.device.map(quad_indices);
     memcpy(index_data, screen_quad_indices, sizeof(screen_quad_indices));
-    quad_indices.unmap();
+    engine_data.device.unmap(quad_indices);
 
-    pipeline = GraphicsPipelineBuilder("./Assets/Shaders/Stars/Stars.spv",
-                                       "vertex_main",
-                                       "./Assets/Shaders/Stars/Stars.spv",
-                                       "pixel_main", api_data.descriptor_layout)
-                   .create()
-                   .getResult();
+    pipeline =
+        GraphicsPipelineBuilder(
+            engine_data, "./Assets/Shaders/Stars/Stars.spv", "vertex_main",
+            "./Assets/Shaders/Stars/Stars.spv", "pixel_main")
+            .create()
+            .getResult();
 
-    stars_data_buffer = BufferBuilder(sizeof(StarsData))
+    stars_data_buffer = BufferBuilder(engine_data, sizeof(StarsData))
                             .isConstantBuffer()
                             .isCPUWritable()
                             .create()
                             .getResult();
+    push_constants.stars_data = stars_data_buffer.device_address;
 }
 
 void StarRenderer::render(const FrameData& frame_data,
@@ -67,18 +59,19 @@ void StarRenderer::render(const FrameData& frame_data,
                           const StarsData& stars_data) {
     auto command_buffer = frame_data.cmd;
 
-    auto stars_data_ptr = stars_data_buffer.map();
+    auto stars_data_ptr = engine_data.device.map(stars_data_buffer);
     memcpy(stars_data_ptr, &stars_data, sizeof(stars_data));
-    stars_data_buffer.unmap();
+    engine_data.device.unmap(stars_data_buffer);
 
     command_buffer.setPipeline(pipeline);
 
-    VkDeviceAddress camera_address = camera_data.getDeviceAddress();
-    VkDeviceAddress stars_address = stars_data_buffer.getDeviceAddress();
-    auto constants = Constants{camera_address, stars_address};
-    command_buffer.pushConstants(pipeline, &constants);
+    command_buffer.pushConstants(pipeline, &push_constants);
 
     command_buffer.draw(quad_vertices, quad_indices);
+}
+
+void StarRenderer::setCameraData(VkDeviceAddress camera_data) {
+    push_constants.camera_data = camera_data;
 }
 
 }  // namespace Graphics

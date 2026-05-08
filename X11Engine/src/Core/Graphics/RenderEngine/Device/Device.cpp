@@ -1,12 +1,16 @@
 #include "Device.h"
 
+#include <vulkan/vk_enum_string_helper.h>
 #include <vulkan/vulkan.h>
 #include <vulkan/vulkan_core.h>
 
 #include "Buffer.h"
 #include "DeviceProperties.h"
+#include "ExtensionFunctions.h"
 #include "GraphicsPipeline.h"
 #include "Image.h"
+#include "Logger.h"
+#include "LoggerFactory.h"
 
 constexpr auto TEXTURE_BINDING_INDEX = 0;
 constexpr auto SAMPLER_BINDING_INDEX = 1;
@@ -17,7 +21,9 @@ constexpr auto MAX_SAMPLE_DESCRIPTORS_COUNT = 1000;
 namespace Graphics {
 
 Device::Device(vkb::Device device, VmaAllocator allocator)
-    : device(device), allocator(allocator) {
+    : device(device),
+      allocator(allocator),
+      logger(LoggerFactory::getLogger("GraphicsDevice")) {
     createDescriptorLayout();
     properties = DeviceProperties::readProperties(device.physical_device);
 }
@@ -30,7 +36,7 @@ Device::~Device() {
 vkb::Swapchain Device::createSwapChain(VkSurfaceFormatKHR format,
                                        VkPresentModeKHR present_mode,
                                        size_t image_count,
-                                       VkImageUsageFlags flags) const {
+                                       VkImageUsageFlags flags) {
     vkb::SwapchainBuilder swapchain_builder{device};
 
     swapchain_builder.set_desired_format(format);
@@ -47,26 +53,28 @@ vkb::Swapchain Device::createSwapChain(VkSurfaceFormatKHR format,
 
 Result<Image, ImageError> Device::createImage(
     const VkImageCreateInfo& image_info,
-    const VmaAllocationCreateInfo& alloc_info) const {
+    const VmaAllocationCreateInfo& alloc_info) {
     VkImage image;
     VmaAllocation allocation;
-    vmaCreateImage(allocator, &image_info, &alloc_info, &image, &allocation,
-                   nullptr);
+    VkResult result = vmaCreateImage(allocator, &image_info, &alloc_info,
+                                     &image, &allocation, nullptr);
+    if (result != VK_SUCCESS)
+        logger.error("Image creation failed with {}", string_VkResult(result));
 
-    auto result = Image{};
-    result.image = image;
-    result.allocation = allocation;
-    result.layout = VK_IMAGE_LAYOUT_UNDEFINED;
-    result.format = image_info.format;
-    result.width = image_info.extent.width;
-    result.height = image_info.extent.height;
+    auto image_result = Image{};
+    image_result.image = image;
+    image_result.allocation = allocation;
+    image_result.layout = VK_IMAGE_LAYOUT_UNDEFINED;
+    image_result.format = image_info.format;
+    image_result.width = image_info.extent.width;
+    image_result.height = image_info.extent.height;
 
-    return result;
+    return image_result;
 }
 
 Result<Buffer, BufferError> Device::createBuffer(
     const VkBufferCreateInfo& buffer_info,
-    const VmaAllocationCreateInfo& alloc_info) const {
+    const VmaAllocationCreateInfo& alloc_info) {
     Buffer buffer = {};
 
     vmaCreateBuffer(allocator, &buffer_info, &alloc_info, &buffer.buffer,
@@ -75,7 +83,9 @@ Result<Buffer, BufferError> Device::createBuffer(
     VkBufferDeviceAddressInfo info = {};
     info.sType = VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO;
     info.buffer = buffer.buffer;
-    buffer.device_address = vkGetBufferDeviceAddress(device, &info);
+
+    if ((buffer_info.usage & VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT) != 0)
+        buffer.device_address = vkGetBufferDeviceAddress(device, &info);
 
     buffer.size = buffer_info.size;
     return buffer;
@@ -91,7 +101,7 @@ void Device::unmap(const Buffer& buffer) const {
     vmaUnmapMemory(allocator, buffer.allocation);
 }
 
-VkCommandPool Device::createCommandPool(uint32_t queue_index) const {
+VkCommandPool Device::createCommandPool(uint32_t queue_index) {
     VkCommandPoolCreateInfo info = {};
     info.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
     info.pNext = nullptr;
@@ -99,7 +109,11 @@ VkCommandPool Device::createCommandPool(uint32_t queue_index) const {
     info.queueFamilyIndex = queue_index;
 
     VkCommandPool pool = {};
-    vkCreateCommandPool(device, &info, nullptr, &pool);
+    VkResult result = vkCreateCommandPool(device, &info, nullptr, &pool);
+
+    if (result != VK_SUCCESS)
+        logger.error("Command pool creation failed with with {}",
+                     string_VkResult(result));
     return pool;
 }
 
@@ -107,19 +121,23 @@ void Device::resetCommandPool(VkCommandPool pool) const {
     vkResetCommandPool(device, pool, 0);
 }
 
-VkCommandBuffer Device::createCommandBuffer(VkCommandPool pool) const {
+VkCommandBuffer Device::createCommandBuffer(VkCommandPool pool) {
     VkCommandBufferAllocateInfo info = {};
     info.commandPool = pool;
     info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
     info.commandBufferCount = 1;
 
     VkCommandBuffer buffer = {};
-    vkAllocateCommandBuffers(device, &info, &buffer);
+    VkResult result = vkAllocateCommandBuffers(device, &info, &buffer);
+
+    if (result != VK_SUCCESS)
+        logger.error("Command buffer creation failed with with {}",
+                     string_VkResult(result));
 
     return buffer;
 }
 
-VkImageView Device::createDepthStencil(const Image& image) const {
+VkImageView Device::createDepthStencil(const Image& image) {
     VkImageViewCreateInfo info = {};
     info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
     info.image = image.image;
@@ -134,7 +152,7 @@ VkImageView Device::createDepthStencil(const Image& image) const {
     return view;
 }
 
-VkImageView Device::createRenderTarget(const Image& image) const {
+VkImageView Device::createRenderTarget(const Image& image) {
     VkImageViewCreateInfo info = {};
     info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
     info.image = image.image;
@@ -155,7 +173,7 @@ DescriptorLayout Device::getDescriptorLayout() const {
 
 DeviceProperties Device::getDeviceProperties() const { return properties; }
 
-VkFence Device::createFence(bool is_signaled) const {
+VkFence Device::createFence(bool is_signaled) {
     VkFenceCreateInfo info = {};
     info.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
     info.pNext = nullptr;
@@ -166,16 +184,42 @@ VkFence Device::createFence(bool is_signaled) const {
     return fence;
 }
 
-void Device::waitFence(VkFence fence) const {
-    vkWaitForFences(device, 1, &fence, true, UINT64_MAX);
+void Device::waitFence(VkFence fence) {
+    VkResult result = vkWaitForFences(device, 1, &fence, true, UINT64_MAX);
+    if (result != VK_SUCCESS)
+        logger.error("Failure waiting for fence with {}",
+                     string_VkResult(result));
 }
 
 void Device::resetFence(VkFence fence) const {
     vkResetFences(device, 1, &fence);
 }
 
+VkPipelineLayout Device::createPipelineLayout(size_t push_constants_size) {
+    VkPushConstantRange constants = {};
+    constants.stageFlags = VK_SHADER_STAGE_ALL_GRAPHICS;
+    constants.size = push_constants_size;
+    constants.offset = 0;
+
+    VkPipelineLayoutCreateInfo pipelineLayoutCI = {};
+    pipelineLayoutCI.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+    pipelineLayoutCI.setLayoutCount = 1;
+    pipelineLayoutCI.pSetLayouts = &descriptor_layout.layout;
+
+    if (push_constants_size != 0) {
+        pipelineLayoutCI.pushConstantRangeCount = 1;
+        pipelineLayoutCI.pPushConstantRanges = &constants;
+    }
+
+    VkPipelineLayout pipeline_layout = {};
+    auto result = vkCreatePipelineLayout(device, &pipelineLayoutCI, nullptr,
+                                         &pipeline_layout);
+
+    return pipeline_layout;
+}
+
 GraphicsPipeline Device::createGraphicsPipeline(
-    const VkGraphicsPipelineCreateInfo& pipeline_info) const {
+    const VkGraphicsPipelineCreateInfo& pipeline_info) {
     GraphicsPipeline pipeline;
     VkResult result = vkCreateGraphicsPipelines(
         device, VK_NULL_HANDLE, 1, &pipeline_info, nullptr, &pipeline.pipeline);
@@ -184,14 +228,14 @@ GraphicsPipeline Device::createGraphicsPipeline(
     return pipeline;
 }
 
-VkSampler Device::createSampler(const VkSamplerCreateInfo& sampler_info) const {
+VkSampler Device::createSampler(const VkSamplerCreateInfo& sampler_info) {
     VkSampler sampler = {};
     vkCreateSampler(device, &sampler_info, nullptr, &sampler);
 
     return sampler;
 }
 
-Semaphore Device::createSemaphore() const {
+Semaphore Device::createSemaphore() {
     Semaphore semaphore;
 
     VkSemaphoreCreateInfo info = {};
@@ -241,7 +285,7 @@ void Device::createDescriptorLayout() {
 }
 
 VkShaderModule Device::createShader(const uint32_t* shader_data,
-                                    size_t shader_data_size) const {
+                                    size_t shader_data_size) {
     VkShaderModuleCreateInfo info = {};
     info.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
     info.pCode = shader_data;

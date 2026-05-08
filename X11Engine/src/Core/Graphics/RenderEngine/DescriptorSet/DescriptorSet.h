@@ -1,28 +1,25 @@
 #pragma once
 
 #include <vulkan/vulkan.h>
-#include <vulkan/vulkan_core.h>
 
 #include <cstddef>
 
 #include "Buffer.h"
 #include "Device.h"
-#include "Sampler.h"
 
 namespace Graphics {
 
 class DescriptorSet {
    public:
-    DescriptorSet(const Device& device,
-                  const DeviceProperties& device_properties);
+    DescriptorSet(Device& device, const DeviceProperties& device_properties);
 
     void addImage(const VkImageView& texture);
-    void addSampler(const Sampler& texture);
+    void addSampler(const VkSampler& sampler);
 
     VkDeviceAddress getDescriptors() const;
 
    private:
-    const Device& device;
+    Device& device;
 
     Buffer descriptors;
     size_t current_texture_index;

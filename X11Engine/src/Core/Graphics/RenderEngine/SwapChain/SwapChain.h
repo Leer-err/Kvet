@@ -19,7 +19,7 @@ class SwapChain {
     };
 
     SwapChain() = default;
-    SwapChain(const Device& device, Queue presentation_queue, uint32_t width,
+    SwapChain(Device& device, Queue presentation_queue, uint32_t width,
               uint32_t height, Config::BufferingMode buffering_mode);
 
     void destroy();

@@ -1,6 +1,7 @@
 #include "CameraManager.h"
 
 #include "CameraData.h"
+#include "GraphicsCommunicationManager.h"
 #include "Matrix.h"
 #include "Quaternion.h"
 #include "Transform.h"
@@ -41,6 +42,8 @@ void CameraManager::updateCameraData() {
 
     camera_data.view_projection = view_projection;
     camera_data.inverse_view_projection = view_projection.inverse();
+
+    GraphicsCommunicationManager::get().send(camera_data);
 }
 
 CameraData CameraManager::getCameraData() const { return camera_data; }

@@ -13,16 +13,16 @@
 // #include "ScriptSystem.h"
 // #include "Shape.h"
 // #include "StaticMeshRenderSystem.h"
-// #include "StaticProjectionCamera.h"
+#include "StaticProjectionCamera.h"
 // #include "StaticRigidBody.h"
 #include "Transform.h"
 // #include "TransformSystem.h"
 #include "Vector3.h"
 
 Scene::Scene() {
-    // auto cam = std::make_shared<StaticProjectionCamera>(60.f, (float)4 / 3,
-    //                                                     0.1f, 1000.f);
-    // CameraManager::get().setMainCamera(cam);
+    auto cam = std::make_shared<StaticProjectionCamera>(60.f, (float)4 / 3,
+                                                        0.1f, 1000.f);
+    CameraManager::get().setMainCamera(cam);
 
     // setupSystems();
 
@@ -71,7 +71,7 @@ void Scene::update(float deltaTime) {
     sky.draw();
     world.update(deltaTime);
 
-    // CameraManager::get().updateCameraData();
+    CameraManager::get().updateCameraData();
     GraphicsCommunicationManager::get().send(
         CameraManager::get().getCameraData());
 }

@@ -1,6 +1,5 @@
 #pragma once
 
-#include "APIData.h"
 #include "Buffer.h"
 #include "EngineData.h"
 #include "FrameData.h"
@@ -10,19 +9,30 @@
 namespace Graphics {
 
 class StarRenderer {
+    struct PushConstants {
+        VkDeviceAddress camera_data;
+        VkDeviceAddress stars_data;
+    };
+
    public:
-    StarRenderer(const APIData& api_data, const EngineData& engine_data);
+    StarRenderer(const EngineData& engine_data);
 
     void render(const FrameData& frame_data, const Buffer& camera_data,
                 const StarsData& stars_data);
 
+    void setCameraData(VkDeviceAddress camera_data);
+
    private:
-    Graphics::Buffer quad_vertices;
-    Graphics::Buffer quad_indices;
+    EngineData engine_data;
 
-    Graphics::GraphicsPipeline pipeline;
+    Buffer quad_vertices;
+    Buffer quad_indices;
 
-    Graphics::Buffer stars_data_buffer;
+    GraphicsPipeline pipeline;
+
+    Buffer stars_data_buffer;
+
+    PushConstants push_constants;
 };
 
 }  // namespace Graphics

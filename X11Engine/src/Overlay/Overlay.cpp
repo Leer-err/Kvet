@@ -1,18 +1,12 @@
 #include "Overlay.h"
 
-#include <backends/imgui_impl_dx11.h>
-#include <backends/imgui_impl_win32.h>
-#include <d3d11.h>
+#include <backends/imgui_impl_sdl3.h>
+#include <backends/imgui_impl_vulkan.h>
 #include <imgui.h>
-#include <winscard.h>
 
 #include <ranges>
 #include <string>
 #include <tracy/Tracy.hpp>
-
-#include "APIResources.h"
-#include "Renderer.h"
-#include "Window.h"
 
 Overlay::OverlayElements::Text::Text(std::function<std::string()> text_callback)
     : text_callback(text_callback) {}
