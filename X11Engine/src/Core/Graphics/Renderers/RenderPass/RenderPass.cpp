@@ -1,9 +1,12 @@
 #include "RenderPass.h"
 
+#include <tracy/Tracy.hpp>
+
 #include "BufferBuilder.h"
 #include "CameraData.h"
 #include "CloudsData.h"
 #include "CloudsRenderer.h"
+#include "Device.h"
 #include "GraphicsCommunicationManager.h"
 
 namespace Graphics {
@@ -23,11 +26,16 @@ RenderPass::RenderPass(EngineData engine_data)
 }
 
 void RenderPass::render(const FrameData& frame_data) {
+    ZoneScoped;
     auto& manager = GraphicsCommunicationManager::get();
+
+    TracyVkZone(frame_data.trace_ctx, frame_data.cmd.buffer, "Render pass");
 
     CloudsData clouds_data = {};
     clouds_data.color = {1, 0, 1};
     clouds_renderer.preRender(frame_data, clouds_data);
+
+    updateCameraBuffer();
 
     beginPass(frame_data);
 
@@ -50,10 +58,10 @@ void RenderPass::endPass(const FrameData& frame_data) {
 }
 
 void RenderPass::updateCameraBuffer() {
-    auto camera_data =
-        GraphicsCommunicationManager::get().recieve<CameraData>();
+    // auto camera_data =
+    //     GraphicsCommunicationManager::get().recieve<CameraData>();
 
-    if (!camera_data) return;
+    // if (!camera_data) return;
 
     CameraData data = {};
     data.view_projection = Matrix::projection(1.04, 16.f / 9, 1000, 1);
@@ -61,7 +69,7 @@ void RenderPass::updateCameraBuffer() {
     data.inverse_view_projection = data.view_projection.inverse();
 
     void* mapped_buffer = engine_data.device.map(camera_data_buffer);
-    memcpy(mapped_buffer, &camera_data, sizeof(CameraData));
+    memcpy(mapped_buffer, &data, sizeof(CameraData));
     engine_data.device.unmap(camera_data_buffer);
 }
 

@@ -71,9 +71,9 @@ void Scene::update(float deltaTime) {
     sky.draw();
     world.update(deltaTime);
 
-    CameraManager::get().updateCameraData();
-    GraphicsCommunicationManager::get().send(
-        CameraManager::get().getCameraData());
+    // CameraManager::get().updateCameraData();
+    // GraphicsCommunicationManager::get().send(
+    //     CameraManager::get().getCameraData());
 }
 
 void Scene::setupSystems() {

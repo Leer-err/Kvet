@@ -2,6 +2,7 @@
 
 namespace Graphics {
 
+// VK_EXT_descriptor_buffer
 PFN_vkGetDescriptorSetLayoutSizeEXT vkGetDescriptorSetLayoutSizeEXT;
 PFN_vkGetDescriptorSetLayoutBindingOffsetEXT
     vkGetDescriptorSetLayoutBindingOffsetEXT;
@@ -11,7 +12,13 @@ PFN_vkGetDescriptorEXT vkGetDescriptorEXT;
 PFN_vkCmdBindDescriptorBufferEmbeddedSamplersEXT
     vkCmdBindDescriptorBufferEmbeddedSamplersEXT;
 
+// VK_EXT_calibrated_timestamps
+PFN_vkGetPhysicalDeviceCalibrateableTimeDomainsEXT
+    vkGetPhysicalDeviceCalibrateableTimeDomainsEXT;
+PFN_vkGetCalibratedTimestampsEXT vkGetCalibratedTimestampsEXT;
+
 void loadExtensionFunctions(VkDevice device) {
+    // VK_EXT_descriptor_buffer
     vkGetDescriptorSetLayoutSizeEXT =
         reinterpret_cast<PFN_vkGetDescriptorSetLayoutSizeEXT>(
             vkGetDeviceProcAddr(device, "vkGetDescriptorSetLayoutSizeEXT"));
@@ -31,6 +38,15 @@ void loadExtensionFunctions(VkDevice device) {
     vkCmdSetDescriptorBufferOffsetsEXT =
         reinterpret_cast<PFN_vkCmdSetDescriptorBufferOffsetsEXT>(
             vkGetDeviceProcAddr(device, "vkCmdSetDescriptorBufferOffsetsEXT"));
+
+    // VK_EXT_calibrated_timestamps
+    vkGetPhysicalDeviceCalibrateableTimeDomainsEXT =
+        reinterpret_cast<PFN_vkGetPhysicalDeviceCalibrateableTimeDomainsEXT>(
+            vkGetDeviceProcAddr(
+                device, "vkGetPhysicalDeviceCalibrateableTimeDomainsEXT"));
+    vkGetCalibratedTimestampsEXT =
+        reinterpret_cast<PFN_vkGetCalibratedTimestampsEXT>(
+            vkGetDeviceProcAddr(device, "vkGetCalibratedTimestampsEXT"));
 }
 
 }  // namespace Graphics

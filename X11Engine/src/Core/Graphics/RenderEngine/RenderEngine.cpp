@@ -4,6 +4,7 @@
 #include <vulkan/vulkan.h>
 
 #include <tracy/Tracy.hpp>
+#include <tracy/TracyVulkan.hpp>
 // #include "AppConfig.h"
 // #include "Context.h"
 // #include "Format.h"
@@ -15,7 +16,6 @@
 #include "DeviceProperties.h"
 #include "EngineData.h"
 #include "FrameData.h"
-// #include "RenderEnviroment.h"
 #include "ImageBuilder.h"
 #include "RenderPass.h"
 #include "ShaderRegistry.h"
@@ -35,17 +35,24 @@ RenderEngine::RenderEngine(const vkb::Instance& instance,
       graphics_queue(graphics_queue),
       presentation_queue(presentation_queue),
       surface(surface),
-      frames_in_flight(FrameInFlight(this->device, graphics_queue.index),
-                       FrameInFlight(this->device, graphics_queue.index)),
+      frames_in_flight{FrameInFlight(this->device, graphics_queue.index),
+                       FrameInFlight(this->device, graphics_queue.index)},
       frame_in_flight_index(0) {
     reinitWindowDependentResources();
 
     EngineData data = getEngineData();
     render_pass = std::make_unique<RenderPass>(data);
+
+    auto pool = frames_in_flight[frame_in_flight_index].pool;
+    auto trace_cmd = pool.getCommandBuffer();
+    trace_ctx = this->device.createTracingContext(graphics_queue, trace_cmd);
+    pool.reset();
 }
 
 RenderEngine::~RenderEngine() {
     device.waitIdle();
+
+    TracyVkDestroy(trace_ctx);
 
     swap_chain.destroy();
     vkb::destroy_surface(instance, surface);
@@ -62,10 +69,16 @@ void RenderEngine::render() {
 
     beginFrame(cmd);
 
-    FrameData data = {
-        .cmd = cmd, .env = render_enviroment, .descriptor_set = descriptor_set};
+    FrameData data = {.cmd = cmd,
+                      .env = render_enviroment,
+                      .descriptor_set = descriptor_set,
+                      .trace_ctx = trace_ctx};
 
     render_pass->render(data);
+
+    if (trace_dump_counter++ % 100 == 0) {
+        TracyVkCollect(trace_ctx, cmd.buffer);
+    }
 
     endFrame(cmd);
 

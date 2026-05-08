@@ -2,9 +2,11 @@
 
 #include <VkBootstrap.h>
 #include <vulkan/vulkan.h>
+#include <vulkan/vulkan_core.h>
 
 #include <cstddef>
 #include <cstdint>
+#include <tracy/TracyVulkan.hpp>
 
 #include "Buffer.h"
 #include "DescriptorLayout.h"
@@ -12,10 +14,13 @@
 #include "GraphicsPipeline.h"
 #include "Image.h"
 #include "Logger.h"
+#include "Queue.h"
 #include "Result.h"
 #include "Semaphore.h"
 
 namespace Graphics {
+
+struct CommandBuffer;
 
 class Device {
    public:
@@ -69,6 +74,9 @@ class Device {
     void waitIdle() const;
 
     VkDevice getHandle() const;
+
+    TracyVkCtx createTracingContext(const Queue& queue,
+                                    const CommandBuffer& command_buffer) const;
 
    private:
     void createDescriptorLayout();

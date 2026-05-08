@@ -115,6 +115,8 @@ CloudsRenderer::CloudsRenderer(const EngineData& engine_data) {
 
 void CloudsRenderer::render(const FrameData& frame_data,
                             const CloudsData& clouds_data) {
+    TracyVkZone(frame_data.trace_ctx, frame_data.cmd.buffer, "Clouds");
+
     auto command_buffer = frame_data.cmd;
 
     command_buffer.setPipeline(cloud_pipeline);
@@ -127,6 +129,9 @@ void CloudsRenderer::render(const FrameData& frame_data,
 
 void CloudsRenderer::preRender(const FrameData& frame_data,
                                const CloudsData& clouds_data) {
+    TracyVkZone(frame_data.trace_ctx, frame_data.cmd.buffer,
+                "Cloud texture bake");
+
     auto command_buffer = frame_data.cmd;
 
     auto render_target_barrier = clouds_texture.createBarrier(

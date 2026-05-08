@@ -1,6 +1,7 @@
 #include "Graphics.h"
 
 #include <vk_mem_alloc.h>
+#include <vulkan/vulkan_core.h>
 
 #include <memory>
 
@@ -47,6 +48,7 @@ static Result<vkb::Device, Error> createDevice(const vkb::Instance& instance,
             .set_minimum_version(1, 3)
             .require_dedicated_transfer_queue()
             .add_required_extension(VK_EXT_DESCRIPTOR_BUFFER_EXTENSION_NAME)
+            .add_required_extension(VK_EXT_CALIBRATED_TIMESTAMPS_EXTENSION_NAME)
             .select();
 
     if (!phys_ret) {

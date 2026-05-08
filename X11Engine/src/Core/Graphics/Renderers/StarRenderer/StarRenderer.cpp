@@ -57,6 +57,8 @@ StarRenderer::StarRenderer(const EngineData& engine_data)
 void StarRenderer::render(const FrameData& frame_data,
                           const Buffer& camera_data,
                           const StarsData& stars_data) {
+    TracyVkZone(frame_data.trace_ctx, frame_data.cmd.buffer, "Stars");
+
     auto command_buffer = frame_data.cmd;
 
     auto stars_data_ptr = engine_data.device.map(stars_data_buffer);

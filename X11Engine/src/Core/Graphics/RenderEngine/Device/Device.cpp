@@ -5,6 +5,7 @@
 #include <vulkan/vulkan_core.h>
 
 #include "Buffer.h"
+#include "CommandBuffer.h"
 #include "DeviceProperties.h"
 #include "ExtensionFunctions.h"
 #include "GraphicsPipeline.h"
@@ -305,5 +306,13 @@ void Device::writeDescriptor(const VkDescriptorGetInfoEXT& info,
 void Device::waitIdle() const { vkDeviceWaitIdle(device); }
 
 VkDevice Device::getHandle() const { return device; }
+
+TracyVkCtx Device::createTracingContext(
+    const Queue& queue, const CommandBuffer& command_buffer) const {
+    return TracyVkContextCalibrated(
+        device.physical_device, device, queue.queue, command_buffer.buffer,
+        vkGetPhysicalDeviceCalibrateableTimeDomainsEXT,
+        vkGetCalibratedTimestampsEXT);
+}
 
 }  // namespace Graphics

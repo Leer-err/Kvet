@@ -81,6 +81,9 @@ class RenderEngine final : public IRenderEngine {
 
     SwapChain swap_chain;
 
+    TracyVkCtx trace_ctx;
+    int trace_dump_counter = 0;
+
     uint32_t width;
     uint32_t height;
 

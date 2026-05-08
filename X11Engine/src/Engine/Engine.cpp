@@ -78,7 +78,7 @@ void Engine::update(float delta_time) {
 
     Input::PhysicalInput::get().saveState();
 
-    // Scene::get().update(delta_time);
+    Scene::get().update(delta_time);
 
     GraphicsCommunicationManager::get().flush();
     renderer->render();

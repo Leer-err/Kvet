@@ -39,7 +39,6 @@ Matrix Matrix::projection(float fov, float aspect_ratio, float far,
                           float near) {
     Matrix result;
     get(result) = glm::perspective(fov, aspect_ratio, near, far);
-    result.m[1][1] *= -1;
     return result;
 }
 
