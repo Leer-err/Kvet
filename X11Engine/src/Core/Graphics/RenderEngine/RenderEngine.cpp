@@ -28,8 +28,7 @@ RenderEngine::RenderEngine(const vkb::Instance& instance,
                            const Queue& graphics_queue,
                            const Queue& presentation_queue,
                            const VmaAllocator& allocator, VkSurfaceKHR surface)
-    : instance(instance),
-      device(device, allocator),
+    : device(device, allocator),
       shader_registry(this->device),
       descriptor_set(this->device, this->device.getDeviceProperties()),
       graphics_queue(graphics_queue),
@@ -55,8 +54,7 @@ RenderEngine::~RenderEngine() {
     TracyVkDestroy(trace_ctx);
 
     swap_chain.destroy();
-    vkb::destroy_surface(instance, surface);
-    vkb::destroy_instance(instance);
+    vkb::destroy_surface(device.getInstance(), surface);
 }
 
 void RenderEngine::render() {

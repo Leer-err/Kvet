@@ -16,6 +16,7 @@ target_link_libraries(Graphics
         Utility
         Tracy::TracyClient
         SDL3::SDL3
+        ImGuiLib
         vulkan-interface
         vulkan-allocator
         vk-bootstrap::vk-bootstrap
@@ -23,6 +24,7 @@ target_link_libraries(Graphics
 )
 
 add_subdirectory(RenderEngine)
+add_subdirectory(Overlay)
 add_subdirectory(Renderers)
 add_subdirectory(RenderData)
 add_subdirectory(GraphicsCommunicationManager)

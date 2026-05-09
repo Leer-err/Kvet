@@ -11,6 +11,7 @@
 #include "SDL3/SDL_scancode.h"
 #include "SDL3/SDL_video.h"
 #include "WindowConfig.h"
+#include "backends/imgui_impl_sdl3.h"
 
 using Input::Axis;
 using Input::Button;
@@ -71,6 +72,8 @@ bool Window::processMessages() {
     SDL_Event event;
 
     while (SDL_PollEvent(&event)) {
+        ImGui_ImplSDL3_ProcessEvent(&event);
+
         switch (event.type) {
             case SDL_EVENT_QUIT:
                 return false;

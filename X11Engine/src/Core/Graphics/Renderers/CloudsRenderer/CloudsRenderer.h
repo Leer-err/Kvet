@@ -28,9 +28,10 @@ class CloudsRenderer {
     void setCameraData(VkDeviceAddress camera_data);
 
    private:
-    Buffer cloud_plane_vertices;
-    Buffer quad_vertices;
-    Buffer quad_indices;
+    EngineData engine_data;
+
+    Mesh quad;
+    Mesh cloud_plane;
 
     GraphicsPipeline cloud_texture_pipeline;
     GraphicsPipeline cloud_pipeline;

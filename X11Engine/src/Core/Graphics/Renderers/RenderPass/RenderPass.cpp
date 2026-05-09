@@ -8,13 +8,15 @@
 #include "CloudsRenderer.h"
 #include "Device.h"
 #include "GraphicsCommunicationManager.h"
+#include "OverlayRenderer.h"
 
 namespace Graphics {
 
 RenderPass::RenderPass(EngineData engine_data)
     : engine_data(engine_data),
       star_renderer(engine_data),
-      clouds_renderer(engine_data) {
+      clouds_renderer(engine_data),
+      overlay_renderer(engine_data) {
     camera_data_buffer = BufferBuilder(engine_data, sizeof(CameraData))
                              .isConstantBuffer()
                              .isCPUWritable()
@@ -31,9 +33,11 @@ void RenderPass::render(const FrameData& frame_data) {
 
     TracyVkZone(frame_data.trace_ctx, frame_data.cmd.buffer, "Render pass");
 
-    CloudsData clouds_data = {};
-    clouds_data.color = {1, 0, 1};
-    clouds_renderer.preRender(frame_data, clouds_data);
+    auto clouds = manager.recieve<CloudsData>();
+
+    if (clouds) {
+        clouds_renderer.preRender(frame_data, clouds.value());
+    }
 
     updateCameraBuffer();
 
@@ -43,8 +47,11 @@ void RenderPass::render(const FrameData& frame_data) {
     if (stars) {
         star_renderer.render(frame_data, camera_data_buffer, *stars);
     }
+    if (clouds) {
+        clouds_renderer.render(frame_data, clouds.value());
+    }
 
-    clouds_renderer.render(frame_data, clouds_data);
+    overlay_renderer.render(frame_data);
 
     endPass(frame_data);
 }

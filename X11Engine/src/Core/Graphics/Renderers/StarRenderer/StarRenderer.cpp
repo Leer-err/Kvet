@@ -8,6 +8,7 @@
 #include "CommandBuffer.h"
 #include "EngineData.h"
 #include "GraphicsPipelineBuilder.h"
+#include "MeshBuilder.h"
 #include "StarsData.h"
 #include "Vector3.h"
 
@@ -21,23 +22,10 @@ StarRenderer::StarRenderer(const EngineData& engine_data)
 
     constexpr uint32_t screen_quad_indices[] = {0, 1, 2, 1, 3, 2};
 
-    quad_vertices = BufferBuilder(engine_data, sizeof(screen_quad_vertices))
-                        .isVertexBuffer(sizeof(Vector3))
-                        .isCPUWritable()
-                        .create()
-                        .getResult();
-    auto vertex_data = engine_data.device.map(quad_vertices);
-    memcpy(vertex_data, screen_quad_vertices, sizeof(screen_quad_vertices));
-    engine_data.device.unmap(quad_vertices);
-
-    quad_indices = BufferBuilder(engine_data, sizeof(screen_quad_indices))
-                       .isIndexBuffer()
-                       .isCPUWritable()
-                       .create()
-                       .getResult();
-    auto index_data = engine_data.device.map(quad_indices);
-    memcpy(index_data, screen_quad_indices, sizeof(screen_quad_indices));
-    engine_data.device.unmap(quad_indices);
+    quad = MeshBuilder(engine_data, screen_quad_vertices,
+                       sizeof(screen_quad_vertices), screen_quad_indices,
+                       sizeof(screen_quad_indices))
+               .create();
 
     pipeline =
         GraphicsPipelineBuilder(
@@ -69,7 +57,7 @@ void StarRenderer::render(const FrameData& frame_data,
 
     command_buffer.pushConstants(pipeline, &push_constants);
 
-    command_buffer.draw(quad_vertices, quad_indices);
+    command_buffer.draw(quad);
 }
 
 void StarRenderer::setCameraData(VkDeviceAddress camera_data) {

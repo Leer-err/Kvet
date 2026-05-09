@@ -9,7 +9,7 @@
 #include <variant>
 #include <vector>
 
-namespace Overlay {
+namespace Graphics {
 namespace OverlayElements {
 
 template <typename T>
@@ -135,4 +135,4 @@ class Overlay {
     std::vector<OverlayElements::AnyElement> elements;
 };
 
-};  // namespace Overlay
+};  // namespace Graphics

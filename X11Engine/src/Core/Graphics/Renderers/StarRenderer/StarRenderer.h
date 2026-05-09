@@ -4,6 +4,7 @@
 #include "EngineData.h"
 #include "FrameData.h"
 #include "GraphicsPipeline.h"
+#include "Mesh.h"
 #include "StarsData.h"
 
 namespace Graphics {
@@ -25,8 +26,7 @@ class StarRenderer {
    private:
     EngineData engine_data;
 
-    Buffer quad_vertices;
-    Buffer quad_indices;
+    Mesh quad;
 
     GraphicsPipeline pipeline;
 

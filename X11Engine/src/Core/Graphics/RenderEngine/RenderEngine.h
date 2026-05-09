@@ -65,7 +65,6 @@ class RenderEngine final : public IRenderEngine {
     void prepareBackbufferForPresentation(const CommandBuffer& cmd,
                                           Image& backbuffer);
 
-    vkb::Instance instance;
     Device device;
     Queue graphics_queue;
     Queue presentation_queue;

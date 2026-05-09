@@ -13,7 +13,7 @@ class BufferBuilder {
     BufferBuilder(const EngineData& engine_data, size_t size);
 
     BufferBuilder& isShaderResource();
-    BufferBuilder& isVertexBuffer(size_t stride, size_t offset = 0);
+    BufferBuilder& isVertexBuffer();
     BufferBuilder& isIndexBuffer();
     BufferBuilder& isConstantBuffer();
     BufferBuilder& isDescriptorBuffer();

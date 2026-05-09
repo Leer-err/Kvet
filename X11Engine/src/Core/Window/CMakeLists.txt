@@ -15,4 +15,5 @@ target_link_libraries(Window
         Input
     PRIVATE 
         SDL3::SDL3
+        ImGuiLib
 )

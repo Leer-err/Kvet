@@ -30,7 +30,6 @@ set_target_properties(${TARGET_NAME} PROPERTIES
 
 add_subdirectory(Dependencies)
 
-# add_subdirectory(Input)
 # add_subdirectory(Event)
 # add_subdirectory(FileReader)
 # add_subdirectory(Graphics)
@@ -42,5 +41,4 @@ add_subdirectory(Components)
 # add_subdirectory(Assets)
 # add_subdirectory(Script)
 add_subdirectory(Scene)
-# add_subdirectory(Overlay)
 add_subdirectory(Core)

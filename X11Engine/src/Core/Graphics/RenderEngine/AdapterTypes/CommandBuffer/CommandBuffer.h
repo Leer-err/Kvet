@@ -2,10 +2,10 @@
 
 #include <vulkan/vulkan.h>
 
-#include "Buffer.h"
 #include "DescriptorSet.h"
 #include "GraphicsPipeline.h"
 #include "Image.h"
+#include "Mesh.h"
 #include "RenderEnviroment.h"
 
 namespace Graphics {
@@ -14,7 +14,7 @@ struct CommandBuffer {
     void begin() const;
     void end() const;
 
-    void draw(const Buffer& vertex_buffer, const Buffer& index_buffer) const;
+    void draw(const Mesh& mesh) const;
 
     void copy(Image& src, Image& dst) const;
 

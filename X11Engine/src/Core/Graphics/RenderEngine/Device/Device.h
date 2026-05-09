@@ -50,7 +50,6 @@ class Device {
     VkImageView createRenderTarget(const Image& image);
 
     DescriptorLayout getDescriptorLayout() const;
-
     DeviceProperties getDeviceProperties() const;
 
     VkFence createFence(bool is_signaled);
@@ -73,7 +72,9 @@ class Device {
 
     void waitIdle() const;
 
-    VkDevice getHandle() const;
+    VkInstance getInstance() const;
+    VkDevice getDevice() const;
+    VkPhysicalDevice getPhysicalDevice() const;
 
     TracyVkCtx createTracingContext(const Queue& queue,
                                     const CommandBuffer& command_buffer) const;
@@ -81,6 +82,7 @@ class Device {
    private:
     void createDescriptorLayout();
 
+    vkb::Instance instance;
     vkb::Device device;
 
     VmaAllocator allocator;

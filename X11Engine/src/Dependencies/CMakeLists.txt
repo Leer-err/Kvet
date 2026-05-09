@@ -117,15 +117,14 @@ target_sources(ImGuiLib PRIVATE
 	${CMAKE_CURRENT_SOURCE_DIR}/imgui/imgui.cpp
 )
 
-if(WIN32)
 target_sources(ImGuiLib PRIVATE
-	${CMAKE_CURRENT_SOURCE_DIR}/imgui/backends/imgui_impl_win32.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/imgui/backends/imgui_impl_dx11.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/imgui/backends/imgui_impl_sdl3.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/imgui/backends/imgui_impl_vulkan.cpp
 )
-endif()
 
-target_link_libraries(${TARGET_NAME} PUBLIC
-    ImGuiLib
+target_link_libraries(ImGuiLib PRIVATE
+	SDL3::SDL3
+	vulkan-interface
 )
 
 #Lua

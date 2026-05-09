@@ -3,6 +3,7 @@
 #include "CloudsRenderer.h"
 #include "DescriptorSet.h"
 #include "FrameData.h"
+#include "OverlayRenderer.h"
 #include "StarRenderer.h"
 
 namespace Graphics {
@@ -25,6 +26,7 @@ class RenderPass {
 
     StarRenderer star_renderer;
     CloudsRenderer clouds_renderer;
+    OverlayRenderer overlay_renderer;
 };
 
 }  // namespace Graphics

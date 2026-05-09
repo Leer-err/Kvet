@@ -22,7 +22,7 @@ BufferBuilder& BufferBuilder::isShaderResource() {
     return *this;
 }
 
-BufferBuilder& BufferBuilder::isVertexBuffer(size_t stride, size_t offset) {
+BufferBuilder& BufferBuilder::isVertexBuffer() {
     buffer_info.usage |= VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
     return *this;
 }

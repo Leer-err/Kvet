@@ -12,6 +12,7 @@
 #include "Image.h"
 #include "Logger.h"
 #include "LoggerFactory.h"
+#include "VkBootstrap.h"
 
 constexpr auto TEXTURE_BINDING_INDEX = 0;
 constexpr auto SAMPLER_BINDING_INDEX = 1;
@@ -32,6 +33,7 @@ Device::Device(vkb::Device device, VmaAllocator allocator)
 Device::~Device() {
     vmaDestroyAllocator(allocator);
     vkb::destroy_device(device);
+    vkb::destroy_instance(instance);
 }
 
 vkb::Swapchain Device::createSwapChain(VkSurfaceFormatKHR format,
@@ -305,7 +307,13 @@ void Device::writeDescriptor(const VkDescriptorGetInfoEXT& info,
 
 void Device::waitIdle() const { vkDeviceWaitIdle(device); }
 
-VkDevice Device::getHandle() const { return device; }
+VkInstance Device::getInstance() const { return instance; }
+
+VkDevice Device::getDevice() const { return device; }
+
+VkPhysicalDevice Device::getPhysicalDevice() const {
+    return device.physical_device;
+}
 
 TracyVkCtx Device::createTracingContext(
     const Queue& queue, const CommandBuffer& command_buffer) const {

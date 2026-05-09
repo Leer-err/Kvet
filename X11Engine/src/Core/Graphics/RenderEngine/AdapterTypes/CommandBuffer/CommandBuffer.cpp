@@ -54,15 +54,15 @@ void CommandBuffer::setPipeline(const GraphicsPipeline& pipeline) const {
                       pipeline.pipeline);
 }
 
-void CommandBuffer::draw(const Buffer& vertex_buffer,
-                         const Buffer& index_buffer) const {
-    vkCmdBindIndexBuffer(buffer, index_buffer.buffer, 0, VK_INDEX_TYPE_UINT32);
+void CommandBuffer::draw(const Mesh& mesh) const {
+    vkCmdBindIndexBuffer(buffer, mesh.index_buffer.buffer, 0,
+                         VK_INDEX_TYPE_UINT32);
 
     VkDeviceSize vertex_buffer_offset = 0;
-    vkCmdBindVertexBuffers(buffer, 0, 1, &vertex_buffer.buffer,
+    vkCmdBindVertexBuffers(buffer, 0, 1, &mesh.vertex_buffer.buffer,
                            &vertex_buffer_offset);
 
-    auto index_count = index_buffer.size / sizeof(uint32_t);
+    auto index_count = mesh.index_buffer.size / sizeof(uint32_t);
     vkCmdDrawIndexed(buffer, index_count, 3, 0, 0, 0);
 }
 

@@ -8,6 +8,7 @@ target_include_directories(Graphics PRIVATE
 
 add_subdirectory(Device)
 add_subdirectory(SwapChain)
+add_subdirectory(Mesh)
 add_subdirectory(RenderEnviroment)
 add_subdirectory(DeviceProperties)
 add_subdirectory(DescriptorSet)

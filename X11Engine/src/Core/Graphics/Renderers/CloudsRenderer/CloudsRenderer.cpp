@@ -7,9 +7,11 @@
 #include "BufferBuilder.h"
 #include "CloudsData.h"
 #include "DescriptorSet.h"
+#include "EngineData.h"
 #include "GraphicsPipelineBuilder.h"
 #include "ImageBuilder.h"
 #include "InputLayoutBuilder.h"
+#include "MeshBuilder.h"
 #include "Sampler.h"
 #include "ShaderBuilder.h"
 #include "Vector2.h"
@@ -22,7 +24,8 @@ struct Vertex {
     Vector2 uv;
 };
 
-CloudsRenderer::CloudsRenderer(const EngineData& engine_data) {
+CloudsRenderer::CloudsRenderer(const EngineData& engine_data)
+    : engine_data(engine_data) {
     constexpr Vertex cloud_plane_vertex_data[] = {
         {Vector3(-1, 0, -1), Vector2(0, 0)},
         {Vector3(-1, 0, 1), Vector2(0, 1)},
@@ -35,34 +38,14 @@ CloudsRenderer::CloudsRenderer(const EngineData& engine_data) {
 
     constexpr uint32_t screen_quad_indices[] = {0, 1, 2, 1, 3, 2};
 
-    cloud_plane_vertices =
-        BufferBuilder(engine_data, sizeof(cloud_plane_vertex_data))
-            .isVertexBuffer(sizeof(Vector3))
-            .isCPUWritable()
-            .create()
-            .getResult();
-    auto cloud_plane_data = engine_data.device.map(cloud_plane_vertices);
-    memcpy(cloud_plane_data, cloud_plane_vertex_data,
-           sizeof(cloud_plane_vertex_data));
-    engine_data.device.unmap(cloud_plane_vertices);
-
-    quad_vertices = BufferBuilder(engine_data, sizeof(screen_quad_vertices))
-                        .isVertexBuffer(sizeof(Vector3))
-                        .isCPUWritable()
-                        .create()
-                        .getResult();
-    auto vertex_data = engine_data.device.map(quad_vertices);
-    memcpy(vertex_data, screen_quad_vertices, sizeof(screen_quad_vertices));
-    engine_data.device.unmap(quad_vertices);
-
-    quad_indices = BufferBuilder(engine_data, sizeof(screen_quad_indices))
-                       .isIndexBuffer()
-                       .isCPUWritable()
-                       .create()
-                       .getResult();
-    auto index_data = engine_data.device.map(quad_indices);
-    memcpy(index_data, screen_quad_indices, sizeof(screen_quad_indices));
-    engine_data.device.unmap(quad_indices);
+    cloud_plane = MeshBuilder(engine_data, cloud_plane_vertex_data,
+                              sizeof(cloud_plane_vertex_data),
+                              screen_quad_indices, sizeof(screen_quad_indices))
+                      .create();
+    quad = MeshBuilder(engine_data, &screen_quad_vertices[0],
+                       sizeof(screen_quad_vertices), &screen_quad_indices[0],
+                       sizeof(screen_quad_indices))
+               .create();
 
     clouds_texture =
         ImageBuilder(engine_data, VK_FORMAT_R8G8B8A8_UNORM, 512, 512)
@@ -72,7 +55,7 @@ CloudsRenderer::CloudsRenderer(const EngineData& engine_data) {
             .getResult();
     engine_data.descriptor_set.addImage(
         engine_data.device.createRenderTarget(clouds_texture));
-    engine_data.descriptor_set.addSampler(Sampler::point(engine_data));
+    engine_data.descriptor_set.addSampler(Sampler::linear(engine_data));
 
     env.width = 512;
     env.height = 512;
@@ -117,6 +100,10 @@ void CloudsRenderer::render(const FrameData& frame_data,
                             const CloudsData& clouds_data) {
     TracyVkZone(frame_data.trace_ctx, frame_data.cmd.buffer, "Clouds");
 
+    auto data_ptr = engine_data.device.map(clouds_data_buffer);
+    memcpy(data_ptr, &clouds_data, sizeof(CloudsData));
+    engine_data.device.unmap(clouds_data_buffer);
+
     auto command_buffer = frame_data.cmd;
 
     command_buffer.setPipeline(cloud_pipeline);
@@ -124,13 +111,17 @@ void CloudsRenderer::render(const FrameData& frame_data,
 
     command_buffer.pushConstants(cloud_pipeline, &push_constants);
 
-    command_buffer.draw(cloud_plane_vertices, quad_indices);
+    command_buffer.draw(cloud_plane);
 }
 
 void CloudsRenderer::preRender(const FrameData& frame_data,
                                const CloudsData& clouds_data) {
     TracyVkZone(frame_data.trace_ctx, frame_data.cmd.buffer,
                 "Cloud texture bake");
+
+    auto data_ptr = engine_data.device.map(clouds_data_buffer);
+    memcpy(data_ptr, &clouds_data, sizeof(CloudsData));
+    engine_data.device.unmap(clouds_data_buffer);
 
     auto command_buffer = frame_data.cmd;
 
@@ -150,7 +141,7 @@ void CloudsRenderer::preRender(const FrameData& frame_data,
     command_buffer.pushConstants(cloud_texture_pipeline,
                                  &clouds_data_buffer.device_address);
 
-    command_buffer.draw(quad_vertices, quad_indices);
+    command_buffer.draw(quad);
 
     command_buffer.unbindRenderEnviroment();
 

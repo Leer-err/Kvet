@@ -1,5 +1,6 @@
 #include "Scene.h"
 
+#include <format>
 #include <memory>
 #include <tracy/Tracy.hpp>
 
@@ -17,6 +18,7 @@
 // #include "StaticRigidBody.h"
 #include "Transform.h"
 // #include "TransformSystem.h"
+#include "Overlay.h"
 #include "Vector3.h"
 
 Scene::Scene() {

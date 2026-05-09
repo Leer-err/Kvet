@@ -14,6 +14,9 @@
 #include "SDL3/SDL_vulkan.h"
 #include "VkBootstrap.h"
 #include "Window.h"
+#include "backends/imgui_impl_sdl3.h"
+#include "backends/imgui_impl_vulkan.h"
+#include "imgui.h"
 
 namespace Graphics {
 
@@ -113,6 +116,48 @@ static Result<VmaAllocator, Error> createAllocator(
     return allocator;
 }
 
+static void createOverlay(const vkb::Instance& instance,
+                          const vkb::Device& device, Queue graphics_queue,
+                          SDL_Window* window) {
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO();
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
+
+    ImGui::StyleColorsDark();
+
+    float main_scale = 1;
+    ImGuiStyle& style = ImGui::GetStyle();
+    style.ScaleAllSizes(main_scale);
+    style.FontScaleDpi = main_scale;
+
+    ImGui_ImplSDL3_InitForVulkan(window);
+    ImGui_ImplVulkan_InitInfo init_info = {};
+    init_info.ApiVersion = VK_API_VERSION_1_3;
+    init_info.Instance = instance;
+    init_info.PhysicalDevice = device.physical_device;
+    init_info.Device = device;
+    init_info.QueueFamily = graphics_queue.index;
+    init_info.Queue = graphics_queue.queue;
+    init_info.PipelineCache = VK_NULL_HANDLE;
+    init_info.DescriptorPool = VK_NULL_HANDLE;
+    init_info.MinImageCount = 3;
+    init_info.ImageCount = 3;
+    init_info.UseDynamicRendering = true;
+    init_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
+    init_info.DescriptorPoolSize = 100;
+
+    VkFormat swapchain_format = VK_FORMAT_R8G8B8A8_SRGB;
+    init_info.PipelineRenderingCreateInfo = {
+        .sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO};
+    init_info.PipelineRenderingCreateInfo.colorAttachmentCount = 1;
+    init_info.PipelineRenderingCreateInfo.pColorAttachmentFormats =
+        &swapchain_format;
+
+    ImGui_ImplVulkan_Init(&init_info);
+}
+
 static void printError(const Error error) {
     auto logger = LoggerFactory::getLogger("Graphics");
     switch (error) {
@@ -175,6 +220,8 @@ bool init() {
     auto allocator = allocator_result.getResult();
 
     loadExtensionFunctions(device);
+
+    createOverlay(instance, device, graphics_queue, handle);
 
     render_engine = new RenderEngine(instance, device, graphics_queue,
                                      presentation_queue, allocator, surface);
