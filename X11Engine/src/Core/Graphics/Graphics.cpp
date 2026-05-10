@@ -1,9 +1,11 @@
 #include "Graphics.h"
 
+#include <SDL3/SDL_vulkan.h>
+#include <backends/imgui_impl_sdl3.h>
+#include <backends/imgui_impl_vulkan.h>
+#include <imgui.h>
 #include <vk_mem_alloc.h>
-#include <vulkan/vulkan_core.h>
-
-#include <memory>
+#include <vulkan/vulkan.h>
 
 #include "AppConfig.h"
 #include "ExtensionFunctions.h"
@@ -11,12 +13,9 @@
 #include "Queue.h"
 #include "RenderEngine.h"
 #include "Result.h"
-#include "SDL3/SDL_vulkan.h"
 #include "VkBootstrap.h"
 #include "Window.h"
-#include "backends/imgui_impl_sdl3.h"
-#include "backends/imgui_impl_vulkan.h"
-#include "imgui.h"
+
 
 namespace Graphics {
 
@@ -219,7 +218,7 @@ bool init() {
     }
     auto allocator = allocator_result.getResult();
 
-    loadExtensionFunctions(device);
+    loadExtensionFunctions(instance, device);
 
     createOverlay(instance, device, graphics_queue, handle);
 

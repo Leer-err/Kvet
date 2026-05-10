@@ -1,6 +1,5 @@
 target_sources(Graphics PRIVATE
-    Buffer.cpp
-    BufferBuilder.cpp
+    StagingBuffer.cpp
 )
 
 target_include_directories(Graphics PRIVATE

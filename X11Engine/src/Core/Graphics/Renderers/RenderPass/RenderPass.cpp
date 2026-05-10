@@ -9,6 +9,7 @@
 #include "Device.h"
 #include "GraphicsCommunicationManager.h"
 #include "OverlayRenderer.h"
+#include "StaticModelData.h"
 
 namespace Graphics {
 
@@ -16,6 +17,7 @@ RenderPass::RenderPass(EngineData engine_data)
     : engine_data(engine_data),
       star_renderer(engine_data),
       clouds_renderer(engine_data),
+      static_mesh_renderer(engine_data),
       overlay_renderer(engine_data) {
     camera_data_buffer = BufferBuilder(engine_data, sizeof(CameraData))
                              .isConstantBuffer()
@@ -25,6 +27,7 @@ RenderPass::RenderPass(EngineData engine_data)
 
     clouds_renderer.setCameraData(camera_data_buffer.device_address);
     star_renderer.setCameraData(camera_data_buffer.device_address);
+    static_mesh_renderer.setCameraData(camera_data_buffer.device_address);
 }
 
 void RenderPass::render(const FrameData& frame_data) {
@@ -51,7 +54,11 @@ void RenderPass::render(const FrameData& frame_data) {
         clouds_renderer.render(frame_data, clouds.value());
     }
 
-    overlay_renderer.render(frame_data);
+    while (auto model = manager.recieve<StaticModelData>()) {
+        static_mesh_renderer.render(frame_data, model.value());
+    }
+
+    // overlay_renderer.render(frame_data);
 
     endPass(frame_data);
 }

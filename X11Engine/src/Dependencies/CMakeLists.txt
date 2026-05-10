@@ -79,27 +79,35 @@ endif()
 # 	DEPENDS ${CMAKE_BINARY_DIR}/bin/PhysXFoundation_64.dll
 # )
 
-#Assimp
+# Assimp
 
-# target_include_directories(${TARGET_NAME} PUBLIC
-# 	${CMAKE_CURRENT_SOURCE_DIR}/assimp/include
-# )
+add_library(Assimp INTERFACE)
 
-# target_link_directories(${TARGET_NAME} PUBLIC
-# 	${CMAKE_CURRENT_SOURCE_DIR}/assimp/lib/Debug
-# 	${CMAKE_CURRENT_SOURCE_DIR}/assimp/bin
-# )
+target_include_directories(Assimp INTERFACE
+	${CMAKE_CURRENT_SOURCE_DIR}/assimp/include
+)
 
-# add_custom_command(
-# 	OUTPUT
-#         ${CMAKE_BINARY_DIR}/bin/$<IF:$<CONFIG:Debug>,assimp-vc143-mtd.dll,assimp-vc143-mt.dll>
-# 	COMMAND
-# 		${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/assimp/bin/${CMAKE_BUILD_TYPE}/$<IF:$<CONFIG:Debug>,assimp-vc143-mtd.dll,assimp-vc143-mt.dll> ${CMAKE_BINARY_DIR}/bin
-#     DEPENDS ${EXECUTABLE_NAME}
-# )
-# add_custom_target(copy_assimp_libs ALL
-# 	DEPENDS ${CMAKE_BINARY_DIR}/bin/$<IF:$<CONFIG:Debug>,assimp-vc143-mtd.dll,assimp-vc143-mt.dll>
-# )
+target_link_directories(Assimp INTERFACE
+	${CMAKE_CURRENT_SOURCE_DIR}/assimp/lib/Debug
+	${CMAKE_CURRENT_SOURCE_DIR}/assimp/lib/Release
+	${CMAKE_CURRENT_SOURCE_DIR}/assimp/bin
+)
+
+target_link_libraries(Assimp 
+	INTERFACE
+		$<IF:$<CONFIG:Debug>,assimp-vc143-mtd.dll,assimp-vc143-mt.dll>
+)
+
+add_custom_command(
+	OUTPUT
+        ${CMAKE_BINARY_DIR}/bin/$<IF:$<CONFIG:Debug>,assimp-vc143-mtd.dll,assimp-vc143-mt.dll>
+	COMMAND
+		${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/assimp/bin/${CMAKE_BUILD_TYPE}/$<IF:$<CONFIG:Debug>,assimp-vc143-mtd.dll,assimp-vc143-mt.dll> ${CMAKE_BINARY_DIR}/bin
+    DEPENDS ${EXECUTABLE_NAME}
+)
+add_custom_target(copy_assimp_libs ALL
+	DEPENDS ${CMAKE_BINARY_DIR}/bin/$<IF:$<CONFIG:Debug>,assimp-vc143-mtd.dll,assimp-vc143-mt.dll>
+)
 
 # ImGui
 
@@ -208,4 +216,17 @@ target_sources(SPIRV-Reflect
 )
 target_include_directories(SPIRV-Reflect PUBLIC
 	${CMAKE_CURRENT_SOURCE_DIR}/SPIRV-Reflect/
+)
+
+# STB
+
+add_library(STB STATIC)
+
+target_include_directories(STB PUBLIC
+	${CMAKE_CURRENT_SOURCE_DIR}/stb/
+)
+
+target_sources(STB
+	PRIVATE
+		STBUsage.cpp
 )

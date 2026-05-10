@@ -1,10 +1,10 @@
 #pragma once
 
 #include "CloudsRenderer.h"
-#include "DescriptorSet.h"
 #include "FrameData.h"
 #include "OverlayRenderer.h"
 #include "StarRenderer.h"
+#include "StaticMeshRenderer.h"
 
 namespace Graphics {
 
@@ -26,6 +26,7 @@ class RenderPass {
 
     StarRenderer star_renderer;
     CloudsRenderer clouds_renderer;
+    StaticMeshRenderer static_mesh_renderer;
     OverlayRenderer overlay_renderer;
 };
 

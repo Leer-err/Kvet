@@ -47,7 +47,7 @@ class Device {
     VkCommandBuffer createCommandBuffer(VkCommandPool pool);
 
     VkImageView createDepthStencil(const Image& image);
-    VkImageView createRenderTarget(const Image& image);
+    VkImageView createTextureView(const Image& image);
 
     DescriptorLayout getDescriptorLayout() const;
     DeviceProperties getDeviceProperties() const;

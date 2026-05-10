@@ -18,3 +18,4 @@ target_compile_definitions(Types PUBLIC GLM_FORCE_LEFT_HANDED GLM_FORCE_DEPTH_ZE
 
 add_subdirectory(Result)
 add_subdirectory(Math)
+add_subdirectory(Vertex)

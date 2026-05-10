@@ -8,7 +8,7 @@ class IChannel {
    public:
     virtual ~IChannel() {}
 
-    virtual void flush() = 0;
+    virtual void clear() = 0;
 };
 
 template <typename T>
@@ -19,7 +19,9 @@ class Channel : public IChannel {
     void send(const T& data) {
         std::scoped_lock<std::mutex> lock(access_mutex);
 
-        queue.push(data);
+        queue.push_back(data);
+
+        ready_elements_count++;
     }
 
     std::optional<T> recieve() {
@@ -27,22 +29,24 @@ class Channel : public IChannel {
 
         if (ready_elements_count == 0) return {};
 
-        auto value = queue.back();
-        queue.pop();
+        auto value = queue.front();
+        queue.pop_front();
 
         ready_elements_count--;
 
         return value;
     }
 
-    void flush() {
+    void clear() {
         std::scoped_lock<std::mutex> lock(access_mutex);
 
-        ready_elements_count = queue.size();
+        queue.clear();
+
+        ready_elements_count = 0;
     }
 
    private:
-    std::queue<T> queue;
+    std::deque<T> queue;
     std::mutex access_mutex;
 
     size_t ready_elements_count;

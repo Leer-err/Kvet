@@ -17,7 +17,7 @@ namespace Graphics {
 StarRenderer::StarRenderer(const EngineData& engine_data)
     : engine_data(engine_data) {
     constexpr Vector3 screen_quad_vertices[] = {
-        Vector3(-1, -1, 1), Vector3(1, -1, 1), Vector3(-1, 1, 1),
+        Vector3(-1, -1, 1), Vector3(-1, 1, 1), Vector3(1, -1, 1),
         Vector3(1, 1, 1)};
 
     constexpr uint32_t screen_quad_indices[] = {0, 1, 2, 1, 3, 2};

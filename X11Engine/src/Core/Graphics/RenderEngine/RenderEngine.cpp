@@ -10,6 +10,7 @@
 // #include "Format.h"
 #include "AppConfig.h"
 // #include "Context.h"
+#include "BufferBuilder.h"
 #include "CommandBuffer.h"
 #include "CommandPool.h"
 #include "DescriptorSet.h"
@@ -17,8 +18,10 @@
 #include "EngineData.h"
 #include "FrameData.h"
 #include "ImageBuilder.h"
+#include "MeshBuilder.h"
 #include "RenderPass.h"
 #include "ShaderRegistry.h"
+#include "StagingBuffer/StagingBuffer.h"
 #include "SwapChain.h"
 
 namespace Graphics {
@@ -36,6 +39,7 @@ RenderEngine::RenderEngine(const vkb::Instance& instance,
       surface(surface),
       frames_in_flight{FrameInFlight(this->device, graphics_queue.index),
                        FrameInFlight(this->device, graphics_queue.index)},
+      staging_buffer(this->device),
       frame_in_flight_index(0) {
     reinitWindowDependentResources();
 
@@ -66,6 +70,11 @@ void RenderEngine::render() {
     auto cmd = pool.getCommandBuffer();
 
     beginFrame(cmd);
+
+    {
+        TracyVkZone(trace_ctx, cmd.buffer, "Staging copy");
+        staging_buffer.flush(cmd);
+    }
 
     FrameData data = {.cmd = cmd,
                       .env = render_enviroment,
@@ -143,7 +152,7 @@ void RenderEngine::reinitWindowDependentResources() {
     render_enviroment.width = width;
     render_enviroment.height = height;
     render_enviroment.render_target =
-        device.createRenderTarget(render_target_texture);
+        device.createTextureView(render_target_texture);
     render_enviroment.clear_render_target = true;
     render_enviroment.render_target_clear_value =
         VkClearValue{.color = {0, 0, 0, 1}};
@@ -166,7 +175,7 @@ void RenderEngine::prepareRenderTargetForRendering(const CommandBuffer& cmd) {
         VK_ACCESS_2_COLOR_ATTACHMENT_READ_BIT |
             VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT);
 
-    cmd.barrier(&barrier, 1);
+    cmd.barrier(&barrier, 1, nullptr, 0);
 }
 
 void RenderEngine::copyToBackbuffer(const CommandBuffer& cmd,
@@ -183,7 +192,7 @@ void RenderEngine::copyToBackbuffer(const CommandBuffer& cmd,
         VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT,
         VK_PIPELINE_STAGE_2_TRANSFER_BIT, VK_ACCESS_2_TRANSFER_READ_BIT);
 
-    cmd.barrier(barriers, 2);
+    cmd.barrier(barriers, 2, nullptr, 0);
     cmd.copy(render_target, backbuffer);
 }
 
@@ -195,11 +204,53 @@ void RenderEngine::prepareBackbufferForPresentation(const CommandBuffer& cmd,
         VK_ACCESS_2_TRANSFER_WRITE_BIT, VK_PIPELINE_STAGE_2_NONE,
         VK_ACCESS_2_NONE);
 
-    cmd.barrier(&render_finished, 1);
+    cmd.barrier(&render_finished, 1, nullptr, 0);
+}
+
+TextureHandle RenderEngine::addTexture(void* data, uint32_t width,
+                                       uint32_t height) {
+    // TODO: image lifetime tracking
+
+    auto image =
+        ImageBuilder(getEngineData(), VK_FORMAT_R8G8B8A8_UNORM, width, height)
+            .isShaderResource()
+            .isCopyDestination()
+            .create()
+            .getResult();
+
+    auto view = device.createTextureView(image);
+    auto handle = descriptor_set.addImage(view);
+
+    staging_buffer.stageImage(image, data, width * height * 4);
+
+    return handle;
+}
+
+MeshHandle RenderEngine::addMesh(void* vertex_data, size_t vertex_data_size,
+                                 void* index_data, size_t index_data_size) {
+    Mesh mesh = {};
+    mesh.vertex_buffer = BufferBuilder(getEngineData(), vertex_data_size)
+                             .isVertexBuffer()
+                             .isCopyDestination()
+                             .create()
+                             .getResult();
+    mesh.index_buffer = BufferBuilder(getEngineData(), index_data_size)
+                            .isIndexBuffer()
+                            .isCopyDestination()
+                            .create()
+                            .getResult();
+
+    auto handle = mesh_registry.addMesh(mesh);
+
+    staging_buffer.stageBuffer(mesh.vertex_buffer, vertex_data,
+                               vertex_data_size);
+    staging_buffer.stageBuffer(mesh.index_buffer, index_data, index_data_size);
+
+    return handle;
 }
 
 EngineData RenderEngine::getEngineData() {
-    return EngineData{device, descriptor_set, shader_registry};
+    return EngineData{device, descriptor_set, shader_registry, mesh_registry};
 }
 
 uint32_t RenderEngine::getWidth() const { return width; }

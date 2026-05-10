@@ -16,6 +16,7 @@ target_link_libraries(Core PUBLIC
 	Graphics
 	Types
 	Utility
+	File
 	# Physics
 	# Script
 )
@@ -27,5 +28,6 @@ add_subdirectory(Config)
 add_subdirectory(Window)
 add_subdirectory(Graphics)
 add_subdirectory(Utility)
+add_subdirectory(File)
 # add_subdirectory(Physics)
 # add_subdirectory(Script)

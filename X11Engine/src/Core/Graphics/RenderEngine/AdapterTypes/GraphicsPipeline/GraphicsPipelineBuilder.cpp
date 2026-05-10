@@ -1,6 +1,7 @@
 #include "GraphicsPipelineBuilder.h"
 
 #include <vulkan/vulkan.h>
+#include <vulkan/vulkan_core.h>
 
 #include <cstddef>
 
@@ -153,7 +154,7 @@ GraphicsPipelineBuilder::create() {
     rasterizationState.sType =
         VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
     rasterizationState.lineWidth = 1.0f;
-    rasterizationState.cullMode = VK_CULL_MODE_NONE;
+    rasterizationState.cullMode = VK_CULL_MODE_BACK_BIT;
 
     VkPipelineMultisampleStateCreateInfo multisampleState = {};
     multisampleState.sType =

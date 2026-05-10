@@ -12,11 +12,13 @@
 #include "DeviceProperties.h"
 #include "EngineData.h"
 #include "IRenderEngine.h"
+#include "Mesh/MeshRegistry.h"
 #include "Queue.h"
 #include "RenderEnviroment.h"
 #include "RenderPass.h"
 #include "Semaphore.h"
 #include "ShaderRegistry.h"
+#include "StagingBuffer/StagingBuffer.h"
 #include "StarRenderer.h"
 #include "SwapChain.h"
 #include "VkBootstrap.h"
@@ -46,7 +48,12 @@ class RenderEngine final : public IRenderEngine {
     ~RenderEngine();
 
     void reinitWindowDependentResources();
-    void render();
+    void render() override;
+
+    TextureHandle addTexture(void* data, uint32_t width,
+                             uint32_t height) override;
+    MeshHandle addMesh(void* vertex_data, size_t vertex_data_size,
+                       void* index_data, size_t index_data_size) override;
 
     uint32_t getWidth() const;
     uint32_t getHeight() const;
@@ -72,6 +79,9 @@ class RenderEngine final : public IRenderEngine {
 
     DescriptorSet descriptor_set;
     ShaderRegistry shader_registry;
+    MeshRegistry mesh_registry;
+
+    StagingBuffer staging_buffer;
 
     Image render_target_texture;
     RenderEnviroment render_enviroment;

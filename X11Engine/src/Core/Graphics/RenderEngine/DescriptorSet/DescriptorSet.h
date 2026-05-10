@@ -6,6 +6,7 @@
 
 #include "Buffer.h"
 #include "Device.h"
+#include "TextureHandle.h"
 
 namespace Graphics {
 
@@ -13,8 +14,8 @@ class DescriptorSet {
    public:
     DescriptorSet(Device& device, const DeviceProperties& device_properties);
 
-    void addImage(const VkImageView& texture);
-    void addSampler(const VkSampler& sampler);
+    TextureHandle addImage(const VkImageView& texture);
+    size_t addSampler(const VkSampler& sampler);
 
     VkDeviceAddress getDescriptors() const;
 
@@ -22,7 +23,7 @@ class DescriptorSet {
     Device& device;
 
     Buffer descriptors;
-    size_t current_texture_index;
+    TextureHandle current_texture_index;
     size_t current_sampler_index;
 
     size_t texture_descriptor_size;

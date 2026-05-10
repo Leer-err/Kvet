@@ -33,7 +33,7 @@ CloudsRenderer::CloudsRenderer(const EngineData& engine_data)
         {Vector3(1, 0, 1), Vector2(1, 1)}};
 
     constexpr Vector3 screen_quad_vertices[] = {
-        Vector3(-1, -1, 1), Vector3(1, -1, 1), Vector3(-1, 1, 1),
+        Vector3(-1, -1, 1), Vector3(-1, 1, 1), Vector3(1, -1, 1),
         Vector3(1, 1, 1)};
 
     constexpr uint32_t screen_quad_indices[] = {0, 1, 2, 1, 3, 2};
@@ -54,12 +54,12 @@ CloudsRenderer::CloudsRenderer(const EngineData& engine_data)
             .create()
             .getResult();
     engine_data.descriptor_set.addImage(
-        engine_data.device.createRenderTarget(clouds_texture));
+        engine_data.device.createTextureView(clouds_texture));
     engine_data.descriptor_set.addSampler(Sampler::linear(engine_data));
 
     env.width = 512;
     env.height = 512;
-    env.render_target = engine_data.device.createRenderTarget(clouds_texture);
+    env.render_target = engine_data.device.createTextureView(clouds_texture);
     env.clear_render_target = true;
     env.render_target_clear_value.color = {0, 0, 0, 0};
 
@@ -130,7 +130,7 @@ void CloudsRenderer::preRender(const FrameData& frame_data,
         VK_ACCESS_2_NONE, VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT,
         VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT);
 
-    command_buffer.barrier(&render_target_barrier, 1);
+    command_buffer.barrier(&render_target_barrier, 1, nullptr, 0);
 
     command_buffer.bindRenderEnviroment(env);
 
@@ -150,7 +150,7 @@ void CloudsRenderer::preRender(const FrameData& frame_data,
         VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT,
         VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT,
         VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT, VK_ACCESS_2_SHADER_READ_BIT);
-    command_buffer.barrier(&cloud_texture_barrier, 1);
+    command_buffer.barrier(&cloud_texture_barrier, 1, nullptr, 0);
 }
 
 void CloudsRenderer::setCameraData(VkDeviceAddress camera_data) {

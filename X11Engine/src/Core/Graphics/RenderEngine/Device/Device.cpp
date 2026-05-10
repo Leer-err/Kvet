@@ -155,7 +155,7 @@ VkImageView Device::createDepthStencil(const Image& image) {
     return view;
 }
 
-VkImageView Device::createRenderTarget(const Image& image) {
+VkImageView Device::createTextureView(const Image& image) {
     VkImageViewCreateInfo info = {};
     info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
     info.image = image.image;

@@ -1,10 +1,11 @@
 #pragma once
 
 #include <vulkan/vulkan.h>
+#include <vulkan/vulkan_core.h>
 
 namespace Graphics {
 
-void loadExtensionFunctions(VkDevice device);
+void loadExtensionFunctions(VkInstance instance, VkDevice device);
 
 // VK_EXT_descriptor_buffer
 extern PFN_vkGetDescriptorSetLayoutSizeEXT vkGetDescriptorSetLayoutSizeEXT;

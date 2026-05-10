@@ -1,6 +1,7 @@
 #include "CommandBuffer.h"
 
 #include <vulkan/vulkan.h>
+#include <vulkan/vulkan_core.h>
 
 #include <cstddef>
 
@@ -19,7 +20,7 @@ void CommandBuffer::begin() const {
     vkBeginCommandBuffer(buffer, &info);
 }
 
-void CommandBuffer::copy(Image& src, Image& dst) const {
+void CommandBuffer::copy(const Image& src, Image& dst) const {
     VkImageCopy2 copy_region = {};
     copy_region.sType = VK_STRUCTURE_TYPE_IMAGE_COPY_2;
     copy_region.extent.width = src.width;
@@ -144,12 +145,16 @@ void CommandBuffer::end() const { vkEndCommandBuffer(buffer); }
 
 void CommandBuffer::reset() const { vkResetCommandBuffer(buffer, 0); }
 
-void CommandBuffer::barrier(const VkImageMemoryBarrier2* barriers,
-                            size_t barrier_count) const {
+void CommandBuffer::barrier(const VkImageMemoryBarrier2* image_barriers,
+                            size_t image_barrier_count,
+                            const VkBufferMemoryBarrier2* buffer_barriers,
+                            size_t buffer_barrier_count) const {
     VkDependencyInfo dep = {};
     dep.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO;
-    dep.imageMemoryBarrierCount = barrier_count;
-    dep.pImageMemoryBarriers = barriers;
+    dep.imageMemoryBarrierCount = image_barrier_count;
+    dep.pImageMemoryBarriers = image_barriers;
+    dep.pBufferMemoryBarriers = buffer_barriers;
+    dep.bufferMemoryBarrierCount = buffer_barrier_count;
 
     vkCmdPipelineBarrier2(buffer, &dep);
 }

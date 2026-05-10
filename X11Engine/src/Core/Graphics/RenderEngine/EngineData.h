@@ -2,6 +2,7 @@
 
 #include "DescriptorSet.h"
 #include "Device.h"
+#include "MeshRegistry.h"
 #include "ShaderRegistry.h"
 
 namespace Graphics {
@@ -11,6 +12,7 @@ struct EngineData {
 
     DescriptorSet& descriptor_set;
     ShaderRegistry& shader_registry;
+    MeshRegistry& mesh_registry;
 };
 
 }  // namespace Graphics

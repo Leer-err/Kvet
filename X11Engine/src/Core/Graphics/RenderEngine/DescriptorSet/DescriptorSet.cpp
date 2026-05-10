@@ -43,14 +43,13 @@ DescriptorSet::DescriptorSet(Device& device,
     descriptors = device.createBuffer(buffer_info, alloc_info).getResult();
 }
 
-void DescriptorSet::addImage(const VkImageView& texture) {
+TextureHandle DescriptorSet::addImage(const VkImageView& texture) {
     auto descriptors_ptr = device.map(descriptors);
 
     char* binding_ptr =
         static_cast<char*>(descriptors_ptr) + texture_descriptors_offset;
     char* element_ptr =
         binding_ptr + (current_texture_index * texture_descriptor_size);
-    current_texture_index++;
 
     VkDescriptorImageInfo image_descriptor_info = {};
     image_descriptor_info.imageView = texture;
@@ -64,16 +63,20 @@ void DescriptorSet::addImage(const VkImageView& texture) {
     device.writeDescriptor(info, texture_descriptor_size, element_ptr);
 
     device.unmap(descriptors);
+
+    auto index = current_texture_index;
+    current_texture_index++;
+
+    return index;
 }
 
-void DescriptorSet::addSampler(const VkSampler& sampler) {
+size_t DescriptorSet::addSampler(const VkSampler& sampler) {
     auto descriptors_ptr = device.map(descriptors);
 
     char* binding_ptr =
         static_cast<char*>(descriptors_ptr) + sampler_descriptors_offset;
     char* element_ptr =
         binding_ptr + (current_sampler_index * sampler_descriptor_size);
-    current_sampler_index++;
 
     VkDescriptorGetInfoEXT info{};
     info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_GET_INFO_EXT;
@@ -82,6 +85,11 @@ void DescriptorSet::addSampler(const VkSampler& sampler) {
     device.writeDescriptor(info, sampler_descriptor_size, element_ptr);
 
     device.unmap(descriptors);
+
+    auto index = current_sampler_index;
+    current_sampler_index++;
+
+    return index;
 }
 
 VkDeviceAddress DescriptorSet::getDescriptors() const {

@@ -29,9 +29,9 @@ class GraphicsCommunicationManager {
         return channel->recieve();
     }
 
-    void flush() {
+    void clear() {
         for (const auto& [type_id, channel] : channels) {
-            channel->flush();
+            channel->clear();
         }
     }
 

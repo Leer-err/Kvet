@@ -1,5 +1,8 @@
 #include "ExtensionFunctions.h"
 
+#include <vulkan/vulkan_core.h>
+
+
 namespace Graphics {
 
 // VK_EXT_descriptor_buffer
@@ -17,7 +20,7 @@ PFN_vkGetPhysicalDeviceCalibrateableTimeDomainsEXT
     vkGetPhysicalDeviceCalibrateableTimeDomainsEXT;
 PFN_vkGetCalibratedTimestampsEXT vkGetCalibratedTimestampsEXT;
 
-void loadExtensionFunctions(VkDevice device) {
+void loadExtensionFunctions(VkInstance instance, VkDevice device) {
     // VK_EXT_descriptor_buffer
     vkGetDescriptorSetLayoutSizeEXT =
         reinterpret_cast<PFN_vkGetDescriptorSetLayoutSizeEXT>(
@@ -42,8 +45,8 @@ void loadExtensionFunctions(VkDevice device) {
     // VK_EXT_calibrated_timestamps
     vkGetPhysicalDeviceCalibrateableTimeDomainsEXT =
         reinterpret_cast<PFN_vkGetPhysicalDeviceCalibrateableTimeDomainsEXT>(
-            vkGetDeviceProcAddr(
-                device, "vkGetPhysicalDeviceCalibrateableTimeDomainsEXT"));
+            vkGetInstanceProcAddr(
+                instance, "vkGetPhysicalDeviceCalibrateableTimeDomainsEXT"));
     vkGetCalibratedTimestampsEXT =
         reinterpret_cast<PFN_vkGetCalibratedTimestampsEXT>(
             vkGetDeviceProcAddr(device, "vkGetCalibratedTimestampsEXT"));

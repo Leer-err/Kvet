@@ -16,6 +16,7 @@ add_library(${TARGET_NAME} STATIC)
 target_link_libraries(${TARGET_NAME} PUBLIC 
 	TracyClient 
 	Core
+	STB
 )
 
 target_include_directories(${TARGET_NAME} PUBLIC

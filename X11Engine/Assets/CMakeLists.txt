@@ -14,7 +14,7 @@ foreach(src_file ${SHADERS})
 
     add_custom_command(
         OUTPUT ${out_file}
-        COMMAND ${SLANG_COMPILER} ${src_file} -o ${out_file}
+        COMMAND ${SLANG_COMPILER} ${src_file} -o ${out_file} 
         DEPENDS ${src_file}
         COMMENT "Generating ${filename}.spv"
         VERBATIM

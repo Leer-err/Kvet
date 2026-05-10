@@ -16,7 +16,7 @@ struct CommandBuffer {
 
     void draw(const Mesh& mesh) const;
 
-    void copy(Image& src, Image& dst) const;
+    void copy(const Image& src, Image& dst) const;
 
     template <typename T>
     void pushConstants(const GraphicsPipeline& pipeline,
@@ -33,8 +33,10 @@ struct CommandBuffer {
     void bindRenderEnviroment(const RenderEnviroment& env) const;
     void unbindRenderEnviroment() const;
 
-    void barrier(const VkImageMemoryBarrier2* barriers,
-                 size_t barrier_count) const;
+    void barrier(const VkImageMemoryBarrier2* image_barriers,
+                 size_t image_barrier_count,
+                 const VkBufferMemoryBarrier2* buffer_barriers,
+                 size_t buffer_barrier_count) const;
 
     void reset() const;
 

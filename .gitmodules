@@ -25,3 +25,6 @@
 [submodule "X11Engine/src/Dependencies/SPIRV-Reflect"]
 	path = X11Engine/src/Dependencies/SPIRV-Reflect
 	url = https://github.com/KhronosGroup/SPIRV-Reflect.git
+[submodule "X11Engine/src/Dependencies/stb"]
+	path = X11Engine/src/Dependencies/stb
+	url = https://github.com/nothings/stb.git

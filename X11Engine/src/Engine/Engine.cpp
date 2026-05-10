@@ -5,7 +5,9 @@
 #include <tracy/Tracy.hpp>
 
 #include "Graphics.h"
+#include "ModelReader.h"
 #include "Scene.h"
+#include "StaticModelData.h"
 #include "Window.h"
 
 // #include "GameInputConfigReader.h"
@@ -13,6 +15,8 @@
 #include "PhysicalInput.h"
 // #include "ScriptLoader.h"
 // #include "ScriptSandbox.h"
+#include <stb_image.h>
+
 #include "GraphicsCommunicationManager.h"
 
 namespace Engine {
@@ -33,6 +37,8 @@ bool Engine::init() {
     return true;
 }
 
+StaticModelData model_data = {};
+
 void Engine::run() {
     // GameInputConfigReader input_config_reader;
     // input_config_reader.read(
@@ -40,6 +46,23 @@ void Engine::run() {
     //     GameInputContext::get());
 
     renderer = Graphics::getRenderEngine();
+
+    File::ModelReader reader("./Assets/Gem.fbx");
+    auto vertices = reader.readVertices();
+    auto indices = reader.readIndices();
+
+    model_data.position = {0, 0, 10};
+    model_data.mesh =
+        renderer->addMesh(vertices.data(), vertices.size() * sizeof(Vertex),
+                          indices.data(), indices.size() * sizeof(uint32_t));
+
+    int width;
+    int height;
+    int channels;
+    unsigned char* data =
+        stbi_load("./Assets/Gem.png", &width, &height, &channels, 0);
+
+    model_data.albedo = renderer->addTexture(data, width, height);
 
     main_loop_thread = std::thread([this]() { mainLoopWorker(); });
 
@@ -80,8 +103,10 @@ void Engine::update(float delta_time) {
 
     Scene::get().update(delta_time);
 
-    GraphicsCommunicationManager::get().flush();
+    GraphicsCommunicationManager::get().send(model_data);
     renderer->render();
+
+    GraphicsCommunicationManager::get().clear();
 
     // Overlay::Overlay::get().draw();
 
