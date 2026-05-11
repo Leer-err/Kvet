@@ -58,7 +58,7 @@ void RenderPass::render(const FrameData& frame_data) {
         static_mesh_renderer.render(frame_data, model.value());
     }
 
-    // overlay_renderer.render(frame_data);
+    overlay_renderer.render(frame_data);
 
     endPass(frame_data);
 }
