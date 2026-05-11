@@ -1,4 +1,10 @@
+add_library(ECS STATIC)
 
+target_link_libraries(ECS
+    PRIVATE
+        Utility
+        Tracy::TracyClient
+)
 
 add_subdirectory(Component)
 add_subdirectory(Entity)

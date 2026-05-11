@@ -17,6 +17,7 @@ target_link_libraries(Core PUBLIC
 	Types
 	Utility
 	File
+	ECS
 	# Physics
 	# Script
 )
@@ -29,5 +30,6 @@ add_subdirectory(Window)
 add_subdirectory(Graphics)
 add_subdirectory(Utility)
 add_subdirectory(File)
+add_subdirectory(ECS)
 # add_subdirectory(Physics)
 # add_subdirectory(Script)
