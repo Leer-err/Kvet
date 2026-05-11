@@ -10,7 +10,7 @@ EventSubscription::EventSubscription(
     const std::function<void()>& unsubscribe_callback)
     : unsubscribe_callback(unsubscribe_callback) {}
 
-EventSubscription::~EventSubscription() {
+EventSubscription::~EventSubscription() noexcept {
     if (unsubscribe_callback) {
         (*unsubscribe_callback)();
     }

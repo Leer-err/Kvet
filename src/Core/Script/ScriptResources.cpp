@@ -2,6 +2,6 @@
 
 namespace Script {
 
-sol::state_view Resources::getState() { return state; }
+sol::state& Resources::getState() { return state; }
 
 };  // namespace Script

@@ -106,11 +106,12 @@ InputLayoutBuilder::getElementsFromShader(
     result = spvReflectEnumerateInputVariables(&module, &var_count, NULL);
     if (result != SPV_REFLECT_RESULT_SUCCESS) return Error::ParseError;
 
-    SpvReflectInterfaceVariable** input_vars =
-        (SpvReflectInterfaceVariable**)malloc(
-            var_count * sizeof(SpvReflectInterfaceVariable*));
+    auto input_vars = new SpvReflectInterfaceVariable*[var_count];
     result = spvReflectEnumerateInputVariables(&module, &var_count, input_vars);
-    if (result != SPV_REFLECT_RESULT_SUCCESS) return Error::ParseError;
+    if (result != SPV_REFLECT_RESULT_SUCCESS) {
+        delete[] input_vars;
+        return Error::ParseError;
+    }
 
     auto inputs = std::vector<VkFormat>(var_count);
     for (int i = 0; i < var_count; i++) {
@@ -120,6 +121,8 @@ InputLayoutBuilder::getElementsFromShader(
         auto index = input_vars[i]->location;
         inputs[index] = element_type.getResult();
     }
+
+    delete[] input_vars;
 
     return inputs;
 }
@@ -171,16 +174,20 @@ InputLayoutBuilder::getPushConstantsFromShader(
     result = spvReflectEnumeratePushConstantBlocks(&module, &var_count, NULL);
     if (result != SPV_REFLECT_RESULT_SUCCESS) return Error::ParseError;
 
-    SpvReflectBlockVariable** push_vars = (SpvReflectBlockVariable**)malloc(
-        var_count * sizeof(SpvReflectBlockVariable*));
+    auto push_vars = new SpvReflectBlockVariable*[var_count];
     result =
         spvReflectEnumeratePushConstantBlocks(&module, &var_count, push_vars);
-    if (result != SPV_REFLECT_RESULT_SUCCESS) return Error::ParseError;
+    if (result != SPV_REFLECT_RESULT_SUCCESS) {
+        delete[] push_vars;
+        return Error::ParseError;
+    }
 
     size_t size = 0;
     for (int i = 0; i < var_count; i++) {
         size += push_vars[i]->size;
     }
+
+    delete[] push_vars;
 
     return size;
 }

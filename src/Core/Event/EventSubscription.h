@@ -10,7 +10,7 @@ class EventSubscription {
    public:
     EventSubscription();
     EventSubscription(const std::function<void()>& unsubscribe_callback);
-    ~EventSubscription();
+    ~EventSubscription() noexcept;
 
     EventSubscription(EventSubscription&&);
     EventSubscription& operator=(EventSubscription&&);
