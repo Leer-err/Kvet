@@ -116,7 +116,10 @@ InputLayoutBuilder::getElementsFromShader(
     auto inputs = std::vector<VkFormat>(var_count);
     for (int i = 0; i < var_count; i++) {
         auto element_type = parseType(input_vars[i]->format);
-        if (element_type.isError()) return element_type.getError();
+        if (element_type.isError()) {
+            delete[] input_vars;
+            return element_type.getError();
+        }
 
         auto index = input_vars[i]->location;
         inputs[index] = element_type.getResult();
