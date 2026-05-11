@@ -93,20 +93,36 @@ target_link_directories(Assimp INTERFACE
 	${CMAKE_CURRENT_SOURCE_DIR}/assimp/bin
 )
 
+if (WIN32)
+	set(ASSIMP_LIB_FILE $<IF:$<CONFIG:Debug>,assimp-vc143-mtd.dll,assimp-vc143-mt.dll>)
+
+	add_custom_command(
+		OUTPUT
+	        ${CMAKE_BINARY_DIR}/bin/${ASSIMP_LIB_FILE}
+		COMMAND
+			${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/assimp/bin/${CMAKE_BUILD_TYPE}/${ASSIMP_LIB_FILE} ${CMAKE_BINARY_DIR}/bin
+	    DEPENDS ${EXECUTABLE_NAME}
+	)
+else()
+  	set(ASSIMP_LIB_FILE libassimp.so.6.0.2)
+
+	add_custom_command(
+		OUTPUT
+	        ${CMAKE_BINARY_DIR}/bin/${ASSIMP_LIB_FILE}
+		COMMAND
+			${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/assimp/bin/${ASSIMP_LIB_FILE} ${CMAKE_BINARY_DIR}/bin
+	    DEPENDS ${EXECUTABLE_NAME}
+	)
+endif()
+
 target_link_libraries(Assimp 
 	INTERFACE
-		$<IF:$<CONFIG:Debug>,assimp-vc143-mtd.dll,assimp-vc143-mt.dll>
+		${ASSIMP_LIB_FILE}
 )
 
-add_custom_command(
-	OUTPUT
-        ${CMAKE_BINARY_DIR}/bin/$<IF:$<CONFIG:Debug>,assimp-vc143-mtd.dll,assimp-vc143-mt.dll>
-	COMMAND
-		${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/assimp/bin/${CMAKE_BUILD_TYPE}/$<IF:$<CONFIG:Debug>,assimp-vc143-mtd.dll,assimp-vc143-mt.dll> ${CMAKE_BINARY_DIR}/bin
-    DEPENDS ${EXECUTABLE_NAME}
-)
+
 add_custom_target(copy_assimp_libs ALL
-	DEPENDS ${CMAKE_BINARY_DIR}/bin/$<IF:$<CONFIG:Debug>,assimp-vc143-mtd.dll,assimp-vc143-mt.dll>
+	DEPENDS ${CMAKE_BINARY_DIR}/bin/${ASSIMP_LIB_FILE}
 )
 
 # ImGui

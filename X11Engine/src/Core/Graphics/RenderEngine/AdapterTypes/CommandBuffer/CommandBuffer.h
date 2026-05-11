@@ -17,6 +17,7 @@ struct CommandBuffer {
     void draw(const Mesh& mesh) const;
 
     void copy(const Image& src, Image& dst) const;
+    void blit(const Image& src, Image& dst) const;
 
     template <typename T>
     void pushConstants(const GraphicsPipeline& pipeline,

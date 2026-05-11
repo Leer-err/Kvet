@@ -51,6 +51,6 @@ SamplerState samplers;
 [shader("pixel")]
 float4 pixel_main(in Vertex_Output data)
 {
-    uint64_t texture_index = constants.model_data.albedo_descriptor;
+    uint32_t texture_index = constants.model_data.albedo_descriptor;
     return textures[texture_index].Sample(samplers, data.uv);
 }

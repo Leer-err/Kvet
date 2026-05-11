@@ -8,6 +8,7 @@
 #include "Buffer.h"
 #include "ExtensionFunctions.h"
 #include "GraphicsPipeline.h"
+#include "Image.h"
 #include "RenderEnviroment.h"
 
 namespace Graphics {
@@ -41,6 +42,31 @@ void CommandBuffer::copy(const Image& src, Image& dst) const {
     copy_info.pRegions = &copy_region;
 
     vkCmdCopyImage2(buffer, &copy_info);
+}
+
+void CommandBuffer::blit(const Image& src, Image& dst) const {
+    VkImageBlit2 region = {};
+    region.sType = VK_STRUCTURE_TYPE_IMAGE_BLIT_2;
+    region.srcSubresource = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1};
+    region.srcOffsets[0] = {};
+    region.srcOffsets[1] = {static_cast<int32_t>(src.width),
+                            static_cast<int32_t>(src.height), 1};
+    region.dstSubresource = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1};
+    region.dstOffsets[0] = {};
+    region.dstOffsets[1] = {static_cast<int32_t>(dst.width),
+                            static_cast<int32_t>(dst.height), 1};
+
+    VkBlitImageInfo2 info = {};
+    info.sType = VK_STRUCTURE_TYPE_BLIT_IMAGE_INFO_2;
+    info.srcImage = src.image;
+    info.srcImageLayout = src.layout;
+    info.dstImage = dst.image;
+    info.dstImageLayout = dst.layout;
+    info.filter = VK_FILTER_NEAREST;
+    info.regionCount = 1;
+    info.pRegions = &region;
+
+    vkCmdBlitImage2(buffer, &info);
 }
 
 void CommandBuffer::pushConstants(const GraphicsPipeline& pipeline,

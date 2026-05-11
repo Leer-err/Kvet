@@ -32,7 +32,7 @@ SwapChain::SwapChain(Device& device, Queue presentation_queue, uint32_t width,
     }
 
     VkSurfaceFormatKHR format = {};
-    format.format = VK_FORMAT_R8G8B8A8_SRGB;
+    format.format = VK_FORMAT_B8G8R8A8_SRGB;
     format.colorSpace = VK_COLORSPACE_SRGB_NONLINEAR_KHR;
 
     swap_chain = device.createSwapChain(
@@ -44,6 +44,8 @@ SwapChain::SwapChain(Device& device, Queue presentation_queue, uint32_t width,
     for (int i = 0; i < swap_chain_size; i++) {
         Image image = {};
         image.image = swap_cahin_images[i];
+        image.width = width;
+        image.height = height;
         image.format = format.format;
 
         images[i] = image;

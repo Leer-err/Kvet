@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstddef>
+
 #include "MeshHandle.h"
 #include "TextureHandle.h"
 

@@ -2,6 +2,7 @@
 
 #include <VkBootstrap.h>
 #include <vulkan/vulkan.h>
+#include <vulkan/vulkan_core.h>
 
 #include <tracy/Tracy.hpp>
 #include <tracy/TracyVulkan.hpp>
@@ -184,23 +185,23 @@ void RenderEngine::copyToBackbuffer(const CommandBuffer& cmd,
     VkImageMemoryBarrier2 barriers[2] = {};
     barriers[0] = backbuffer.createBarrier(
         VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_PIPELINE_STAGE_2_NONE,
-        VK_ACCESS_2_NONE, VK_PIPELINE_STAGE_2_TRANSFER_BIT,
+        VK_ACCESS_2_NONE, VK_PIPELINE_STAGE_2_BLIT_BIT,
         VK_ACCESS_2_TRANSFER_WRITE_BIT);
     barriers[1] = render_target.createBarrier(
         VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
         VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT,
-        VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT,
-        VK_PIPELINE_STAGE_2_TRANSFER_BIT, VK_ACCESS_2_TRANSFER_READ_BIT);
+        VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT, VK_PIPELINE_STAGE_2_BLIT_BIT,
+        VK_ACCESS_2_TRANSFER_READ_BIT);
 
     cmd.barrier(barriers, 2, nullptr, 0);
-    cmd.copy(render_target, backbuffer);
+    cmd.blit(render_target, backbuffer);
 }
 
 void RenderEngine::prepareBackbufferForPresentation(const CommandBuffer& cmd,
                                                     Image& backbuffer) {
     ZoneScoped;
     auto render_finished = backbuffer.createBarrier(
-        VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, VK_PIPELINE_STAGE_2_TRANSFER_BIT,
+        VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, VK_PIPELINE_STAGE_2_BLIT_BIT,
         VK_ACCESS_2_TRANSFER_WRITE_BIT, VK_PIPELINE_STAGE_2_NONE,
         VK_ACCESS_2_NONE);
 
