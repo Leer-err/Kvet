@@ -1,26 +1,19 @@
 #pragma once
 
+#include "IScene.h"
 #include "Sky.h"
 #include "World.h"
 
-class Scene {
+class Scene : public IScene {
    public:
-    static Scene& get() {
-        static Scene instance;
-        return instance;
-    }
-
-    void update(float deltaTime);
-
-    World& getWorld();
-
-   private:
     Scene();
 
+    void update(float deltaTime) override;
+
+   private:
     void setupSystems();
 
     Sky sky;
 
     World world;
-    Entity player;
 };

@@ -5,6 +5,7 @@
 #include <thread>
 
 #include "IRenderEngine.h"
+#include "IScene.h"
 
 // #include "Scene.h"
 // #include "World.h"
@@ -20,7 +21,7 @@ class Engine {
 
     bool init();
 
-    void run();
+    void run(IScene* scene);
     void exit();
 
     float getTime() const;
@@ -32,9 +33,9 @@ class Engine {
     Engine& operator=(Engine&&) = delete;
 
     void windowWorker();
-    void mainLoopWorker();
+    void mainLoopWorker(IScene* scene);
 
-    void update(float delta_time);
+    void update(IScene* scene, float delta_time);
 
     void setupSystemPipeline();
 
