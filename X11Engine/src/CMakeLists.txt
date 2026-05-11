@@ -29,9 +29,6 @@ set_target_properties(${TARGET_NAME} PROPERTIES
 	CXX_EXTENSIONS OFF
 )
 
-add_subdirectory(Dependencies)
-
-# add_subdirectory(Event)
 # add_subdirectory(FileReader)
 # add_subdirectory(Graphics)
 add_subdirectory(Engine)
