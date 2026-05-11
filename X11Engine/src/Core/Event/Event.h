@@ -1,10 +1,10 @@
 #ifndef EVENT_H
 #define EVENT_H
 
-namespace Engine::Event {
+namespace Event {
 
 struct Event {};
 
-};  // namespace Engine::Event
+};  // namespace Event
 
 #endif  // EVENT_H

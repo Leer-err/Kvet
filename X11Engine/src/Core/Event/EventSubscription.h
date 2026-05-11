@@ -4,7 +4,7 @@
 #include <functional>
 #include <optional>
 
-namespace Engine::Event {
+namespace Event {
 
 class EventSubscription {
    public:
@@ -19,6 +19,6 @@ class EventSubscription {
     std::optional<std::function<void()>> unsubscribe_callback;
 };
 
-};  // namespace Engine::Event
+};  // namespace Event
 
 #endif  // EVENT_SUBSCRIPTION_H

@@ -11,7 +11,7 @@
 #include "TypeId.h"
 #include "TypeIdHelper.h"
 
-namespace Engine::Event {
+namespace Event {
 
 template <typename EventType>
 using EventCallback = std::function<void(const EventType&)>;
@@ -88,12 +88,6 @@ class EventBus {
     EventBus& operator=(EventBus&&) = delete;
 };
 
-};  // namespace Engine::Event
+};  // namespace Event
 
 #endif  // EVENT_BUS_H
-
-struct ScriptEventType {};
-
-struct ScriptEvent {
-    ScriptEventType type;
-};

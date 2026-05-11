@@ -18,6 +18,7 @@ target_link_libraries(Core PUBLIC
 	Utility
 	File
 	ECS
+	Event
 	# Physics
 	# Script
 )
@@ -31,5 +32,6 @@ add_subdirectory(Graphics)
 add_subdirectory(Utility)
 add_subdirectory(File)
 add_subdirectory(ECS)
+add_subdirectory(Event)
 # add_subdirectory(Physics)
 # add_subdirectory(Script)

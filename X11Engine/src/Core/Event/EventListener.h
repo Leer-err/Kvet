@@ -5,7 +5,7 @@
 
 #include "Event.h"
 
-namespace Engine::Event {
+namespace Event {
 
 class EventListener {
    public:
@@ -17,6 +17,6 @@ class EventListener {
     std::function<void(const Event* event)> callback;
 };
 
-};  // namespace Engine::Event
+};  // namespace Event
 
 #endif  // EVENT_LISTENER_H

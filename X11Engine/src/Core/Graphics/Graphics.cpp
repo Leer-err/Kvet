@@ -16,7 +16,6 @@
 #include "VkBootstrap.h"
 #include "Window.h"
 
-
 namespace Graphics {
 
 enum class Error {
@@ -144,15 +143,16 @@ static void createOverlay(const vkb::Instance& instance,
     init_info.MinImageCount = 3;
     init_info.ImageCount = 3;
     init_info.UseDynamicRendering = true;
-    init_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
+    init_info.PipelineInfoMain.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
     init_info.DescriptorPoolSize = 100;
 
     VkFormat swapchain_format = VK_FORMAT_R8G8B8A8_SRGB;
-    init_info.PipelineRenderingCreateInfo = {
+    init_info.PipelineInfoMain.PipelineRenderingCreateInfo = {
         .sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO};
-    init_info.PipelineRenderingCreateInfo.colorAttachmentCount = 1;
-    init_info.PipelineRenderingCreateInfo.pColorAttachmentFormats =
-        &swapchain_format;
+    init_info.PipelineInfoMain.PipelineRenderingCreateInfo
+        .colorAttachmentCount = 1;
+    init_info.PipelineInfoMain.PipelineRenderingCreateInfo
+        .pColorAttachmentFormats = &swapchain_format;
 
     ImGui_ImplVulkan_Init(&init_info);
 }

@@ -3,7 +3,7 @@
 
 #include "EventBus.h"
 
-using namespace Engine::Event;
+using namespace Event;
 
 struct TestEvent : public Event {};
 

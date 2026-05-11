@@ -5,7 +5,7 @@
 
 #include "Event.h"
 
-namespace Engine::Event {
+namespace Event {
 
 void EventBus::flush() {
     mutex.lock();
@@ -58,4 +58,4 @@ void EventBus::unsubscribe(TypeId type_id,
     }
 }
 
-};  // namespace Engine::Event
+};  // namespace Event

@@ -2,7 +2,7 @@
 
 #include <optional>
 
-namespace Engine::Event {
+namespace Event {
 
 EventSubscription::EventSubscription() : unsubscribe_callback(std::nullopt) {}
 
@@ -26,4 +26,4 @@ EventSubscription& EventSubscription::operator=(EventSubscription&& other) {
     return *this;
 }
 
-};  // namespace Engine::Event
+};  // namespace Event
