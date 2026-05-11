@@ -72,7 +72,8 @@ GraphicsPipelineBuilder::create() {
     if (input_layout_result.isError()) {
         switch (input_layout_result.getError()) {
             case InputLayoutBuilder::Error::FileNotFound:
-                return Error::ShaderFileNotFound;
+            case InputLayoutBuilder::Error::ParseError:
+                return Error::ShaderNotBuilt;
             case InputLayoutBuilder::Error::UnsupportedElementFormat:
                 return Error::VertexInputTypeNotSupported;
         }
@@ -187,12 +188,8 @@ GraphicsPipelineBuilder::createShader(const std::string& filename,
     auto shader_build_result =
         ShaderBuilder(engine_data, filename, entrypoint, stage).create();
 
-    if (shader_build_result.isOk()) return shader_build_result.getResult();
+    if (shader_build_result.isError()) return Error::ShaderNotBuilt;
 
-    auto error = shader_build_result.getError();
-    switch (error) {
-        case ShaderError::NotFound:
-            return Error::ShaderFileNotFound;
-    }
+    return shader_build_result.getResult();
 }
 }  // namespace Graphics

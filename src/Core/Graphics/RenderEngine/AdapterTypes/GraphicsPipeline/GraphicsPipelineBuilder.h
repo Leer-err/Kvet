@@ -18,7 +18,7 @@ namespace Graphics {
 
 class GraphicsPipelineBuilder {
    public:
-    enum class Error { ShaderFileNotFound, VertexInputTypeNotSupported };
+    enum class Error { ShaderNotBuilt, VertexInputTypeNotSupported };
 
     GraphicsPipelineBuilder(const EngineData& engine_data,
                             const std::string& vertex_shader_filename,

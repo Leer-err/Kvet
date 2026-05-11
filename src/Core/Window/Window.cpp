@@ -5,7 +5,6 @@
 #include "AppConfig.h"
 #include "LoggerFactory.h"
 #include "PhysicalInput.h"
-#include "SDL3/SDL_error.h"
 #include "SDL3/SDL_events.h"
 #include "SDL3/SDL_mouse.h"
 #include "SDL3/SDL_scancode.h"
@@ -139,7 +138,7 @@ void Window::processKeyUp(const SDL_Event* event) {
 }
 
 void Window::processMouseButtonDown(const SDL_Event* event) {
-    Button button;
+    Button button = Button::INVALID_BUTTON;
 
     switch (event->button.button) {
         case SDL_BUTTON_LEFT:
@@ -159,7 +158,7 @@ void Window::processMouseButtonDown(const SDL_Event* event) {
 }
 
 void Window::processMouseButtonUp(const SDL_Event* event) {
-    Button button;
+    Button button = Button::INVALID_BUTTON;
 
     switch (event->button.button) {
         case SDL_BUTTON_LEFT:

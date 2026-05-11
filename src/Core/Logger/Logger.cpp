@@ -15,7 +15,9 @@ Logger::Logger(const char* name, std::vector<spdlog::sink_ptr> sinks)
     spdlog::register_logger(logger);
 }
 
-Logger::~Logger() { logger->flush(); }
+Logger::~Logger() {
+    if (logger) logger->flush();
+}
 
 void Logger::setLevel(LogLevel level) {
     spdlog::level::level_enum spdlog_level;
