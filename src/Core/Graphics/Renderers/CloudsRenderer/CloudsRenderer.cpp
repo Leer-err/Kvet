@@ -4,16 +4,13 @@
 
 #include <cstring>
 
-#include "BufferBuilder.h"
 #include "CloudsData.h"
 #include "DescriptorSet.h"
 #include "EngineData.h"
 #include "GraphicsPipelineBuilder.h"
 #include "ImageBuilder.h"
-#include "InputLayoutBuilder.h"
 #include "MeshBuilder.h"
 #include "Sampler.h"
-#include "ShaderBuilder.h"
 #include "Vector2.h"
 #include "Vector3.h"
 
@@ -25,7 +22,7 @@ struct Vertex {
 };
 
 CloudsRenderer::CloudsRenderer(const EngineData& engine_data)
-    : engine_data(engine_data) {
+    : engine_data(engine_data), clouds_data_buffer(this->engine_data) {
     constexpr Vertex cloud_plane_vertex_data[] = {
         {Vector3(-1, 0, -1), Vector2(0, 0)},
         {Vector3(-1, 0, 1), Vector2(0, 1)},
@@ -77,34 +74,15 @@ CloudsRenderer::CloudsRenderer(const EngineData& engine_data)
             "./Assets/Shaders/Clouds/Clouds.spv", "pixel_main")
             .create()
             .getResult();
-
-    clouds_data_buffer = BufferBuilder(engine_data, sizeof(CloudsData))
-                             .isConstantBuffer()
-                             .isCPUWritable()
-                             .create()
-                             .getResult();
-    push_constants.clouds_address = clouds_data_buffer.device_address;
-
-    CloudsData data = {};
-    data.color = Vector3(1, 0, 1);
-    data.time = 0;
-    data.cloud_plane_scale = 1000;
-    data.height = 100;
-
-    auto data_ptr = engine_data.device.map(clouds_data_buffer);
-    memcpy(data_ptr, &data, sizeof(CloudsData));
-    engine_data.device.unmap(clouds_data_buffer);
 }
 
 void CloudsRenderer::render(const FrameData& frame_data,
                             const CloudsData& clouds_data) {
     TracyVkZone(frame_data.trace_ctx, frame_data.cmd.buffer, "Clouds");
 
-    auto data_ptr = engine_data.device.map(clouds_data_buffer);
-    memcpy(data_ptr, &clouds_data, sizeof(CloudsData));
-    engine_data.device.unmap(clouds_data_buffer);
-
     auto command_buffer = frame_data.cmd;
+
+    push_constants.clouds_address = clouds_data_buffer.getAddress(frame_data);
 
     command_buffer.setPipeline(cloud_pipeline);
     command_buffer.bindDescriptorSet(cloud_pipeline, frame_data.descriptor_set);
@@ -119,9 +97,7 @@ void CloudsRenderer::preRender(const FrameData& frame_data,
     TracyVkZone(frame_data.trace_ctx, frame_data.cmd.buffer,
                 "Cloud texture bake");
 
-    auto data_ptr = engine_data.device.map(clouds_data_buffer);
-    memcpy(data_ptr, &clouds_data, sizeof(CloudsData));
-    engine_data.device.unmap(clouds_data_buffer);
+    clouds_data_buffer.update(frame_data, clouds_data);
 
     auto command_buffer = frame_data.cmd;
 
@@ -138,8 +114,9 @@ void CloudsRenderer::preRender(const FrameData& frame_data,
     command_buffer.bindDescriptorSet(cloud_texture_pipeline,
                                      frame_data.descriptor_set);
 
+    auto clouds_device_address = clouds_data_buffer.getAddress(frame_data);
     command_buffer.pushConstants(cloud_texture_pipeline,
-                                 &clouds_data_buffer.device_address);
+                                 &clouds_device_address);
 
     command_buffer.draw(quad);
 

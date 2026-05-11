@@ -18,7 +18,8 @@ class BufferBuilder {
     BufferBuilder& isConstantBuffer();
     BufferBuilder& isDescriptorBuffer();
 
-    BufferBuilder& isCPUWritable(bool is_random = false);
+    BufferBuilder& isCPUWritable(bool always_mapped = false,
+                                 bool is_random = false);
 
     BufferBuilder& isCopySource();
     BufferBuilder& isCopyDestination();

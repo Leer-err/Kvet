@@ -1,5 +1,7 @@
 #pragma once
 
+#include "BufferedUniform.h"
+#include "CameraData.h"
 #include "CloudsRenderer.h"
 #include "FrameData.h"
 #include "OverlayRenderer.h"
@@ -18,11 +20,11 @@ class RenderPass {
     void beginPass(const FrameData& frame_data);
     void endPass(const FrameData& frame_data);
 
-    void updateCameraBuffer();
+    void updateCameraBuffer(const FrameData& frame_data);
 
     EngineData engine_data;
 
-    Buffer camera_data_buffer;
+    BufferedUniform<CameraData> camera_data_buffer;
 
     StarRenderer star_renderer;
     CloudsRenderer clouds_renderer;

@@ -3,32 +3,29 @@
 #include <vulkan/vulkan.h>
 
 #include <cstdint>
-#include <memory>
 
 #include "CommandBuffer.h"
 #include "CommandPool.h"
 #include "DescriptorSet.h"
 #include "Device.h"
 #include "DeviceProperties.h"
+#include "EngineConstants.h"
 #include "EngineData.h"
 #include "IRenderEngine.h"
-#include "Mesh/MeshRegistry.h"
+#include "MeshRegistry.h"
 #include "Queue.h"
 #include "RenderEnviroment.h"
 #include "RenderPass.h"
 #include "Semaphore.h"
 #include "ShaderRegistry.h"
-#include "StagingBuffer/StagingBuffer.h"
+#include "StagingBuffer.h"
 #include "StarRenderer.h"
 #include "SwapChain.h"
 #include "VkBootstrap.h"
-// #include "Texture.h"
 
 namespace Graphics {
 
 class RenderEngine final : public IRenderEngine {
-    static constexpr size_t MAX_FRAMES_IN_FLIGHT = 2;
-
     struct FrameInFlight {
         FrameInFlight(Device& device, uint32_t queue_index)
             : pool(device, queue_index),

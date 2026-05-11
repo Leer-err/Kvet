@@ -1,38 +1,49 @@
 #pragma once
 
+#include <vulkan/vulkan_core.h>
+
 #include <array>
 #include <cstddef>
-#include <cstdint>
 
 #include "Buffer.h"
-#include "Device.h"
+#include "EngineConstants.h"
+#include "EngineData.h"
 #include "FrameData.h"
 
 namespace Graphics {
 
 class BufferedUniformBase {
    public:
-    BufferedUniformBase(const Device& device, size_t size);
-    ~BufferedUniformBase();
+    BufferedUniformBase(EngineData& engine_data, size_t size);
 
     void update(const FrameData& frame, const void* data);
 
-    Buffer getBuffer(const FrameData& frame);
+    const Buffer& getBuffer(const FrameData& frame);
+    VkDeviceAddress getAddress(const FrameData& frame);
 
    private:
+    EngineData& engine_data;
+
     std::array<Buffer, MAX_FRAMES_IN_FLIGHT> buffers;
+    size_t size;
 };
 
 template <typename T>
 class BufferedUniform {
    public:
-    BufferedUniform(const Device& device) : base(device, sizeof(T)) {}
+    BufferedUniform(EngineData& engine_data) : base(engine_data, sizeof(T)) {}
 
     void update(const FrameData& frame, const T& data) {
         base.update(frame, &data);
     }
 
-    Buffer getBuffer(const FrameData& frame) { return base.getBuffer(frame); }
+    const Buffer& getBuffer(const FrameData& frame) {
+        return base.getBuffer(frame);
+    }
+
+    VkDeviceAddress getAddress(const FrameData& frame) {
+        return base.getAddress(frame);
+    }
 
    private:
     BufferedUniformBase base;

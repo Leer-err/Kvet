@@ -1,15 +1,22 @@
 #pragma once
 
 #include <vulkan/vulkan.h>
-#include <vulkan/vulkan_core.h>
 
+#include "BufferedUniform.h"
 #include "EngineData.h"
 #include "FrameData.h"
+#include "Matrix.h"
 #include "StaticModelData.h"
 
 namespace Graphics {
 
 class StaticMeshRenderer {
+    struct StaticModelBuffer {
+        Matrix model;
+
+        TextureHandle albedo_descriptor;
+    };
+
     struct PushConstants {
         VkDeviceAddress camera_data;
         VkDeviceAddress model_data;
@@ -26,7 +33,7 @@ class StaticMeshRenderer {
 
     GraphicsPipeline pipeline;
 
-    Buffer model_data_buffer;
+    BufferedUniform<StaticModelBuffer> model_data_buffer;
 
     PushConstants push_constants;
 };

@@ -77,7 +77,8 @@ void RenderEngine::render() {
         staging_buffer.flush(cmd);
     }
 
-    FrameData data = {.cmd = cmd,
+    FrameData data = {.frame_in_flight_index = frame_in_flight_index,
+                      .cmd = cmd,
                       .env = render_enviroment,
                       .descriptor_set = descriptor_set,
                       .trace_ctx = trace_ctx};

@@ -1,0 +1,36 @@
+#include "BufferedUniform.h"
+
+#include <cstddef>
+#include <cstring>
+
+#include "Buffer.h"
+#include "BufferBuilder.h"
+
+namespace Graphics {
+
+BufferedUniformBase::BufferedUniformBase(EngineData& engine_data, size_t size)
+    : size(size), engine_data(engine_data) {
+    for (auto i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
+        buffers[i] = BufferBuilder(engine_data, size)
+                         .isConstantBuffer()
+                         .isCPUWritable(true)
+                         .create()
+                         .getResult();
+    }
+}
+
+void BufferedUniformBase::update(const FrameData& frame, const void* data) {
+    auto ptr = buffers[frame.frame_in_flight_index].mapped_address;
+
+    memcpy(ptr, data, size);
+}
+
+const Buffer& BufferedUniformBase::getBuffer(const FrameData& frame) {
+    return buffers[frame.frame_in_flight_index];
+}
+
+VkDeviceAddress BufferedUniformBase::getAddress(const FrameData& frame) {
+    return buffers[frame.frame_in_flight_index].device_address;
+}
+
+}  // namespace Graphics

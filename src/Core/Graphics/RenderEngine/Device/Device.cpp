@@ -80,8 +80,10 @@ Result<Buffer, BufferError> Device::createBuffer(
     const VmaAllocationCreateInfo& alloc_info) {
     Buffer buffer = {};
 
+    VmaAllocationInfo result_info = {};
+
     vmaCreateBuffer(allocator, &buffer_info, &alloc_info, &buffer.buffer,
-                    &buffer.allocation, nullptr);
+                    &buffer.allocation, &result_info);
 
     VkBufferDeviceAddressInfo info = {};
     info.sType = VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO;
@@ -89,6 +91,9 @@ Result<Buffer, BufferError> Device::createBuffer(
 
     if ((buffer_info.usage & VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT) != 0)
         buffer.device_address = vkGetBufferDeviceAddress(device, &info);
+
+    if ((alloc_info.flags & VMA_ALLOCATION_CREATE_MAPPED_BIT) != 0)
+        buffer.mapped_address = result_info.pMappedData;
 
     buffer.size = buffer_info.size;
     return buffer;

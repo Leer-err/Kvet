@@ -17,6 +17,7 @@ struct Buffer {
     VkBuffer buffer;
     VmaAllocation allocation;
 
+    void* mapped_address;
     VkDeviceAddress device_address;
     size_t size;
 };

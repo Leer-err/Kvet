@@ -44,12 +44,15 @@ BufferBuilder& BufferBuilder::isDescriptorBuffer() {
     return *this;
 }
 
-BufferBuilder& BufferBuilder::isCPUWritable(bool is_random) {
+BufferBuilder& BufferBuilder::isCPUWritable(bool always_mapped,
+                                            bool is_random) {
     if (is_random)
         alloc_info.flags |= VMA_ALLOCATION_CREATE_HOST_ACCESS_RANDOM_BIT;
     else
         alloc_info.flags |=
             VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
+
+    if (always_mapped) alloc_info.flags |= VMA_ALLOCATION_CREATE_MAPPED_BIT;
 
     return *this;
 }

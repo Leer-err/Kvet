@@ -15,7 +15,7 @@
 namespace Graphics {
 
 StarRenderer::StarRenderer(const EngineData& engine_data)
-    : engine_data(engine_data) {
+    : engine_data(engine_data), stars_data_buffer(this->engine_data) {
     constexpr Vector3 screen_quad_vertices[] = {
         Vector3(-1, -1, 1), Vector3(-1, 1, 1), Vector3(1, -1, 1),
         Vector3(1, 1, 1)};
@@ -33,25 +33,16 @@ StarRenderer::StarRenderer(const EngineData& engine_data)
             "./Assets/Shaders/Stars/Stars.spv", "pixel_main")
             .create()
             .getResult();
-
-    stars_data_buffer = BufferBuilder(engine_data, sizeof(StarsData))
-                            .isConstantBuffer()
-                            .isCPUWritable()
-                            .create()
-                            .getResult();
-    push_constants.stars_data = stars_data_buffer.device_address;
 }
 
 void StarRenderer::render(const FrameData& frame_data,
-                          const Buffer& camera_data,
                           const StarsData& stars_data) {
     TracyVkZone(frame_data.trace_ctx, frame_data.cmd.buffer, "Stars");
 
     auto command_buffer = frame_data.cmd;
 
-    auto stars_data_ptr = engine_data.device.map(stars_data_buffer);
-    memcpy(stars_data_ptr, &stars_data, sizeof(stars_data));
-    engine_data.device.unmap(stars_data_buffer);
+    stars_data_buffer.update(frame_data, stars_data);
+    push_constants.stars_data = stars_data_buffer.getAddress(frame_data);
 
     command_buffer.setPipeline(pipeline);
 

@@ -3,6 +3,7 @@
 #include <vulkan/vulkan_core.h>
 
 #include "Buffer.h"
+#include "BufferedUniform.h"
 #include "CloudsData.h"
 #include "CommandBuffer.h"
 #include "DescriptorSet.h"
@@ -38,7 +39,7 @@ class CloudsRenderer {
     RenderEnviroment env;
 
     Image clouds_texture;
-    Buffer clouds_data_buffer;
+    BufferedUniform<CloudsData> clouds_data_buffer;
 
     PushConstants push_constants;
 };

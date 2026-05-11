@@ -18,20 +18,18 @@ RenderPass::RenderPass(EngineData engine_data)
       star_renderer(engine_data),
       clouds_renderer(engine_data),
       static_mesh_renderer(engine_data),
-      overlay_renderer(engine_data) {
-    camera_data_buffer = BufferBuilder(engine_data, sizeof(CameraData))
-                             .isConstantBuffer()
-                             .isCPUWritable()
-                             .create()
-                             .getResult();
-
-    clouds_renderer.setCameraData(camera_data_buffer.device_address);
-    star_renderer.setCameraData(camera_data_buffer.device_address);
-    static_mesh_renderer.setCameraData(camera_data_buffer.device_address);
-}
+      overlay_renderer(engine_data),
+      camera_data_buffer(engine_data) {}
 
 void RenderPass::render(const FrameData& frame_data) {
     ZoneScoped;
+
+    auto camera_data_address = camera_data_buffer.getAddress(frame_data);
+
+    clouds_renderer.setCameraData(camera_data_address);
+    star_renderer.setCameraData(camera_data_address);
+    static_mesh_renderer.setCameraData(camera_data_address);
+
     auto& manager = GraphicsCommunicationManager::get();
 
     TracyVkZone(frame_data.trace_ctx, frame_data.cmd.buffer, "Render pass");
@@ -42,13 +40,13 @@ void RenderPass::render(const FrameData& frame_data) {
         clouds_renderer.preRender(frame_data, clouds.value());
     }
 
-    updateCameraBuffer();
+    updateCameraBuffer(frame_data);
 
     beginPass(frame_data);
 
     auto stars = manager.recieve<StarsData>();
     if (stars) {
-        star_renderer.render(frame_data, camera_data_buffer, *stars);
+        star_renderer.render(frame_data, *stars);
     }
     if (clouds) {
         clouds_renderer.render(frame_data, clouds.value());
@@ -71,7 +69,7 @@ void RenderPass::endPass(const FrameData& frame_data) {
     frame_data.cmd.unbindRenderEnviroment();
 }
 
-void RenderPass::updateCameraBuffer() {
+void RenderPass::updateCameraBuffer(const FrameData& frame_data) {
     // auto camera_data =
     //     GraphicsCommunicationManager::get().recieve<CameraData>();
 
@@ -82,9 +80,7 @@ void RenderPass::updateCameraBuffer() {
     data.view_projection.m[1][1] *= -1;
     data.inverse_view_projection = data.view_projection.inverse();
 
-    void* mapped_buffer = engine_data.device.map(camera_data_buffer);
-    memcpy(mapped_buffer, &data, sizeof(CameraData));
-    engine_data.device.unmap(camera_data_buffer);
+    camera_data_buffer.update(frame_data, data);
 }
 
 }  // namespace Graphics

@@ -8,6 +8,8 @@
 namespace Graphics {
 
 struct FrameData {
+    uint32_t frame_in_flight_index;
+
     CommandBuffer cmd;
     RenderEnviroment env;
 

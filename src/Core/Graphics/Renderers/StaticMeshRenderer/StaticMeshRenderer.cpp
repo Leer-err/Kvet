@@ -10,27 +10,14 @@
 
 namespace Graphics {
 
-struct StaticModelBuffer {
-    Matrix model;
-
-    TextureHandle albedo_descriptor;
-};
-
 StaticMeshRenderer::StaticMeshRenderer(const EngineData& engine_data)
-    : engine_data(engine_data) {
+    : engine_data(engine_data), model_data_buffer(this->engine_data) {
     pipeline = GraphicsPipelineBuilder(
                    engine_data, "./Assets/Shaders/StaticModel/StaticModel.spv",
                    "vertex_main",
                    "./Assets/Shaders/StaticModel/StaticModel.spv", "pixel_main")
                    .create()
                    .getResult();
-
-    model_data_buffer = BufferBuilder(engine_data, sizeof(StaticModelBuffer))
-                            .isConstantBuffer()
-                            .isCPUWritable()
-                            .create()
-                            .getResult();
-    push_constants.model_data = model_data_buffer.device_address;
 }
 
 void StaticMeshRenderer::render(const FrameData& frame_data,
@@ -43,9 +30,8 @@ void StaticMeshRenderer::render(const FrameData& frame_data,
     buffer.model = Matrix::translation(model_data.position);
     buffer.albedo_descriptor = model_data.albedo;
 
-    auto model_data_ptr = engine_data.device.map(model_data_buffer);
-    memcpy(model_data_ptr, &buffer, sizeof(StaticModelBuffer));
-    engine_data.device.unmap(model_data_buffer);
+    model_data_buffer.update(frame_data, buffer);
+    push_constants.model_data = model_data_buffer.getAddress(frame_data);
 
     command_buffer.setPipeline(pipeline);
 
