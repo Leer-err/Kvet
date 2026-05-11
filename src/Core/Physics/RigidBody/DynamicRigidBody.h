@@ -1,0 +1,51 @@
+#ifndef DYNAMIC_RIGID_BODY_H
+#define DYNAMIC_RIGID_BODY_H
+
+#include "Quaternion.h"
+#include "Transform.h"
+#include "Vector3.h"
+
+namespace physx {
+class PxRigidDynamic;
+};
+
+namespace Physics {
+
+class DynamicRigidBody {
+   public:
+    enum class Lock {
+        LockRotationX,
+        LockRotationY,
+        LockRotationZ,
+        LockRotationXY,
+        LockRotationXZ,
+        LockRotationYZ,
+        LockRotationXYZ
+    };
+
+    DynamicRigidBody();
+    DynamicRigidBody(const Transform& transform);
+    ~DynamicRigidBody();
+
+    Vector3 getPosition() const;
+    Quaternion getRotation() const;
+
+    Vector3 getVelocity() const;
+
+    void setVelocity(const Vector3& velocity);
+    void setTransform(const Vector3& position, const Quaternion& quaternion);
+    void enableGravity(bool gravity);
+    void setCCD(bool ccd);
+    void lock(Lock lock);
+
+    void addShape(const Shape& shape) override;
+
+    physx::PxRigidDynamic* get() const;
+
+   private:
+    physx::PxRigidDynamic* body;
+};
+
+};  // namespace Physics
+
+#endif  // DYNAMIC_RIGID_BODY_H

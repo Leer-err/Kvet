@@ -1,9 +1,30 @@
-[submodule "X11Engine/src/Dependencies/PhysX"]
-	path = X11Engine/src/Dependencies/PhysX
+[submodule "Dependencies/PhysX"]
+	path = Dependencies/PhysX
 	url = https://github.com/NVIDIA-Omniverse/PhysX.git
-[submodule "X11Engine/src/Dependencies/assimp"]
-	path = X11Engine/src/Dependencies/assimp
+[submodule "Dependencies/assimp"]
+	path = Dependencies/assimp
 	url = https://github.com/assimp/assimp.git
-[submodule "X11Engine/src/Dependencies/imgui"]
-	path = X11Engine/src/Dependencies/imgui
+[submodule "Dependencies/imgui"]
+	path = Dependencies/imgui
 	url = https://github.com/ocornut/imgui.git
+[submodule "Dependencies/sol"]
+	path = Dependencies/sol
+	url = https://github.com/ThePhd/sol2.git
+[submodule "Dependencies/sdl"]
+	path = Dependencies/sdl
+	url = https://github.com/libsdl-org/SDL.git
+[submodule "Dependencies/glm"]
+	path = Dependencies/glm
+	url = https://github.com/g-truc/glm.git
+[submodule "Dependencies/vk-bootstrap"]
+	path = Dependencies/vk-bootstrap
+	url = https://github.com/charles-lunarg/vk-bootstrap.git
+[submodule "Dependencies/VulkanMemoryAllocator"]
+	path = Dependencies/VulkanMemoryAllocator
+	url = https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator.git
+[submodule "Dependencies/SPIRV-Reflect"]
+	path = Dependencies/SPIRV-Reflect
+	url = https://github.com/KhronosGroup/SPIRV-Reflect.git
+[submodule "Dependencies/stb"]
+	path = Dependencies/stb
+	url = https://github.com/nothings/stb.git
