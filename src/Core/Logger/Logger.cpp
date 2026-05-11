@@ -16,7 +16,10 @@ Logger::Logger(const char* name, std::vector<spdlog::sink_ptr> sinks)
 }
 
 Logger::~Logger() {
-    if (logger) logger->flush();
+    try {
+        if (logger) logger->flush();
+    } catch (...) {
+    }
 }
 
 void Logger::setLevel(LogLevel level) {

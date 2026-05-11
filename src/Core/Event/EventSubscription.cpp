@@ -11,8 +11,9 @@ EventSubscription::EventSubscription(
     : unsubscribe_callback(unsubscribe_callback) {}
 
 EventSubscription::~EventSubscription() noexcept {
-    if (unsubscribe_callback) {
-        (*unsubscribe_callback)();
+    try {
+        if (unsubscribe_callback) (*unsubscribe_callback)();
+    } catch (...) {
     }
 }
 
