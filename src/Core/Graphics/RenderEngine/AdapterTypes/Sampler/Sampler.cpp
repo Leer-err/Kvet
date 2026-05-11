@@ -1,6 +1,7 @@
 #include "Sampler.h"
 
 #include <vulkan/vulkan.h>
+#include <vulkan/vulkan_core.h>
 
 #include "EngineData.h"
 
@@ -30,7 +31,7 @@ VkSampler Sampler::createSampler(const EngineData& engine_data, VkFilter filter,
             mipmap_mode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
             break;
         default:
-            throw;
+            return VK_NULL_HANDLE;
     }
 
     VkSamplerCreateInfo info = {};

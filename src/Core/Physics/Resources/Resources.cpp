@@ -19,7 +19,7 @@ Resources::Resources() {
         PX_PHYSICS_VERSION, gDefaultAllocatorCallback, gDefaultErrorCallback);
     if (foundation == nullptr) {
         logger.error("PhysX foudation was not initialized");
-        throw;
+        return;
     }
 
     pvd = PxCreatePvd(*foundation);

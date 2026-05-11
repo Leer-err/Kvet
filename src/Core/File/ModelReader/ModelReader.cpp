@@ -12,19 +12,21 @@
 
 namespace File {
 
-ModelReader::ModelReader(const std::string& filename) {
+ModelReader::ModelReader(const std::string& filename) : mesh(nullptr) {
     const aiScene* scene = importer.ReadFile(
         filename, aiProcess_CalcTangentSpace | aiProcess_Triangulate |
                       aiProcess_JoinIdenticalVertices |
                       aiProcess_MakeLeftHanded | aiProcess_FlipUVs |
                       aiProcess_OptimizeGraph | aiProcess_SortByPType);
 
-    if (scene == nullptr) throw;
+    if (scene == nullptr) return;
 
     mesh = scene->mMeshes[0];
 }
 
 std::vector<Vertex> ModelReader::readVertices() const {
+    if (!mesh) return {};
+
     std::vector<Vertex> vertices;
 
     size_t index_count = mesh->mNumVertices;
@@ -46,6 +48,8 @@ std::vector<Vertex> ModelReader::readVertices() const {
 }
 
 std::vector<uint32_t> ModelReader::readIndices() const {
+    if (!mesh) return {};
+
     std::vector<uint32_t> indices;
 
     size_t index_count = mesh->mNumFaces * 3;
