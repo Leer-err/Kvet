@@ -19,15 +19,15 @@ MeshBuilder::MeshBuilder(const EngineData& engine_data, const void* vertex_data,
 
 Mesh MeshBuilder::create() {
     Mesh mesh = {};
-    mesh.vertex_buffer = BufferBuilder(engine_data, vertex_data_size)
+    mesh.vertex_buffer = BufferBuilder(vertex_data_size)
                              .isVertexBuffer()
                              .isCPUWritable()
-                             .create()
+                             .create(engine_data)
                              .getResult();
-    mesh.index_buffer = BufferBuilder(engine_data, index_data_size)
+    mesh.index_buffer = BufferBuilder(index_data_size)
                             .isIndexBuffer()
                             .isCPUWritable()
-                            .create()
+                            .create(engine_data)
                             .getResult();
 
     auto index_buffer_ptr = engine_data.device.map(mesh.index_buffer);

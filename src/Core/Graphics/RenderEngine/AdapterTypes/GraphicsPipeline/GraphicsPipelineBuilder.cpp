@@ -1,9 +1,8 @@
 #include "GraphicsPipelineBuilder.h"
 
 #include <vulkan/vulkan.h>
-#include <vulkan/vulkan_core.h>
 
-#include <cstddef>
+#include <array>
 
 #include "EngineData.h"
 #include "GraphicsPipeline.h"
@@ -12,37 +11,21 @@
 #include "Rasterizer.h"
 #include "Shader.h"
 #include "ShaderBuilder.h"
-#include "ShaderError.h"
 
 namespace Graphics {
 
 GraphicsPipelineBuilder::GraphicsPipelineBuilder(
-    const EngineData& engine_data, const std::string& vertex_shader_filename,
+    const std::string& vertex_shader_filename,
     const std::string& vertex_shader_entrypoint,
     const std::string& pixel_shader_filename,
     const std::string& pixel_shader_entrypoint)
-    : engine_data(engine_data),
-      rasterizer(Graphics::Rasterizer::fill()),
-      render_target_format(VK_FORMAT_R8G8B8A8_SRGB) {
-    auto vertex_shader_result =
-        createShader(vertex_shader_filename, vertex_shader_entrypoint,
-                     VK_SHADER_STAGE_VERTEX_BIT);
-    auto pixel_shader_result =
-        createShader(pixel_shader_filename, pixel_shader_entrypoint,
-                     VK_SHADER_STAGE_FRAGMENT_BIT);
-
-    if (vertex_shader_result.isError()) {
-        error = vertex_shader_result.getError();
-        return;
-    }
-    if (pixel_shader_result.isError()) {
-        error = pixel_shader_result.getError();
-        return;
-    }
-
-    vertex_shader = vertex_shader_result.getResult();
-    pixel_shader = pixel_shader_result.getResult();
-}
+    : vertex_shader_filename(vertex_shader_filename),
+      vertex_shader_entrypoint(vertex_shader_entrypoint),
+      pixel_shader_filename(pixel_shader_filename),
+      pixel_shader_entrypoint(pixel_shader_entrypoint),
+      render_target_format(VK_FORMAT_R8G8B8A8_SRGB),
+      rasterization_state(Graphics::Rasterizer::fill()),
+      pipeline_info({.pRasterizationState = &rasterization_state}) {}
 
 static VkPipelineShaderStageCreateInfo getStageInfo(const Shader& shader) {
     VkPipelineShaderStageCreateInfo stage_info = {};
@@ -61,12 +44,22 @@ GraphicsPipelineBuilder& GraphicsPipelineBuilder::setRenderTargetFormat(
 }
 
 Result<GraphicsPipeline, GraphicsPipelineBuilder::Error>
-GraphicsPipelineBuilder::create() {
-    // If error occured on previous build step return it immediately
-    if (error) return *error;
+GraphicsPipelineBuilder::create(const EngineData& engine_data) {
+    auto vertex_shader_result =
+        createShader(engine_data, vertex_shader_filename,
+                     vertex_shader_entrypoint, VK_SHADER_STAGE_VERTEX_BIT);
+    auto pixel_shader_result =
+        createShader(engine_data, pixel_shader_filename,
+                     pixel_shader_entrypoint, VK_SHADER_STAGE_FRAGMENT_BIT);
+
+    if (vertex_shader_result.isError() || pixel_shader_result.isError())
+        return Error::ShaderNotBuilt;
+
+    auto vertex_shader = vertex_shader_result.getResult();
+    auto pixel_shader = pixel_shader_result.getResult();
 
     auto input_layout_result =
-        InputLayoutBuilder(engine_data.shader_registry, vertex_shader.filename)
+        InputLayoutBuilder(engine_data.shader_registry, vertex_shader_filename)
             .create();
 
     if (input_layout_result.isError()) {
@@ -85,10 +78,8 @@ GraphicsPipelineBuilder::create() {
     pipeline.layout = engine_data.device.createPipelineLayout(
         input_layout.push_constants_size);
 
-    std::vector<VkPipelineShaderStageCreateInfo> shader_stages;
-    shader_stages.push_back(getStageInfo(vertex_shader));
-    shader_stages.push_back(getStageInfo(pixel_shader));
-
+    std::array shader_stages = {getStageInfo(vertex_shader),
+                                getStageInfo(pixel_shader)};
     VkPipelineInputAssemblyStateCreateInfo input_assembly_state = {};
     input_assembly_state.sType =
         VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
@@ -110,13 +101,13 @@ GraphicsPipelineBuilder::create() {
     viewportState.viewportCount = 1;
     viewportState.scissorCount = 1;
 
-    VkDynamicState dynamicStates[2] = {VK_DYNAMIC_STATE_VIEWPORT,
-                                       VK_DYNAMIC_STATE_SCISSOR};
+    std::array dynamic_states = {VK_DYNAMIC_STATE_VIEWPORT,
+                                 VK_DYNAMIC_STATE_SCISSOR};
 
-    VkPipelineDynamicStateCreateInfo dynamicState = {};
-    dynamicState.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
-    dynamicState.dynamicStateCount = 2;
-    dynamicState.pDynamicStates = dynamicStates;
+    VkPipelineDynamicStateCreateInfo dynamic_state = {};
+    dynamic_state.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
+    dynamic_state.dynamicStateCount = dynamic_states.size();
+    dynamic_state.pDynamicStates = dynamic_states.data();
 
     VkPipelineDepthStencilStateCreateInfo depthStencilState = {};
     depthStencilState.sType =
@@ -125,11 +116,11 @@ GraphicsPipelineBuilder::create() {
     depthStencilState.depthWriteEnable = VK_TRUE;
     depthStencilState.depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL;
 
-    VkPipelineRenderingCreateInfo renderingCI = {};
-    renderingCI.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO;
-    renderingCI.colorAttachmentCount = 1;
-    renderingCI.pColorAttachmentFormats = &render_target_format;
-    renderingCI.depthAttachmentFormat = VK_FORMAT_UNDEFINED;
+    VkPipelineRenderingCreateInfo rendering = {};
+    rendering.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO;
+    rendering.colorAttachmentCount = 1;
+    rendering.pColorAttachmentFormats = &render_target_format;
+    rendering.depthAttachmentFormat = VK_FORMAT_UNDEFINED;
 
     VkPipelineColorBlendAttachmentState blendAttachment = {};
     blendAttachment.colorWriteMask =
@@ -151,12 +142,6 @@ GraphicsPipelineBuilder::create() {
     colorBlendState.attachmentCount = 1;
     colorBlendState.pAttachments = &blendAttachment;
 
-    VkPipelineRasterizationStateCreateInfo rasterizationState = {};
-    rasterizationState.sType =
-        VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
-    rasterizationState.lineWidth = 1.0f;
-    rasterizationState.cullMode = VK_CULL_MODE_BACK_BIT;
-
     VkPipelineMultisampleStateCreateInfo multisampleState = {};
     multisampleState.sType =
         VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
@@ -164,17 +149,16 @@ GraphicsPipelineBuilder::create() {
 
     VkGraphicsPipelineCreateInfo pipeline_info = {};
     pipeline_info.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-    pipeline_info.pNext = &renderingCI;
+    pipeline_info.pNext = &rendering;
     pipeline_info.stageCount = shader_stages.size();
     pipeline_info.pStages = shader_stages.data();
     pipeline_info.pVertexInputState = &vertex_input_state;
     pipeline_info.pInputAssemblyState = &input_assembly_state;
     pipeline_info.pViewportState = &viewportState;
-    pipeline_info.pRasterizationState = &rasterizationState;
     pipeline_info.pMultisampleState = &multisampleState;
     pipeline_info.pDepthStencilState = &depthStencilState;
     pipeline_info.pColorBlendState = &colorBlendState;
-    pipeline_info.pDynamicState = &dynamicState;
+    pipeline_info.pDynamicState = &dynamic_state;
     pipeline_info.layout = pipeline.layout;
     pipeline_info.flags = VK_PIPELINE_CREATE_DESCRIPTOR_BUFFER_BIT_EXT;
 
@@ -182,7 +166,8 @@ GraphicsPipelineBuilder::create() {
 }
 
 Result<Shader, GraphicsPipelineBuilder::Error>
-GraphicsPipelineBuilder::createShader(const std::string& filename,
+GraphicsPipelineBuilder::createShader(const EngineData& engine_data,
+                                      const std::string& filename,
                                       const std::string& entrypoint,
                                       VkShaderStageFlagBits stage) {
     auto shader_build_result =

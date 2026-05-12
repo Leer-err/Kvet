@@ -9,8 +9,7 @@
 
 namespace Graphics {
 
-BufferBuilder::BufferBuilder(const EngineData& engine_data, size_t size)
-    : engine_data(engine_data), buffer_info(), alloc_info() {
+BufferBuilder::BufferBuilder(size_t size) : buffer_info(), alloc_info() {
     buffer_info.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
     buffer_info.size = size;
 
@@ -67,8 +66,13 @@ BufferBuilder& BufferBuilder::isCopyDestination() {
     return *this;
 }
 
-Result<Buffer, BufferError> BufferBuilder::create() {
+Result<Buffer, BufferError> BufferBuilder::create(
+    const EngineData& engine_data) const {
     return engine_data.device.createBuffer(buffer_info, alloc_info);
+}
+
+Result<Buffer, BufferError> BufferBuilder::create(Device& device) const {
+    return device.createBuffer(buffer_info, alloc_info);
 }
 
 }  // namespace Graphics

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vulkan/vulkan.h>
+#include <vulkan/vulkan_core.h>
 
 #include <optional>
 #include <string>
@@ -20,8 +21,7 @@ class GraphicsPipelineBuilder {
    public:
     enum class Error { ShaderNotBuilt, VertexInputTypeNotSupported };
 
-    GraphicsPipelineBuilder(const EngineData& engine_data,
-                            const std::string& vertex_shader_filename,
+    GraphicsPipelineBuilder(const std::string& vertex_shader_filename,
                             const std::string& vertex_shader_entrypoint,
                             const std::string& pixel_shader_filename,
                             const std::string& pixel_shader_entrypoint);
@@ -31,20 +31,21 @@ class GraphicsPipelineBuilder {
 
     GraphicsPipelineBuilder& setRenderTargetFormat(VkFormat format);
 
-    Result<GraphicsPipeline, Error> create();
+    Result<GraphicsPipeline, Error> create(const EngineData& engine_data);
 
    private:
     Result<Shader, GraphicsPipelineBuilder::Error> createShader(
-        const std::string& filename, const std::string& entrypoint,
-        VkShaderStageFlagBits stage);
+        const EngineData& engine_data, const std::string& filename,
+        const std::string& entrypoint, VkShaderStageFlagBits stage);
 
-    EngineData engine_data;
-
-    Shader vertex_shader;
-    Shader pixel_shader;
+    const std::string& vertex_shader_filename;
+    const std::string& vertex_shader_entrypoint;
+    const std::string& pixel_shader_filename;
+    const std::string& pixel_shader_entrypoint;
 
     VkFormat render_target_format;
-    VkPipelineRasterizationStateCreateInfo rasterizer;
+    VkPipelineRasterizationStateCreateInfo rasterization_state;
+    VkGraphicsPipelineCreateInfo pipeline_info;
 
     std::optional<Error> error;
 };

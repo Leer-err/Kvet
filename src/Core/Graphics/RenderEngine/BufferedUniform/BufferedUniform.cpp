@@ -11,10 +11,10 @@ namespace Graphics {
 BufferedUniformBase::BufferedUniformBase(EngineData& engine_data, size_t size)
     : size(size), engine_data(engine_data) {
     for (auto i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
-        buffers[i] = BufferBuilder(engine_data, size)
+        buffers[i] = BufferBuilder(size)
                          .isConstantBuffer()
                          .isCPUWritable(true)
-                         .create()
+                         .create(engine_data)
                          .getResult();
     }
 }

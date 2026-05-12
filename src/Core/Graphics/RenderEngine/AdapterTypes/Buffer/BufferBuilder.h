@@ -3,6 +3,7 @@
 #include <cstddef>
 
 #include "Buffer.h"
+#include "Device.h"
 #include "EngineData.h"
 #include "Result.h"
 
@@ -10,7 +11,7 @@ namespace Graphics {
 
 class BufferBuilder {
    public:
-    BufferBuilder(const EngineData& engine_data, size_t size);
+    explicit BufferBuilder(size_t size);
 
     BufferBuilder& isShaderResource();
     BufferBuilder& isVertexBuffer();
@@ -24,11 +25,10 @@ class BufferBuilder {
     BufferBuilder& isCopySource();
     BufferBuilder& isCopyDestination();
 
-    Result<Buffer, BufferError> create();
+    Result<Buffer, BufferError> create(const EngineData& engine_data) const;
+    Result<Buffer, BufferError> create(Device& device) const;
 
    private:
-    EngineData engine_data;
-
     VkBufferCreateInfo buffer_info;
     VmaAllocationCreateInfo alloc_info;
 };
