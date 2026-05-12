@@ -6,6 +6,8 @@
 
 ## 🎯 Overview
 
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=Leer-err_X11Engine&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=Leer-err_X11Engine)
+
 **Kvet'**  is a real-time 3D game engine written from scratch in modern C++20. It features a Vulkan rendering backend, a fully custom Entity-Component-System (ECS) architecture.
 
 ## 🛠️ Tech Stack
