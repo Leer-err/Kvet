@@ -100,7 +100,7 @@ if (WIN32)
 	    DEPENDS ${EXECUTABLE_NAME}
 	)
 else()
-  	set(ASSIMP_LIB_FILE libassimp.so.6.0.2)
+  	set(ASSIMP_LIB_FILE libassimp.so)
 
 	add_custom_command(
 		OUTPUT

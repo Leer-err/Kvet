@@ -67,7 +67,7 @@ Result<InputLayout, InputLayoutBuilder::Error> InputLayoutBuilder::create() {
     for (const auto& format : elements) {
         auto format_size = getFormatSize(format);
 
-        return Error::UnsupportedElementFormat;
+        if (format_size == 0) return Error::UnsupportedElementFormat;
 
         VkVertexInputAttributeDescription desc = {};
         desc.binding = 0;

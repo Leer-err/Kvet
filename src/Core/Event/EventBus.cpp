@@ -50,8 +50,7 @@ void EventBus::unsubscribe(TypeId type_id,
     if (it == listeners.end()) return;
 
     auto& event_listeners = it->second;
-    event_listeners.erase(
-        std::find(event_listeners.begin(), event_listeners.end(), listener));
+    event_listeners.erase(std::ranges::find(event_listeners, listener));
 
     if (event_listeners.empty()) {
         listeners.erase(it);
