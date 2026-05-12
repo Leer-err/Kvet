@@ -25,6 +25,8 @@ class BufferBuilder {
     BufferBuilder& isCopySource();
     BufferBuilder& isCopyDestination();
 
+    BufferBuilder& isDeviceAddressable();
+
     Result<Buffer, BufferError> create(const EngineData& engine_data) const;
     Result<Buffer, BufferError> create(Device& device) const;
 

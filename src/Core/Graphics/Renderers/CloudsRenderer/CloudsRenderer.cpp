@@ -35,21 +35,19 @@ CloudsRenderer::CloudsRenderer(const EngineData& engine_data)
 
     constexpr uint32_t screen_quad_indices[] = {0, 1, 2, 1, 3, 2};
 
-    cloud_plane = MeshBuilder(engine_data, cloud_plane_vertex_data,
-                              sizeof(cloud_plane_vertex_data),
-                              screen_quad_indices, sizeof(screen_quad_indices))
-                      .create();
-    quad = MeshBuilder(engine_data, &screen_quad_vertices[0],
-                       sizeof(screen_quad_vertices), &screen_quad_indices[0],
-                       sizeof(screen_quad_indices))
-               .create();
+    cloud_plane =
+        MeshBuilder(cloud_plane_vertex_data, sizeof(cloud_plane_vertex_data),
+                    screen_quad_indices, sizeof(screen_quad_indices))
+            .create(engine_data);
+    quad = MeshBuilder(&screen_quad_vertices[0], sizeof(screen_quad_vertices),
+                       &screen_quad_indices[0], sizeof(screen_quad_indices))
+               .create(engine_data);
 
-    clouds_texture =
-        ImageBuilder(engine_data, VK_FORMAT_R8G8B8A8_UNORM, 512, 512)
-            .isRenderTarget()
-            .isShaderResource()
-            .create()
-            .getResult();
+    clouds_texture = ImageBuilder(VK_FORMAT_R8G8B8A8_UNORM, 512, 512)
+                         .isRenderTarget()
+                         .isShaderResource()
+                         .create(engine_data)
+                         .getResult();
     engine_data.descriptor_set.addImage(
         engine_data.device.createTextureView(clouds_texture));
     engine_data.descriptor_set.addSampler(Sampler::linear(engine_data));
@@ -62,18 +60,16 @@ CloudsRenderer::CloudsRenderer(const EngineData& engine_data)
 
     cloud_texture_pipeline =
         GraphicsPipelineBuilder(
-            engine_data, "./Assets/Shaders/Clouds/CloudsTexture.spv",
-            "vertex_main", "./Assets/Shaders/Clouds/CloudsTexture.spv",
-            "pixel_main")
+            "./Assets/Shaders/Clouds/CloudsTexture.spv", "vertex_main",
+            "./Assets/Shaders/Clouds/CloudsTexture.spv", "pixel_main")
             .setRenderTargetFormat(VK_FORMAT_R8G8B8A8_UNORM)
-            .create()
+            .create(engine_data)
             .getResult();
-    cloud_pipeline =
-        GraphicsPipelineBuilder(
-            engine_data, "./Assets/Shaders/Clouds/Clouds.spv", "vertex_main",
-            "./Assets/Shaders/Clouds/Clouds.spv", "pixel_main")
-            .create()
-            .getResult();
+    cloud_pipeline = GraphicsPipelineBuilder(
+                         "./Assets/Shaders/Clouds/Clouds.spv", "vertex_main",
+                         "./Assets/Shaders/Clouds/Clouds.spv", "pixel_main")
+                         .create(engine_data)
+                         .getResult();
 }
 
 void CloudsRenderer::render(const FrameData& frame_data,

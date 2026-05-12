@@ -5,8 +5,6 @@
 #include "Buffer.h"
 #include "BufferBuilder.h"
 #include "DeviceProperties.h"
-#include "ExtensionFunctions.h"
-#include "Sampler.h"
 
 namespace Graphics {
 
@@ -30,21 +28,15 @@ DescriptorSet::DescriptorSet(Device& device,
     current_sampler_index = 0;
     current_texture_index = 0;
 
-    VkBufferCreateInfo buffer_info = {};
-    buffer_info.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-    buffer_info.size = set_size;
-    buffer_info.usage |= VK_BUFFER_USAGE_RESOURCE_DESCRIPTOR_BUFFER_BIT_EXT |
-                         VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT;
-
-    VmaAllocationCreateInfo alloc_info = {};
-    alloc_info.usage = VMA_MEMORY_USAGE_AUTO;
-    alloc_info.flags |= VMA_ALLOCATION_CREATE_HOST_ACCESS_RANDOM_BIT;
-
-    descriptors = device.createBuffer(buffer_info, alloc_info).getResult();
+    descriptors = BufferBuilder(set_size)
+                      .isDescriptorBuffer()
+                      .isCPUWritable(true, true)
+                      .create(device)
+                      .getResult();
 }
 
 TextureHandle DescriptorSet::addImage(const VkImageView& texture) {
-    auto descriptors_ptr = device.map(descriptors);
+    auto descriptors_ptr = descriptors.mapped_address;
 
     char* binding_ptr =
         static_cast<char*>(descriptors_ptr) + texture_descriptors_offset;
@@ -62,8 +54,6 @@ TextureHandle DescriptorSet::addImage(const VkImageView& texture) {
     info.data.pSampledImage = &image_descriptor_info;
     device.writeDescriptor(info, texture_descriptor_size, element_ptr);
 
-    device.unmap(descriptors);
-
     auto index = current_texture_index;
     current_texture_index++;
 
@@ -71,7 +61,7 @@ TextureHandle DescriptorSet::addImage(const VkImageView& texture) {
 }
 
 size_t DescriptorSet::addSampler(const VkSampler& sampler) {
-    auto descriptors_ptr = device.map(descriptors);
+    auto descriptors_ptr = descriptors.mapped_address;
 
     char* binding_ptr =
         static_cast<char*>(descriptors_ptr) + sampler_descriptors_offset;
@@ -83,8 +73,6 @@ size_t DescriptorSet::addSampler(const VkSampler& sampler) {
     info.type = VK_DESCRIPTOR_TYPE_SAMPLER;
     info.data.pSampler = &sampler;
     device.writeDescriptor(info, sampler_descriptor_size, element_ptr);
-
-    device.unmap(descriptors);
 
     auto index = current_sampler_index;
     current_sampler_index++;

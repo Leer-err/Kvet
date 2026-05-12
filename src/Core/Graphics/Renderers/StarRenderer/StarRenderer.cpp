@@ -22,17 +22,15 @@ StarRenderer::StarRenderer(const EngineData& engine_data)
 
     constexpr uint32_t screen_quad_indices[] = {0, 1, 2, 1, 3, 2};
 
-    quad = MeshBuilder(engine_data, screen_quad_vertices,
-                       sizeof(screen_quad_vertices), screen_quad_indices,
-                       sizeof(screen_quad_indices))
-               .create();
+    quad = MeshBuilder(screen_quad_vertices, sizeof(screen_quad_vertices),
+                       screen_quad_indices, sizeof(screen_quad_indices))
+               .create(engine_data);
 
-    pipeline =
-        GraphicsPipelineBuilder(
-            engine_data, "./Assets/Shaders/Stars/Stars.spv", "vertex_main",
-            "./Assets/Shaders/Stars/Stars.spv", "pixel_main")
-            .create()
-            .getResult();
+    pipeline = GraphicsPipelineBuilder(
+                   "./Assets/Shaders/Stars/Stars.spv", "vertex_main",
+                   "./Assets/Shaders/Stars/Stars.spv", "pixel_main")
+                   .create(engine_data)
+                   .getResult();
 }
 
 void StarRenderer::render(const FrameData& frame_data,

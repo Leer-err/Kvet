@@ -4,6 +4,7 @@
 
 #include <cstdint>
 
+#include "Device.h"
 #include "EngineData.h"
 #include "Image.h"
 #include "Result.h"
@@ -12,8 +13,7 @@ namespace Graphics {
 
 class ImageBuilder {
    public:
-    ImageBuilder(const EngineData& engine_data, VkFormat format, uint32_t width,
-                 uint32_t height);
+    ImageBuilder(VkFormat format, uint32_t width, uint32_t height);
 
     ImageBuilder& isShaderResource();
     ImageBuilder& isRenderTarget();
@@ -21,11 +21,10 @@ class ImageBuilder {
     ImageBuilder& isCopySource();
     ImageBuilder& isCopyDestination();
 
-    Result<Image, ImageError> create();
+    Result<Image, ImageError> create(const EngineData& engine_data);
+    Result<Image, ImageError> create(Device& device);
 
    private:
-    EngineData engine_data;
-
     VkImageCreateInfo image_info;
     VmaAllocationCreateInfo alloc_info;
 };

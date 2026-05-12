@@ -45,9 +45,6 @@ class GraphicsPipelineBuilder {
 
     VkFormat render_target_format;
     VkPipelineRasterizationStateCreateInfo rasterization_state;
-    VkGraphicsPipelineCreateInfo pipeline_info;
-
-    std::optional<Error> error;
 };
 
 }  // namespace Graphics

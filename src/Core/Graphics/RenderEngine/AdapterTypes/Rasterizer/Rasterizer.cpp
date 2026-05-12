@@ -20,6 +20,7 @@ VkPipelineRasterizationStateCreateInfo wireframe() {
 VkPipelineRasterizationStateCreateInfo fill() {
     VkPipelineRasterizationStateCreateInfo info = {};
     info.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
+    info.lineWidth = 1.0f;
     info.cullMode = VK_CULL_MODE_BACK_BIT;
     info.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
     info.polygonMode = VK_POLYGON_MODE_FILL;

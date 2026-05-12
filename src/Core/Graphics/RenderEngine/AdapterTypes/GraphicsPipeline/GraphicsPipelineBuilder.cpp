@@ -24,8 +24,7 @@ GraphicsPipelineBuilder::GraphicsPipelineBuilder(
       pixel_shader_filename(pixel_shader_filename),
       pixel_shader_entrypoint(pixel_shader_entrypoint),
       render_target_format(VK_FORMAT_R8G8B8A8_SRGB),
-      rasterization_state(Graphics::Rasterizer::fill()),
-      pipeline_info({.pRasterizationState = &rasterization_state}) {}
+      rasterization_state(Graphics::Rasterizer::fill()) {}
 
 static VkPipelineShaderStageCreateInfo getStageInfo(const Shader& shader) {
     VkPipelineShaderStageCreateInfo stage_info = {};
@@ -96,10 +95,11 @@ GraphicsPipelineBuilder::create(const EngineData& engine_data) {
     vertex_input_state.pVertexAttributeDescriptions =
         input_layout.elements.data();
 
-    VkPipelineViewportStateCreateInfo viewportState = {};
-    viewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
-    viewportState.viewportCount = 1;
-    viewportState.scissorCount = 1;
+    VkPipelineViewportStateCreateInfo viewport_state = {};
+    viewport_state.sType =
+        VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
+    viewport_state.viewportCount = 1;
+    viewport_state.scissorCount = 1;
 
     std::array dynamic_states = {VK_DYNAMIC_STATE_VIEWPORT,
                                  VK_DYNAMIC_STATE_SCISSOR};
@@ -109,12 +109,12 @@ GraphicsPipelineBuilder::create(const EngineData& engine_data) {
     dynamic_state.dynamicStateCount = dynamic_states.size();
     dynamic_state.pDynamicStates = dynamic_states.data();
 
-    VkPipelineDepthStencilStateCreateInfo depthStencilState = {};
-    depthStencilState.sType =
+    VkPipelineDepthStencilStateCreateInfo depth_stencil_state = {};
+    depth_stencil_state.sType =
         VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
-    depthStencilState.depthTestEnable = VK_TRUE;
-    depthStencilState.depthWriteEnable = VK_TRUE;
-    depthStencilState.depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL;
+    depth_stencil_state.depthTestEnable = VK_TRUE;
+    depth_stencil_state.depthWriteEnable = VK_TRUE;
+    depth_stencil_state.depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL;
 
     VkPipelineRenderingCreateInfo rendering = {};
     rendering.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO;
@@ -134,18 +134,18 @@ GraphicsPipelineBuilder::create(const EngineData& engine_data) {
     blendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
     blendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
 
-    VkPipelineColorBlendStateCreateInfo colorBlendState = {};
-    colorBlendState.sType =
+    VkPipelineColorBlendStateCreateInfo color_blend_state = {};
+    color_blend_state.sType =
         VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
-    colorBlendState.logicOpEnable = VK_FALSE;
-    colorBlendState.logicOp = VK_LOGIC_OP_COPY;
-    colorBlendState.attachmentCount = 1;
-    colorBlendState.pAttachments = &blendAttachment;
+    color_blend_state.logicOpEnable = VK_FALSE;
+    color_blend_state.logicOp = VK_LOGIC_OP_COPY;
+    color_blend_state.attachmentCount = 1;
+    color_blend_state.pAttachments = &blendAttachment;
 
-    VkPipelineMultisampleStateCreateInfo multisampleState = {};
-    multisampleState.sType =
+    VkPipelineMultisampleStateCreateInfo multisampling_state = {};
+    multisampling_state.sType =
         VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
-    multisampleState.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
+    multisampling_state.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
 
     VkGraphicsPipelineCreateInfo pipeline_info = {};
     pipeline_info.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
@@ -154,10 +154,11 @@ GraphicsPipelineBuilder::create(const EngineData& engine_data) {
     pipeline_info.pStages = shader_stages.data();
     pipeline_info.pVertexInputState = &vertex_input_state;
     pipeline_info.pInputAssemblyState = &input_assembly_state;
-    pipeline_info.pViewportState = &viewportState;
-    pipeline_info.pMultisampleState = &multisampleState;
-    pipeline_info.pDepthStencilState = &depthStencilState;
-    pipeline_info.pColorBlendState = &colorBlendState;
+    pipeline_info.pViewportState = &viewport_state;
+    pipeline_info.pMultisampleState = &multisampling_state;
+    pipeline_info.pDepthStencilState = &depth_stencil_state;
+    pipeline_info.pRasterizationState = &rasterization_state;
+    pipeline_info.pColorBlendState = &color_blend_state;
     pipeline_info.pDynamicState = &dynamic_state;
     pipeline_info.layout = pipeline.layout;
     pipeline_info.flags = VK_PIPELINE_CREATE_DESCRIPTOR_BUFFER_BIT_EXT;

@@ -9,14 +9,12 @@ namespace Graphics {
 
 class MeshBuilder {
    public:
-    MeshBuilder(const EngineData& engine_data, const void* vertex_data,
-                size_t vertex_data_size, const void* index_data,
-                size_t index_data_size);
+    MeshBuilder(const void* vertex_data, size_t vertex_data_size,
+                const void* index_data, size_t index_data_size);
 
-    Mesh create();
+    Mesh create(const EngineData& engine_data);
 
    private:
-    EngineData engine_data;
     const void* vertex_data;
     size_t vertex_data_size;
     const void* index_data;

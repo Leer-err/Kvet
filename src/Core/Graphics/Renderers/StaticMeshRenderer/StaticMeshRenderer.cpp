@@ -12,12 +12,12 @@ namespace Graphics {
 
 StaticMeshRenderer::StaticMeshRenderer(const EngineData& engine_data)
     : engine_data(engine_data), model_data_buffer(this->engine_data) {
-    pipeline = GraphicsPipelineBuilder(
-                   engine_data, "./Assets/Shaders/StaticModel/StaticModel.spv",
-                   "vertex_main",
-                   "./Assets/Shaders/StaticModel/StaticModel.spv", "pixel_main")
-                   .create()
-                   .getResult();
+    pipeline =
+        GraphicsPipelineBuilder(
+            "./Assets/Shaders/StaticModel/StaticModel.spv", "vertex_main",
+            "./Assets/Shaders/StaticModel/StaticModel.spv", "pixel_main")
+            .create(engine_data)
+            .getResult();
 }
 
 void StaticMeshRenderer::render(const FrameData& frame_data,

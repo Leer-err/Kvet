@@ -8,35 +8,28 @@
 
 namespace Graphics {
 
-MeshBuilder::MeshBuilder(const EngineData& engine_data, const void* vertex_data,
-                         size_t vertex_data_size, const void* index_data,
-                         size_t index_data_size)
-    : engine_data(engine_data),
-      vertex_data(vertex_data),
+MeshBuilder::MeshBuilder(const void* vertex_data, size_t vertex_data_size,
+                         const void* index_data, size_t index_data_size)
+    : vertex_data(vertex_data),
       vertex_data_size(vertex_data_size),
       index_data(index_data),
       index_data_size(index_data_size) {}
 
-Mesh MeshBuilder::create() {
+Mesh MeshBuilder::create(const EngineData& engine_data) {
     Mesh mesh = {};
     mesh.vertex_buffer = BufferBuilder(vertex_data_size)
                              .isVertexBuffer()
-                             .isCPUWritable()
                              .create(engine_data)
                              .getResult();
     mesh.index_buffer = BufferBuilder(index_data_size)
                             .isIndexBuffer()
-                            .isCPUWritable()
                             .create(engine_data)
                             .getResult();
 
-    auto index_buffer_ptr = engine_data.device.map(mesh.index_buffer);
-    memcpy(index_buffer_ptr, index_data, index_data_size);
-    engine_data.device.unmap(mesh.index_buffer);
-
-    auto vertex_buffer_ptr = engine_data.device.map(mesh.vertex_buffer);
-    memcpy(vertex_buffer_ptr, vertex_data, vertex_data_size);
-    engine_data.device.unmap(mesh.vertex_buffer);
+    engine_data.staging_buffer.stageBuffer(mesh.vertex_buffer, vertex_data,
+                                           vertex_data_size);
+    engine_data.staging_buffer.stageBuffer(mesh.index_buffer, index_data,
+                                           index_data_size);
 
     return mesh;
 }

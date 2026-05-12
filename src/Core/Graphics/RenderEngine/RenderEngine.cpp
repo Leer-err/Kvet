@@ -143,11 +143,11 @@ void RenderEngine::reinitWindowDependentResources() {
                            config.render_height, config.buffering_mode);
 
     render_target_texture =
-        ImageBuilder(getEngineData(), VK_FORMAT_R8G8B8A8_SRGB,
-                     config.render_width, config.render_height)
+        ImageBuilder(VK_FORMAT_R8G8B8A8_SRGB, config.render_width,
+                     config.render_height)
             .isCopySource()
             .isRenderTarget()
-            .create()
+            .create(device)
             .getResult();
 
     render_enviroment = RenderEnviroment{};
@@ -213,12 +213,11 @@ TextureHandle RenderEngine::addTexture(void* data, uint32_t width,
                                        uint32_t height) {
     // TODO: image lifetime tracking
 
-    auto image =
-        ImageBuilder(getEngineData(), VK_FORMAT_R8G8B8A8_UNORM, width, height)
-            .isShaderResource()
-            .isCopyDestination()
-            .create()
-            .getResult();
+    auto image = ImageBuilder(VK_FORMAT_R8G8B8A8_UNORM, width, height)
+                     .isShaderResource()
+                     .isCopyDestination()
+                     .create(device)
+                     .getResult();
 
     auto view = device.createTextureView(image);
     auto handle = descriptor_set.addImage(view);
@@ -231,15 +230,15 @@ TextureHandle RenderEngine::addTexture(void* data, uint32_t width,
 MeshHandle RenderEngine::addMesh(void* vertex_data, size_t vertex_data_size,
                                  void* index_data, size_t index_data_size) {
     Mesh mesh = {};
-    mesh.vertex_buffer = BufferBuilder(getEngineData(), vertex_data_size)
+    mesh.vertex_buffer = BufferBuilder(vertex_data_size)
                              .isVertexBuffer()
                              .isCopyDestination()
-                             .create()
+                             .create(device)
                              .getResult();
-    mesh.index_buffer = BufferBuilder(getEngineData(), index_data_size)
+    mesh.index_buffer = BufferBuilder(index_data_size)
                             .isIndexBuffer()
                             .isCopyDestination()
-                            .create()
+                            .create(device)
                             .getResult();
 
     auto handle = mesh_registry.addMesh(mesh);
@@ -252,7 +251,8 @@ MeshHandle RenderEngine::addMesh(void* vertex_data, size_t vertex_data_size,
 }
 
 EngineData RenderEngine::getEngineData() {
-    return EngineData{device, descriptor_set, shader_registry, mesh_registry};
+    return EngineData{device, descriptor_set, shader_registry, mesh_registry,
+                      staging_buffer};
 }
 
 uint32_t RenderEngine::getWidth() const { return width; }

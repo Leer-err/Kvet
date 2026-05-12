@@ -56,6 +56,11 @@ BufferBuilder& BufferBuilder::isCPUWritable(bool always_mapped,
     return *this;
 }
 
+BufferBuilder& BufferBuilder::isDeviceAddressable() {
+    buffer_info.usage |= VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT;
+    return *this;
+}
+
 BufferBuilder& BufferBuilder::isCopySource() {
     buffer_info.usage |= VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
     return *this;

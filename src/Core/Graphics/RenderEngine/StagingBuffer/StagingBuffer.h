@@ -38,7 +38,6 @@ class StagingBuffer {
    private:
     Device& device;
 
-    std::vector<char> host_data_buffer;
     size_t host_data_used;
 
     Buffer buffer;

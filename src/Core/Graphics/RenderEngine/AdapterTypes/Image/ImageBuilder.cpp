@@ -4,14 +4,14 @@
 #include <vulkan/vulkan.h>
 #include <vulkan/vulkan_core.h>
 
+#include "Device.h"
 #include "EngineData.h"
 #include "Image.h"
 
 namespace Graphics {
 
-ImageBuilder::ImageBuilder(const EngineData& engine_data, VkFormat format,
-                           uint32_t width, uint32_t height)
-    : engine_data(engine_data), image_info(), alloc_info() {
+ImageBuilder::ImageBuilder(VkFormat format, uint32_t width, uint32_t height)
+    : image_info(), alloc_info() {
     image_info.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
     image_info.imageType = VK_IMAGE_TYPE_2D;
     image_info.extent = {.width = width, .height = height, .depth = 1};
@@ -51,8 +51,12 @@ ImageBuilder& ImageBuilder::isCopyDestination() {
     return *this;
 }
 
-Result<Image, ImageError> ImageBuilder::create() {
+Result<Image, ImageError> ImageBuilder::create(const EngineData& engine_data) {
     return engine_data.device.createImage(image_info, alloc_info);
+}
+
+Result<Image, ImageError> ImageBuilder::create(Device& device) {
+    return device.createImage(image_info, alloc_info);
 }
 
 }  // namespace Graphics
