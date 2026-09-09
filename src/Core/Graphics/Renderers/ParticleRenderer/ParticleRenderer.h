@@ -26,13 +26,13 @@ class ParticleRenderer {
 
    private:
     static Mesh createQuadMesh(const EngineData& engine_data);
-    static Buffer createParticleBuffer(Device& device);
-    static Buffer createLiveParticleBuffer(Device& device);
+    static BufferHandle createParticleBuffer(Device& device);
+    static BufferHandle createLiveParticleBuffer(Device& device);
 
     EngineData engine_data;
 
-    Buffer particle_buffer;
-    Buffer live_particles_buffer;
+    BufferHandle particle_buffer;
+    BufferHandle live_particles_buffer;
 
     GraphicsPipeline pipeline;
     PushConstants push_constants;

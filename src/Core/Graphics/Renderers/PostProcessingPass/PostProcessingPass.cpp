@@ -40,8 +40,8 @@ PostProcessingPass::PostProcessingPass(Device& device,
     data.color_count = 32;
     data.sampler_index = 0;
 
-    data.sampler_index =
-        *engine_data.descriptor_set.addSampler(Sampler::point(device));
+    // data.sampler_index =
+    //     *engine_data.descriptor_set.addSampler(Sampler::point(device));
 
     Overlay::get().add<OverlayElements::SliderFloat>(
         "Graphics/Post processing", "Dithering spread",
@@ -82,7 +82,7 @@ Mesh PostProcessingPass::createSqreenQuad(Device& device,
     return *engine_data.mesh_registry.getMesh("Quad");
 }
 
-Buffer PostProcessingPass::createDataBuffer(Device& device) {
+BufferHandle PostProcessingPass::createDataBuffer(Device& device) {
     return BufferBuilder(sizeof(PostProcessingData))
         .isConstantBuffer()
         .isDeviceAddressable()

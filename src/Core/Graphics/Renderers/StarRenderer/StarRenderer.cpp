@@ -11,6 +11,7 @@
 #include "FrameGraph.h"
 #include "GraphicsMesh.h"
 #include "GraphicsPipelineBuilder.h"
+#include "Handles.h"
 #include "MeshBuilder.h"
 #include "RenderWorld.h"
 #include "StarsData.h"
@@ -35,8 +36,8 @@ void StarRenderer::render(FrameGraph& frame_graph, const RenderWorld& world) {
     auto pass = GraphicsPass(
         "Stars", pipeline, [this, &world](GraphicsPassExecution& execution) {
             auto stars_data = world.getStarsData();
-            stars_data_buffer.update(stars_data);
-            push_constants.stars_data = stars_data_buffer.getDeviceAddress();
+            stars_data_buffer->update(stars_data);
+            push_constants.stars_data = stars_data_buffer->getDeviceAddress();
 
             execution.appendData(push_constants);
 
@@ -57,7 +58,7 @@ void StarRenderer::setCameraData(VkDeviceAddress camera_data) {
     push_constants.camera_data = camera_data;
 }
 
-Buffer StarRenderer::createStarsBuffer(Device& device) {
+BufferHandle StarRenderer::createStarsBuffer(Device& device) {
     return BufferBuilder(sizeof(StarsData))
         .isConstantBuffer()
         .isChained()

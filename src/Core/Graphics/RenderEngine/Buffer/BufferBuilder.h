@@ -3,7 +3,6 @@
 #include <cstddef>
 
 #include "Buffer.h"
-#include "BufferRegistry.h"
 #include "Device.h"
 #include "EngineData.h"
 #include "Result.h"
@@ -30,7 +29,7 @@ class BufferBuilder {
 
     BufferBuilder& isChained();
 
-    Result<Buffer, BufferError> create(Device& device) const;
+    Result<BufferHandle, BufferError> create(Device& device) const;
 
    private:
     VkBufferCreateInfo buffer_info;

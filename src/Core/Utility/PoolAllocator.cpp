@@ -36,7 +36,10 @@ PoolAllocator::~PoolAllocator() { delete[] ptr; }
 uint8_t* PoolAllocator::allocate() {
     auto data = std::bit_cast<uint8_t*>(free_list);
 
-    if (free_list) free_list = free_list->next;
+    if (free_list)
+        free_list = free_list->next;
+    else
+        return nullptr;
 
     return data;
 }

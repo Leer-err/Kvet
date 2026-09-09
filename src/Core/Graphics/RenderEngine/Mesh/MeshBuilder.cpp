@@ -4,7 +4,6 @@
 #include <vector>
 
 #include "BufferBuilder.h"
-#include "BufferRegistry.h"
 #include "Device.h"
 #include "GraphicsMesh.h"
 #include "Mesh.h"

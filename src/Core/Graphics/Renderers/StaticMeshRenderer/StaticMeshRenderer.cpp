@@ -10,6 +10,7 @@
 #include "FrameData.h"
 #include "FrameGraph.h"
 #include "GraphicsPipelineBuilder.h"
+#include "Handles.h"
 #include "Matrix.h"
 #include "RenderWorld.h"
 #include "Sampler.h"
@@ -28,20 +29,20 @@ StaticMeshRenderer::StaticMeshRenderer(Device& device,
                    .create(device, engine_data.shader_registry)
                    .getResult();
 
-    sampler_index =
-        *engine_data.descriptor_set.addSampler(Sampler::linear(device));
+    // sampler_index =
+    //     *engine_data.descriptor_set.addSampler(Sampler::linear(device));
 }
 
 void StaticMeshRenderer::render(FrameGraph& frame_graph,
                                 const RenderWorld& world) {
     auto buffer_ptr =
-        std::bit_cast<ModelBuffer*>(model_data_buffer.getHostAddress());
+        std::bit_cast<ModelBuffer*>(model_data_buffer->getHostAddress());
     auto objects = world.getOpaqueObjects();
 
     auto pass = GraphicsPass(
         "Static mesh", pipeline,
         [this, objects](GraphicsPassExecution& execution) {
-            auto buffer_address = model_data_buffer.getDeviceAddress();
+            auto buffer_address = model_data_buffer->getDeviceAddress();
 
             for (int i = 0; i < objects.size(); i++) {
                 const auto& model = objects[i];
@@ -76,7 +77,7 @@ void StaticMeshRenderer::setCameraData(const VkDeviceAddress camera_data) {
     push_constants.camera_data = camera_data;
 }
 
-Buffer StaticMeshRenderer::createModelBuffer(Device& device) {
+BufferHandle StaticMeshRenderer::createModelBuffer(Device& device) {
     return BufferBuilder(sizeof(ModelBuffer))
         .isConstantBuffer()
         .isDeviceAddressable()

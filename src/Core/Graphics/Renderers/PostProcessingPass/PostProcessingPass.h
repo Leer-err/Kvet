@@ -29,14 +29,14 @@ class PostProcessingPass {
 
    private:
     static Mesh createSqreenQuad(Device& device, const EngineData& engine_data);
-    static Buffer createDataBuffer(Device& device);
+    static BufferHandle createDataBuffer(Device& device);
 
     EngineData engine_data;
 
     GraphicsPipeline pipeline;
     Mesh quad;
 
-    Buffer dithering_data_buffer;
+    BufferHandle dithering_data_buffer;
     PostProcessingData data;
 };
 

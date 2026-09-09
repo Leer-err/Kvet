@@ -61,8 +61,41 @@ Texture::Texture(VmaAllocator allocator,
       height(image_info.extent.height) {}
 
 Texture::~Texture() {
+    if (texture == VK_NULL_HANDLE) return;
+
     index_allocator.free(descriptor);
     vmaDestroyImage(allocator, texture, allocation);
+}
+
+Texture& Texture::operator=(Texture&& other) noexcept {
+    allocator = other.allocator;
+    texture = other.texture;
+    allocation = other.allocation;
+    layout = other.layout;
+    view = other.view;
+    descriptor = other.descriptor;
+    index_allocator = other.index_allocator;
+    format = other.format;
+    width = other.width;
+    height = other.height;
+
+    other.texture = VK_NULL_HANDLE;
+
+    return *this;
+}
+
+Texture::Texture(Texture&& other) noexcept
+    : allocator(other.allocator),
+      texture(other.texture),
+      allocation(other.allocation),
+      layout(other.layout),
+      view(other.view),
+      descriptor(other.descriptor),
+      index_allocator(other.index_allocator),
+      format(other.format),
+      width(other.width),
+      height(other.height) {
+    other.texture = VK_NULL_HANDLE;
 }
 
 uint32_t Texture::getWidth() const { return width; }

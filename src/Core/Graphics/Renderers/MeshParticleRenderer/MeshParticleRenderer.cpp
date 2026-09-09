@@ -11,7 +11,6 @@
 #include "Handles.h"
 #include "ParticleHandle.h"
 
-
 namespace Graphics {
 
 MeshParticleRenderer::MeshParticleRenderer(Device& device,
@@ -33,9 +32,9 @@ void MeshParticleRenderer::render(FrameGraph& frame_graph,
     auto particles = world.getMeshParticles();
     if (particles.alive.empty()) return;
 
-    particle_buffer.update(std::bit_cast<uint8_t*>(particles.particles.data()),
-                           sizeof(MeshParticle) * particles.particles.size(),
-                           0);
+    particle_buffer->update(std::bit_cast<uint8_t*>(particles.particles.data()),
+                            sizeof(MeshParticle) * particles.particles.size(),
+                            0);
 
     for (int i = 0; i < particles.particles.size(); i++) {
         const auto& particle = particles.particles[i];
@@ -44,7 +43,7 @@ void MeshParticleRenderer::render(FrameGraph& frame_graph,
             "MeshParticles", pipeline,
             [this, particle, i](GraphicsPassExecution& execution) {
                 push_constants.particles_data =
-                    particle_buffer.getDeviceAddress() +
+                    particle_buffer->getDeviceAddress() +
                     i * sizeof(MeshParticle);
 
                 execution.appendData(push_constants);
@@ -73,7 +72,7 @@ Mesh MeshParticleRenderer::createQuadMesh(const EngineData& engine_data) {
     return *engine_data.mesh_registry.getMesh("Quad");
 }
 
-Buffer MeshParticleRenderer::createParticleBuffer(Device& device) {
+BufferHandle MeshParticleRenderer::createParticleBuffer(Device& device) {
     return BufferBuilder(sizeof(MeshParticle) * MAX_PARTICLE_COUNT)
         .isConstantBuffer()
         .isDeviceAddressable()

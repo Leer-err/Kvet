@@ -149,7 +149,7 @@ void RenderingBackend::prepareBackbufferForPresentation(
 }
 
 void RenderingBackend::setCurrentFrameIndex(uint32_t index) {
-    device.getBufferRegistry().setFrameInFlight(index);
+    device.setFrameInFlightIndex(index);
 }
 
 void RenderingBackend::createSwapChain() {

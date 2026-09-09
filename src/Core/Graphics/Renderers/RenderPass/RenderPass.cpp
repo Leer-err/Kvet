@@ -38,7 +38,7 @@ TextureHandle RenderPass::render(const FrameData& frame_data,
                                  const RenderWorld& world) {
     ZoneScoped;
 
-    auto camera_data_address = camera_data_buffer.getDeviceAddress();
+    auto camera_data_address = camera_data_buffer->getDeviceAddress();
 
     star_renderer.setCameraData(camera_data_address);
     static_mesh_renderer.setCameraData(camera_data_address);
@@ -63,7 +63,7 @@ TextureHandle RenderPass::render(const FrameData& frame_data,
 void RenderPass::updateCameraBuffer(const RenderWorld& world) {
     auto camera_data = world.getCameraData();
 
-    camera_data_buffer.update(camera_data);
+    camera_data_buffer->update(camera_data);
 }
 
 void RenderPass::createRenderEnviroment(Device& device) {
@@ -114,7 +114,7 @@ void RenderPass::postProcessing(FrameGraph& frame_graph,
     // frame_data.cmd.unbindRenderEnviroment();
 }
 
-Buffer RenderPass::createCameraBuffer(Device& device) {
+BufferHandle RenderPass::createCameraBuffer(Device& device) {
     auto builder = BufferBuilder(sizeof(CameraData))
                        .isConstantBuffer()
                        .isDeviceAddressable()

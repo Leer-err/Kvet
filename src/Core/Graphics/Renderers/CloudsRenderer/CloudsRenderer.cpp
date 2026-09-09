@@ -8,7 +8,6 @@
 #include "Buffer.h"
 #include "BufferBuilder.h"
 #include "CloudsData.h"
-#include "DescriptorSet.h"
 #include "Device.h"
 #include "EngineData.h"
 #include "GraphicsPipelineBuilder.h"
@@ -36,10 +35,10 @@ CloudsRenderer::CloudsRenderer(Device& device, const EngineData& engine_data)
     clouds_texture = TextureBuilder(VK_FORMAT_R8G8B8A8_UNORM, 512, 512)
                          .isRenderTarget()
                          .isShaderResource()
-                         .create(device, engine_data.descriptor_set)
+                         .create(device)
                          .getResult();
     // engine_data.descriptor_set.addTexture(clouds_texture);
-    engine_data.descriptor_set.addSampler(Sampler::linear(device));
+    // engine_data.descriptor_set.addSampler(Sampler::linear(device));
 
     cloud_texture_pipeline =
         GraphicsPipelineBuilder(
@@ -61,11 +60,11 @@ CloudsRenderer::CloudsRenderer(Device& device, const EngineData& engine_data)
 void CloudsRenderer::render(FrameGraph& frame_graph, const RenderWorld& world) {
     // TracyVkZone(frame_data.trace_ctx, frame_data.cmd.buffer, "Clouds");
 
-    clouds_data_buffer.update(world.getCloudsData());
+    clouds_data_buffer->update(world.getCloudsData());
 
     auto cloud_prepass = GraphicsPass(
         "Cloud bake", cloud_pipeline, [this](GraphicsPassExecution& execution) {
-            auto clouds_address = clouds_data_buffer.getDeviceAddress();
+            auto clouds_address = clouds_data_buffer->getDeviceAddress();
 
             execution.appendData(clouds_address);
             execution.draw(quad);
@@ -76,7 +75,7 @@ void CloudsRenderer::render(FrameGraph& frame_graph, const RenderWorld& world) {
     auto pass = GraphicsPass("Clouds", cloud_pipeline,
                              [this](GraphicsPassExecution& execution) {
                                  push_constants.clouds_address =
-                                     clouds_data_buffer.getDeviceAddress();
+                                     clouds_data_buffer->getDeviceAddress();
 
                                  execution.appendData(push_constants);
                                  execution.draw(cloud_plane);
@@ -93,7 +92,7 @@ void CloudsRenderer::setCameraData(VkDeviceAddress camera_data) {
     push_constants.camera_address = camera_data;
 }
 
-Buffer CloudsRenderer::createCloudDataBuffer(Device& device) {
+BufferHandle CloudsRenderer::createCloudDataBuffer(Device& device) {
     return BufferBuilder(sizeof(CloudsData))
         .isConstantBuffer()
         .isDeviceAddressable()

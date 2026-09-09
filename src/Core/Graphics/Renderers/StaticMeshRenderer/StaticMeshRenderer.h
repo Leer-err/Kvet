@@ -38,12 +38,12 @@ class StaticMeshRenderer {
     void setCameraData(VkDeviceAddress camera_data);
 
    private:
-    static Buffer createModelBuffer(Device& device);
+    static BufferHandle createModelBuffer(Device& device);
     EngineData engine_data;
 
     GraphicsPipeline pipeline;
 
-    Buffer model_data_buffer;
+    BufferHandle model_data_buffer;
 
     PushConstants push_constants;
     uint32_t sampler_index;

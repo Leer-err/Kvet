@@ -30,11 +30,11 @@ class RenderPass {
 
     void createRenderEnviroment(Device& device);
 
-    static Buffer createCameraBuffer(Device& device);
+    static BufferHandle createCameraBuffer(Device& device);
 
     EngineData engine_data;
 
-    Buffer camera_data_buffer;
+    BufferHandle camera_data_buffer;
 
     StarRenderer star_renderer;
     StaticMeshRenderer static_mesh_renderer;

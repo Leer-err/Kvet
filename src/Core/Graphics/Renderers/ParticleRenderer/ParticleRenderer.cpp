@@ -39,9 +39,9 @@ void ParticleRenderer::render(FrameGraph& frame_graph,
     std::vector<ParticleHandle> alive_particles(particles.alive.begin(),
                                                 particles.alive.end());
 
-    particle_buffer.update(std::bit_cast<uint8_t*>(particles.particles.data()),
-                           sizeof(Particle) * particles.particles.size(), 0);
-    live_particles_buffer.update(
+    particle_buffer->update(std::bit_cast<uint8_t*>(particles.particles.data()),
+                            sizeof(Particle) * particles.particles.size(), 0);
+    live_particles_buffer->update(
         std::bit_cast<uint8_t*>(alive_particles.data()),
         sizeof(ParticleHandle) * alive_particles.size(), 0);
 
@@ -50,9 +50,9 @@ void ParticleRenderer::render(FrameGraph& frame_graph,
     auto pass = GraphicsPass(
         "Particles", pipeline,
         [this, particle_count](GraphicsPassExecution& execution) {
-            push_constants.particles_data = particle_buffer.getDeviceAddress();
+            push_constants.particles_data = particle_buffer->getDeviceAddress();
             push_constants.live_particles_data =
-                live_particles_buffer.getDeviceAddress();
+                live_particles_buffer->getDeviceAddress();
 
             execution.appendData(push_constants);
             execution.draw(quad, particle_count);
@@ -79,7 +79,7 @@ Mesh ParticleRenderer::createQuadMesh(const EngineData& engine_data) {
     return *engine_data.mesh_registry.getMesh("Quad");
 }
 
-Buffer ParticleRenderer::createParticleBuffer(Device& device) {
+BufferHandle ParticleRenderer::createParticleBuffer(Device& device) {
     return BufferBuilder(sizeof(Particle) * MAX_PARTICLE_COUNT)
         .isConstantBuffer()
         .isDeviceAddressable()
@@ -89,7 +89,7 @@ Buffer ParticleRenderer::createParticleBuffer(Device& device) {
         .getResult();
 }
 
-Buffer ParticleRenderer::createLiveParticleBuffer(Device& device) {
+BufferHandle ParticleRenderer::createLiveParticleBuffer(Device& device) {
     return BufferBuilder(sizeof(ParticleHandle) * MAX_PARTICLE_COUNT)
         .isConstantBuffer()
         .isDeviceAddressable()

@@ -201,12 +201,12 @@ void GraphicsPassExecution::draw(const Mesh& mesh) { draw(mesh, 1); }
 void GraphicsPassExecution::draw(const Mesh& mesh, size_t count) {
     MeshBuffers push_data = {};
 
-    push_data.vertices = mesh.vertex_buffer.getDeviceAddress();
+    push_data.vertices = mesh.vertex_buffer->getDeviceAddress();
     push_data.meshlet_triangles =
-        mesh.meshlet_triangles_buffer.getDeviceAddress();
+        mesh.meshlet_triangles_buffer->getDeviceAddress();
     push_data.meshlet_vertices =
-        mesh.meshlet_vertices_buffer.getDeviceAddress();
-    push_data.meshlets = mesh.meshlet_buffer.getDeviceAddress();
+        mesh.meshlet_vertices_buffer->getDeviceAddress();
+    push_data.meshlets = mesh.meshlet_buffer->getDeviceAddress();
 
     command_buffer.pushConstants(pipeline, &push_data, 0);
 
@@ -231,7 +231,7 @@ void FrameGraph::execute(const FrameData& frame_data) {
         TracyVkZoneTransient(frame_data.trace_ctx, __tracy_gpu_zone,
                              frame_data.cmd.buffer, pass_name, true);
         ZoneTransientN(__tracy_cpu_zone, pass_name, true);
-        pass.execute(engine_data.descriptor_set, frame_data.cmd);
+        pass.execute(frame_data.cmd);
     }
 }
 

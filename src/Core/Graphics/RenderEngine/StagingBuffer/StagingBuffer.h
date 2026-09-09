@@ -15,7 +15,7 @@ namespace Graphics {
 
 class StagingBuffer {
     struct BufferData {
-        Buffer buffer;
+        BufferHandle buffer;
         size_t host_offset;
 
         size_t data_size;
@@ -35,20 +35,20 @@ class StagingBuffer {
 
     void stageTexture(TextureHandle destination, const void* data,
                       size_t data_size);
-    void stageBuffer(const Buffer& destination, const void* data,
+    void stageBuffer(BufferHandle destination, const void* data,
                      size_t data_size);
 
     void flush(const CommandBuffer& cmd);
 
    private:
     static size_t getTexelBlockSize(VkFormat format);
-    static Buffer createBuffer(Device& device);
+    static BufferHandle createBuffer(Device& device);
 
     Device& device;
 
     size_t host_data_used;
 
-    Buffer buffer;
+    BufferHandle buffer;
 
     std::vector<BufferData> buffers;
     std::vector<TextureData> textures;

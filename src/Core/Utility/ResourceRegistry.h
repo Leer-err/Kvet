@@ -56,7 +56,7 @@ class ResourceIndex {
         index.emplace(name, resource);
     }
 
-    std::optional<Handle<T>> get(std::string_view name) {
+    std::optional<Handle<T>> get(std::string_view name) const {
         auto it = index.find(name);
         if (it == index.end()) return std::nullopt;
 

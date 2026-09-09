@@ -23,7 +23,7 @@ class StarRenderer {
     void setCameraData(VkDeviceAddress camera_data);
 
    private:
-    static Buffer createStarsBuffer(Device& device);
+    static BufferHandle createStarsBuffer(Device& device);
     static Mesh createSkyMesh(const EngineData& engine_data);
 
     EngineData engine_data;
@@ -32,7 +32,7 @@ class StarRenderer {
 
     GraphicsPipeline pipeline;
 
-    Buffer stars_data_buffer;
+    BufferHandle stars_data_buffer;
 
     PushConstants push_constants;
 };

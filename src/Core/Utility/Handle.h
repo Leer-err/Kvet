@@ -19,7 +19,7 @@ class Handle {
         resource = other.resource;
         registry = other.registry;
 
-        registry->acquire(std::bit_cast<uint8_t*>(resource));
+        if (resource) registry->acquire(std::bit_cast<uint8_t*>(resource));
 
         return *this;
     }
@@ -27,7 +27,7 @@ class Handle {
         resource = other.resource;
         registry = other.registry;
 
-        registry->acquire(std::bit_cast<uint8_t*>(resource));
+        if (resource) registry->acquire(std::bit_cast<uint8_t*>(resource));
     }
     Handle& operator=(Handle&& other) noexcept {
         resource = other.resource;

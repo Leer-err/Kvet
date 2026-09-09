@@ -96,7 +96,7 @@ void CommandBuffer::setPipeline(const GraphicsPipeline& pipeline) const {
 
     VkDescriptorBufferBindingInfoEXT info = {};
     info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_BUFFER_BINDING_INFO_EXT;
-    info.address = pipeline.descriptors.getDeviceAddress();
+    info.address = pipeline.descriptors->getDeviceAddress();
     info.usage = VK_BUFFER_USAGE_RESOURCE_DESCRIPTOR_BUFFER_BIT_EXT;
     vkCmdBindDescriptorBuffersEXT(buffer, 1, &info);
 

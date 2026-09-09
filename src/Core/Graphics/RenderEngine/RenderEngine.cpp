@@ -91,8 +91,7 @@ MeshHandle RenderEngine::addMesh(std::string_view name, const ::Mesh& mesh) {
 }
 
 EngineData RenderEngine::getEngineData() {
-    return EngineData{descriptor_set, shader_registry, mesh_registry,
-                      texture_registry, staging_buffer};
+    return EngineData{shader_registry, mesh_registry, staging_buffer};
 }
 
 RenderWorld& RenderEngine::getRenderWorld() { return world; }

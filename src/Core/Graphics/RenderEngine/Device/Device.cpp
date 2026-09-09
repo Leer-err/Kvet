@@ -2,15 +2,14 @@
 
 #include <vulkan/vk_enum_string_helper.h>
 #include <vulkan/vulkan.h>
-#include <vulkan/vulkan_core.h>
 
 #include <array>
-#include <bit>
 #include <vector>
 
 #include "Buffer.h"
-#include "BufferAllocator.h"
+#include "BufferBuilder.h"
 #include "CommandBuffer.h"
+#include "DescriptorLayout.h"
 #include "DeviceProperties.h"
 #include "EngineConstants.h"
 #include "ExtensionFunctions.h"
@@ -27,6 +26,7 @@ constexpr auto SAMPLER_BINDING_INDEX = 1;
 
 constexpr auto MAX_TEXTURE_DESCRIPTORS_COUNT = 1000;
 constexpr auto MAX_SAMPLER_DESCRIPTORS_COUNT = 1000;
+constexpr auto MAX_BUFFERS_COUNT = 1000;
 
 namespace Graphics {
 
@@ -37,16 +37,16 @@ Device::Device(const vkb::Instance& instance, const vkb::Device& device,
       allocator(allocator),
       texture_descriptor_allocator(MAX_TEXTURE_DESCRIPTORS_COUNT),
       sampler_descriptor_allocator(MAX_SAMPLER_DESCRIPTORS_COUNT),
-      buffer_allocator(device, allocator),
-      buffer_registry(),
+      buffer_allocator(MAX_BUFFERS_COUNT, sizeof(Buffer), alignof(Buffer)),
+      buffer_registry(buffer_allocator),
       texture_allocator(MAX_TEXTURE_DESCRIPTORS_COUNT, sizeof(Texture),
                         alignof(Texture)),
       texture_registry(texture_allocator),
+      descriptor_layout(createDescriptorLayout(device)),
       descriptors(createDescriptorBuffer(
-          *this, descriptor_layout.layout_size,
+          descriptor_layout.layout_size,
           properties.descriptor_buffer_properties.alignment)),
       logger(LoggerFactory::getLogger("GraphicsDevice")) {
-    createDescriptorLayout();
     properties = DeviceProperties::readProperties(device.physical_device);
 }
 
@@ -77,28 +77,6 @@ vkb::Swapchain Device::createSwapChain(VkSurfaceFormatKHR format,
 Result<TextureHandle, TextureError> Device::createTexture(
     const VkImageCreateInfo& image_info,
     const VmaAllocationCreateInfo& alloc_info) {
-    VkImage image;
-    VmaAllocation allocation;
-    VkResult result = vmaCreateImage(allocator, &image_info, &alloc_info,
-                                     &image, &allocation, nullptr);
-    if (result != VK_SUCCESS)
-        logger.error("Image creation failed with {}", string_VkResult(result));
-
-    VkImageViewCreateInfo info = {};
-    info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-    info.image = image;
-    info.viewType = VK_IMAGE_VIEW_TYPE_2D;
-    info.format = image_info.format;
-    info.subresourceRange = {.levelCount = 1, .layerCount = 1};
-    if (image_info.format == properties.depth_format)
-        info.subresourceRange.aspectMask =
-            VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT;
-    else
-        info.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-
-    VkImageView view;
-    vkCreateImageView(device, &info, nullptr, &view);
-
     auto texture_result =
         Texture::create(device, allocator, image_info, alloc_info,
                         texture_descriptor_allocator);
@@ -111,32 +89,17 @@ void Device::destroyTexture(const TextureState& state) {
     vmaDestroyImage(allocator, state.texture, state.allocation);
 }
 
-Result<Buffer, BufferError> Device::createBuffer(
+Result<BufferHandle, BufferError> Device::createBuffer(
     const VkBufferCreateInfo& buffer_info,
     const VmaAllocationCreateInfo& alloc_info, bool is_chained) {
-    BufferHandle handle;
+    auto buffer_result =
+        Buffer::create(device, allocator, buffer_info, alloc_info, is_chained,
+                       frame_in_flight_index);
+    if (buffer_result.isError()) return buffer_result.getError();
 
-    if (is_chained) {
-        auto buffer_opt =
-            buffer_allocator.createBuffer(buffer_info, alloc_info);
-        if (buffer_opt.has_value() == false) return BufferError{};
+    auto handle = buffer_registry.create(buffer_result.getResult());
 
-        handle = buffer_registry.registerBuffer(buffer_opt.value());
-    } else {
-        std::array<RawBufferHandle, MAX_FRAMES_IN_FLIGHT> buffers;
-
-        for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-            auto buffer_opt =
-                buffer_allocator.createBuffer(buffer_info, alloc_info);
-            if (buffer_opt.has_value() == false) return BufferError{};
-
-            buffers[i] = buffer_opt.value();
-        }
-
-        handle = buffer_registry.registerBufferChain(buffers);
-    }
-
-    return Buffer(&buffer_registry, &buffer_allocator, handle);
+    return handle;
 }
 
 VkCommandPool Device::createCommandPool(uint32_t queue_index) {
@@ -267,7 +230,9 @@ Semaphore Device::createSemaphore() {
     return semaphore;
 }
 
-void Device::createDescriptorLayout() {
+DescriptorLayout Device::createDescriptorLayout(VkDevice device) {
+    DescriptorLayout layout;
+
     VkDescriptorSetLayoutBinding bindings[2] = {};
     bindings[TEXTURE_BINDING_INDEX].descriptorType =
         VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
@@ -288,19 +253,18 @@ void Device::createDescriptorLayout() {
     info.bindingCount = 2;
     info.pBindings = bindings;
 
-    vkCreateDescriptorSetLayout(device, &info, nullptr,
-                                &descriptor_layout.layout);
+    vkCreateDescriptorSetLayout(device, &info, nullptr, &layout.layout);
 
-    size_t set_size;
-    vkGetDescriptorSetLayoutSizeEXT(device, descriptor_layout.layout,
-                                    &descriptor_layout.layout_size);
+    vkGetDescriptorSetLayoutSizeEXT(device, layout.layout, &layout.layout_size);
 
     vkGetDescriptorSetLayoutBindingOffsetEXT(
-        device, descriptor_layout.layout, TEXTURE_BINDING_INDEX,
-        &descriptor_layout.texture_descriptors_offset);
+        device, layout.layout, TEXTURE_BINDING_INDEX,
+        &layout.texture_descriptors_offset);
     vkGetDescriptorSetLayoutBindingOffsetEXT(
-        device, descriptor_layout.layout, SAMPLER_BINDING_INDEX,
-        &descriptor_layout.sampler_descriptors_offset);
+        device, layout.layout, SAMPLER_BINDING_INDEX,
+        &layout.sampler_descriptors_offset);
+
+    return layout;
 }
 
 VkShaderModule Device::createShader(const uint32_t* shader_data,
@@ -333,6 +297,10 @@ VkPhysicalDevice Device::getPhysicalDevice() const {
 
 BufferRegistry& Device::getBufferRegistry() { return buffer_registry; }
 
+void Device::setFrameInFlightIndex(uint32_t index) {
+    frame_in_flight_index = index;
+}
+
 TracyVkCtx Device::createTracingContext(
     const Queue& queue, const CommandBuffer& command_buffer) const {
     return TracyVkContextCalibrated(
@@ -341,12 +309,14 @@ TracyVkCtx Device::createTracingContext(
         vkGetCalibratedTimestampsEXT);
 }
 
-Buffer Device::createDescriptorBuffer(Device& device, size_t set_size,
-                                      size_t alignment) {
+BufferHandle Device::createDescriptorBuffer(size_t set_size, size_t alignment) {
     auto aligned_size = (set_size + alignment - 1) & ~(alignment - 1);
 
-    return device
-        .createBuffer(VkBufferCreateInfo{}, VmaAllocationCreateInfo{}, false)
+    return BufferBuilder(aligned_size)
+        .isDescriptorBuffer()
+        .isCPUWritable(true, true)
+        .isChained()
+        .create(*this)
         .getResult();
 }
 

@@ -80,7 +80,7 @@ BufferBuilder& BufferBuilder::isChained() {
     return *this;
 }
 
-Result<Buffer, BufferError> BufferBuilder::create(Device& device) const {
+Result<BufferHandle, BufferError> BufferBuilder::create(Device& device) const {
     return device.createBuffer(buffer_info, alloc_info, is_chained);
 }
 

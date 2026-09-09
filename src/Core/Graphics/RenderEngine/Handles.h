@@ -7,5 +7,6 @@
 namespace Graphics {
 
 using TextureHandle = Handle<Texture>;
+using BufferHandle = Handle<Buffer>;
 
 }  // namespace Graphics

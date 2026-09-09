@@ -2,14 +2,11 @@
 
 #include <VkBootstrap.h>
 #include <vulkan/vulkan.h>
-#include <vulkan/vulkan_core.h>
 
 #include <cstddef>
 #include <cstdint>
 #include <tracy/TracyVulkan.hpp>
 
-#include "BufferRegistry.h"
-#include "BufferState.h"
 #include "DescriptorLayout.h"
 #include "Descriptors.h"
 #include "DeviceProperties.h"
@@ -49,7 +46,7 @@ class Device {
         const VmaAllocationCreateInfo& alloc_info);
     void destroyTexture(const TextureState& state);
 
-    Result<Buffer, BufferError> createBuffer(
+    Result<BufferHandle, BufferError> createBuffer(
         const VkBufferCreateInfo& buffer_info,
         const VmaAllocationCreateInfo& alloc_info, bool is_chained);
     void destroyBuffer(const Buffer& state);
@@ -90,11 +87,12 @@ class Device {
     TracyVkCtx createTracingContext(const Queue& queue,
                                     const CommandBuffer& command_buffer) const;
 
-   private:
-    static Buffer createDescriptorBuffer(Device& device, size_t set_size,
-                                         size_t alignment);
+    void setFrameInFlightIndex(uint32_t index);
 
-    void createDescriptorLayout();
+   private:
+    BufferHandle createDescriptorBuffer(size_t set_size, size_t alignment);
+
+    static DescriptorLayout createDescriptorLayout(VkDevice device);
 
     void writeTextureDescriptor(TextureDescriptor index,
                                 VkImageView descriptor);
@@ -108,7 +106,7 @@ class Device {
     IndexAllocator<TextureDescriptor> texture_descriptor_allocator;
     IndexAllocator<SamplerDescriptor> sampler_descriptor_allocator;
 
-    BufferAllocator buffer_allocator;
+    PoolAllocator buffer_allocator;
     BufferRegistry buffer_registry;
 
     PoolAllocator texture_allocator;
@@ -117,7 +115,9 @@ class Device {
     DescriptorLayout descriptor_layout;
     DeviceProperties properties;
 
-    Buffer descriptors;
+    BufferHandle descriptors;
+
+    uint32_t frame_in_flight_index = 0;
 
     Logger logger;
 };

@@ -6,9 +6,7 @@
 
 template <typename T>
 T align(const T data, size_t alignment) {
-    auto tmp = std::bit_cast<size_t>(data + alignment - 1);
-
-    return std::bit_cast<T>(tmp - tmp % alignment);
+    return std::bit_cast<size_t>((data + alignment - 1) & ~(alignment - 1));
 }
 
 class PoolAllocator {
