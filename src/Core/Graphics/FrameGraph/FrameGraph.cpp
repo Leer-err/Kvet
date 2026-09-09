@@ -1,13 +1,11 @@
 #include "FrameGraph.h"
 
 #include <vulkan/vulkan.h>
-#include <vulkan/vulkan_core.h>
 
 #include <tracy/Tracy.hpp>
 #include <vector>
 
 #include "CommandBuffer.h"
-#include "DescriptorSet.h"
 #include "Device.h"
 #include "EngineData.h"
 #include "GraphicsPipeline.h"
@@ -143,8 +141,7 @@ void GraphicsPass::setDepthAttachment(TextureHandle texture,
     writes(texture, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
 }
 
-void GraphicsPass::execute(const DescriptorSet& descriptor_set,
-                           const CommandBuffer& command_buffer) {
+void GraphicsPass::execute(const CommandBuffer& command_buffer) {
     prepareTextures(command_buffer);
 
     RenderEnviroment env = {};
@@ -169,7 +166,7 @@ void GraphicsPass::execute(const DescriptorSet& descriptor_set,
 
     command_buffer.bindRenderEnviroment(env);
 
-    GraphicsPassExecution execution(descriptor_set, command_buffer, pipeline);
+    GraphicsPassExecution execution(command_buffer, pipeline);
 
     executor(execution);
 }
@@ -182,13 +179,11 @@ struct MeshBuffers {
 };
 
 GraphicsPassExecution::GraphicsPassExecution(
-    const DescriptorSet& descriptor_set, const CommandBuffer& command_buffer,
-    const GraphicsPipeline& pipeline)
+    const CommandBuffer& command_buffer, const GraphicsPipeline& pipeline)
     : command_buffer(command_buffer),
       pipeline(pipeline),
       current_push_constant_offset(sizeof(MeshBuffers)) {
     command_buffer.setPipeline(pipeline);
-    command_buffer.bindDescriptorSet(pipeline, descriptor_set);
 }
 
 GraphicsPassExecution::~GraphicsPassExecution() {

@@ -15,8 +15,10 @@
 #include "EngineConstants.h"
 #include "ExtensionFunctions.h"
 #include "GraphicsPipeline.h"
+#include "Handles.h"
 #include "Logger.h"
 #include "LoggerFactory.h"
+#include "Texture.h"
 #include "TextureState.h"
 #include "VkBootstrap.h"
 
@@ -24,7 +26,7 @@ constexpr auto TEXTURE_BINDING_INDEX = 0;
 constexpr auto SAMPLER_BINDING_INDEX = 1;
 
 constexpr auto MAX_TEXTURE_DESCRIPTORS_COUNT = 1000;
-constexpr auto MAX_SAMPLE_DESCRIPTORS_COUNT = 1000;
+constexpr auto MAX_SAMPLER_DESCRIPTORS_COUNT = 1000;
 
 namespace Graphics {
 
@@ -33,8 +35,16 @@ Device::Device(const vkb::Instance& instance, const vkb::Device& device,
     : instance(instance),
       device(device),
       allocator(allocator),
+      texture_descriptor_allocator(MAX_TEXTURE_DESCRIPTORS_COUNT),
+      sampler_descriptor_allocator(MAX_SAMPLER_DESCRIPTORS_COUNT),
       buffer_allocator(device, allocator),
       buffer_registry(),
+      texture_allocator(MAX_TEXTURE_DESCRIPTORS_COUNT, sizeof(Texture),
+                        alignof(Texture)),
+      texture_registry(texture_allocator),
+      descriptors(createDescriptorBuffer(
+          *this, descriptor_layout.layout_size,
+          properties.descriptor_buffer_properties.alignment)),
       logger(LoggerFactory::getLogger("GraphicsDevice")) {
     createDescriptorLayout();
     properties = DeviceProperties::readProperties(device.physical_device);
@@ -64,7 +74,7 @@ vkb::Swapchain Device::createSwapChain(VkSurfaceFormatKHR format,
     return swap_ret.value();
 }
 
-Result<Device::AllocatedImage, TextureError> Device::createTexture(
+Result<TextureHandle, TextureError> Device::createTexture(
     const VkImageCreateInfo& image_info,
     const VmaAllocationCreateInfo& alloc_info) {
     VkImage image;
@@ -89,7 +99,12 @@ Result<Device::AllocatedImage, TextureError> Device::createTexture(
     VkImageView view;
     vkCreateImageView(device, &info, nullptr, &view);
 
-    return AllocatedImage{image, allocation, 0};
+    auto texture_result =
+        Texture::create(device, allocator, image_info, alloc_info,
+                        texture_descriptor_allocator);
+    auto handle = texture_registry.create(texture_result.getResult());
+
+    return handle;
 }
 
 void Device::destroyTexture(const TextureState& state) {
@@ -225,12 +240,11 @@ VkPipelineLayout Device::createPipelineLayout(
 
 GraphicsPipeline Device::createGraphicsPipeline(
     const VkGraphicsPipelineCreateInfo& pipeline_info) {
-    GraphicsPipeline pipeline;
+    VkPipeline pipeline;
     VkResult result = vkCreateGraphicsPipelines(
-        device, VK_NULL_HANDLE, 1, &pipeline_info, nullptr, &pipeline.pipeline);
+        device, VK_NULL_HANDLE, 1, &pipeline_info, nullptr, &pipeline);
 
-    pipeline.layout = pipeline_info.layout;
-    return pipeline;
+    return GraphicsPipeline{pipeline, pipeline_info.layout, descriptors};
 }
 
 VkSampler Device::createSampler(const VkSamplerCreateInfo& sampler_info) {
@@ -266,7 +280,7 @@ void Device::createDescriptorLayout() {
     bindings[SAMPLER_BINDING_INDEX].binding = SAMPLER_BINDING_INDEX;
     bindings[SAMPLER_BINDING_INDEX].stageFlags = VK_SHADER_STAGE_ALL_GRAPHICS;
     bindings[SAMPLER_BINDING_INDEX].descriptorCount =
-        MAX_SAMPLE_DESCRIPTORS_COUNT;
+        MAX_SAMPLER_DESCRIPTORS_COUNT;
 
     VkDescriptorSetLayoutCreateInfo info = {};
     info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
@@ -325,6 +339,15 @@ TracyVkCtx Device::createTracingContext(
         device.physical_device, device, queue.queue, command_buffer.buffer,
         vkGetPhysicalDeviceCalibrateableTimeDomainsEXT,
         vkGetCalibratedTimestampsEXT);
+}
+
+Buffer Device::createDescriptorBuffer(Device& device, size_t set_size,
+                                      size_t alignment) {
+    auto aligned_size = (set_size + alignment - 1) & ~(alignment - 1);
+
+    return device
+        .createBuffer(VkBufferCreateInfo{}, VmaAllocationCreateInfo{}, false)
+        .getResult();
 }
 
 }  // namespace Graphics

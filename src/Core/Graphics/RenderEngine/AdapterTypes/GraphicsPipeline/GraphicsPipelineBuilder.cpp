@@ -82,9 +82,6 @@ GraphicsPipelineBuilder::create(Device& device,
 
     auto input_layout = input_layout_result.getResult();
 
-    auto pipeline = GraphicsPipeline{};
-    pipeline.layout = device.createPipelineLayout(input_layout.push_constants);
-
     auto device_properties = device.getDeviceProperties();
 
     std::array shader_stages = {getStageInfo(vertex_shader),
@@ -164,7 +161,8 @@ GraphicsPipelineBuilder::create(Device& device,
     pipeline_info.pRasterizationState = &rasterization_state;
     pipeline_info.pColorBlendState = &color_blend_state;
     pipeline_info.pDynamicState = &dynamic_state;
-    pipeline_info.layout = pipeline.layout;
+    pipeline_info.layout =
+        device.createPipelineLayout(input_layout.push_constants);
     pipeline_info.flags = VK_PIPELINE_CREATE_DESCRIPTOR_BUFFER_BIT_EXT;
 
     return device.createGraphicsPipeline(pipeline_info);

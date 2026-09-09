@@ -1,5 +1,5 @@
-import camera;
-import mesh;
+import Camera;
+import Mesh;
 
 struct StaticModelData
 {

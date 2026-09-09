@@ -11,7 +11,6 @@
 #include <vector>
 
 #include "CommandBuffer.h"
-#include "DescriptorSet.h"
 #include "EngineData.h"
 #include "FrameData.h"
 #include "GraphicsMesh.h"
@@ -22,8 +21,7 @@ namespace Graphics {
 
 class GraphicsPassExecution {
    public:
-    GraphicsPassExecution(const DescriptorSet& descriptor_set,
-                          const CommandBuffer& command_buffer,
+    GraphicsPassExecution(const CommandBuffer& command_buffer,
                           const GraphicsPipeline& pipeline);
     ~GraphicsPassExecution();
 
@@ -89,8 +87,7 @@ class GraphicsPass : public Pass {
     void setDepthAttachment(TextureHandle texture);
     void setDepthAttachment(TextureHandle texture, VkClearValue clear_color);
 
-    void execute(const DescriptorSet& descriptor_set,
-                 const CommandBuffer& command_buffer);
+    void execute(const CommandBuffer& command_buffer);
 
    private:
     GraphicsPipeline pipeline;

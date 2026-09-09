@@ -7,7 +7,6 @@
 #include <tracy/Tracy.hpp>
 #include <tracy/TracyVulkan.hpp>
 
-#include "DescriptorSet.h"
 #include "EngineData.h"
 #include "FrameData.h"
 #include "FrameGraph.h"
@@ -26,8 +25,6 @@ RenderEngine::RenderEngine(const vkb::Instance& instance,
                            const VmaAllocator& allocator, VkSurfaceKHR surface)
     : backend(instance, device, graphics_queue, presentation_queue, allocator,
               surface),
-      descriptor_set(this->backend.getDevice(),
-                     this->backend.getDevice().getDeviceProperties()),
       shader_registry(this->backend.getDevice()),
       mesh_registry(),
       texture_allocator(1024, sizeof(Texture), alignof(Texture)),
@@ -68,9 +65,7 @@ TextureHandle RenderEngine::addTexture(std::string_view name, void* data,
                        .isCopyDestination();
     if (name != "") builder.setName(name);
 
-    auto image =
-        builder.create(backend.getDevice(), texture_registry, descriptor_set)
-            .getResult();
+    auto image = builder.create(backend.getDevice()).getResult();
 
     staging_buffer.stageTexture(image, data, width * height * 4);
 

@@ -93,18 +93,10 @@ void CommandBuffer::pushConstants(const GraphicsPipeline& pipeline,
 void CommandBuffer::setPipeline(const GraphicsPipeline& pipeline) const {
     vkCmdBindPipeline(buffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
                       pipeline.pipeline);
-}
 
-void CommandBuffer::draw(uint32_t meshlet_count,
-                         uint32_t instance_count) const {
-    vkCmdDrawMeshTasksEXT(buffer, meshlet_count, instance_count, 1);
-}
-
-void CommandBuffer::bindDescriptorSet(const GraphicsPipeline& pipeline,
-                                      const DescriptorSet& set) const {
     VkDescriptorBufferBindingInfoEXT info = {};
     info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_BUFFER_BINDING_INFO_EXT;
-    info.address = set.getDescriptors();
+    info.address = pipeline.descriptors.getDeviceAddress();
     info.usage = VK_BUFFER_USAGE_RESOURCE_DESCRIPTOR_BUFFER_BIT_EXT;
     vkCmdBindDescriptorBuffersEXT(buffer, 1, &info);
 
@@ -113,6 +105,11 @@ void CommandBuffer::bindDescriptorSet(const GraphicsPipeline& pipeline,
     vkCmdSetDescriptorBufferOffsetsEXT(buffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
                                        pipeline.layout, 0, 1, &indices,
                                        &offsets);
+}
+
+void CommandBuffer::draw(uint32_t meshlet_count,
+                         uint32_t instance_count) const {
+    vkCmdDrawMeshTasksEXT(buffer, meshlet_count, instance_count, 1);
 }
 
 void CommandBuffer::bindRenderEnviroment(const RenderEnviroment& env) const {

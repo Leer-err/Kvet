@@ -3,6 +3,7 @@
 #include <bit>
 #include <cassert>
 #include <cstdint>
+#include <functional>
 #include <optional>
 #include <string>
 #include <string_view>
@@ -24,6 +25,14 @@ class ResourceRegistry final : public ResourceRegistryBase {
     }
 
     template <typename... ARGS>
+    Handle<T> create(ARGS&&... args) {
+        auto memory = allocate();
+        if (memory == nullptr) return Handle<T>();
+
+        return Handle(new (memory) T(std::forward<ARGS>(args)...), this);
+    }
+
+    template <auto Func, typename... ARGS>
     Handle<T> create(ARGS&&... args) {
         auto memory = allocate();
         if (memory == nullptr) return Handle<T>();

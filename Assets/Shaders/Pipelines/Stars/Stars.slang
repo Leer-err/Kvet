@@ -1,5 +1,5 @@
-import camera;
-import mesh;
+import Camera;
+import Mesh;
 
 struct VertexOutput{
     float4 viewport_position : SV_POSITION;

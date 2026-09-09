@@ -6,7 +6,6 @@
 #include <cstdint>
 #include <unordered_map>
 
-#include "Handle.h"
 #include "PoolAllocator.h"
 
 class ResourceRegistryBase {

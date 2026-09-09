@@ -14,9 +14,12 @@
 #include "Descriptors.h"
 #include "DeviceProperties.h"
 #include "GraphicsPipeline.h"
+#include "Handles.h"
 #include "Logger.h"
 #include "MeshRegistry.h"
+#include "PoolAllocator.h"
 #include "Queue.h"
+#include "Registries.h"
 #include "Result.h"
 #include "Semaphore.h"
 #include "TextureState.h"
@@ -41,7 +44,7 @@ class Device {
                                    VkPresentModeKHR present_mode,
                                    size_t image_count, VkImageUsageFlags flags);
 
-    Result<AllocatedImage, TextureError> createTexture(
+    Result<TextureHandle, TextureError> createTexture(
         const VkImageCreateInfo& image_info,
         const VmaAllocationCreateInfo& alloc_info);
     void destroyTexture(const TextureState& state);
@@ -88,18 +91,33 @@ class Device {
                                     const CommandBuffer& command_buffer) const;
 
    private:
+    static Buffer createDescriptorBuffer(Device& device, size_t set_size,
+                                         size_t alignment);
+
     void createDescriptorLayout();
+
+    void writeTextureDescriptor(TextureDescriptor index,
+                                VkImageView descriptor);
+    void writeSamplerDescriptor(SamplerDescriptor index, VkSampler descriptor);
 
     vkb::Instance instance;
     vkb::Device device;
 
     VmaAllocator allocator;
 
+    IndexAllocator<TextureDescriptor> texture_descriptor_allocator;
+    IndexAllocator<SamplerDescriptor> sampler_descriptor_allocator;
+
     BufferAllocator buffer_allocator;
     BufferRegistry buffer_registry;
 
+    PoolAllocator texture_allocator;
+    TextureRegistry texture_registry;
+
     DescriptorLayout descriptor_layout;
     DeviceProperties properties;
+
+    Buffer descriptors;
 
     Logger logger;
 };

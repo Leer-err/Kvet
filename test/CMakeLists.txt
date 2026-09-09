@@ -1,7 +1,7 @@
 
 
 include(FetchContent)
-include(ctest)
+include(CTest)
 
 FetchContent_Declare(test
   GIT_REPOSITORY    https://github.com/google/googletest.git
@@ -18,7 +18,7 @@ file(GLOB_RECURSE SOURCES *.c *.cpp)
 add_executable(${TEST_NAME} ${SOURCES})
 
 target_link_libraries(${TEST_NAME} PRIVATE
-	Kvet_lib
+	Utility
 	GTest::gmock
 	GTest::gtest
 )

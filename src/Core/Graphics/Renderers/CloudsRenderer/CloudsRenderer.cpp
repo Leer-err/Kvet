@@ -21,7 +21,6 @@
 #include "Vector3.h"
 #include "VertexFormats.h"
 
-
 namespace Graphics {
 
 struct Vertex {
@@ -37,8 +36,7 @@ CloudsRenderer::CloudsRenderer(Device& device, const EngineData& engine_data)
     clouds_texture = TextureBuilder(VK_FORMAT_R8G8B8A8_UNORM, 512, 512)
                          .isRenderTarget()
                          .isShaderResource()
-                         .create(device, engine_data.texture_registry,
-                                 engine_data.descriptor_set)
+                         .create(device, engine_data.descriptor_set)
                          .getResult();
     // engine_data.descriptor_set.addTexture(clouds_texture);
     engine_data.descriptor_set.addSampler(Sampler::linear(device));

@@ -1,4 +1,4 @@
-module camera;
+module Camera;
 
 public struct CameraData {
     public matrix view_projection;

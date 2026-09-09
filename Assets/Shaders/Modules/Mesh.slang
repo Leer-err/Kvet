@@ -1,4 +1,4 @@
-module mesh;
+module Mesh;
 
 public typedef uint32_t MeshletIndex;
 

@@ -1,4 +1,4 @@
-import camera;
+import Camera;
 
 struct CloudsData
 {

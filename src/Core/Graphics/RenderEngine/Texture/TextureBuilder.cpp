@@ -48,18 +48,13 @@ TextureBuilder& TextureBuilder::isCopyDestination() {
     return *this;
 }
 
-Result<TextureHandle, TextureError> TextureBuilder::create(
-    Device& device, TextureRegistry& texture_registry,
-    DescriptorSet& descriptor_set) {
-    auto texture_opt = device.createTexture(image_info, alloc_info);
-    if (texture_opt.isError()) return texture_opt.getError();
+Result<TextureHandle, TextureError> TextureBuilder::create(Device& device) {
+    auto result = device.createTexture(image_info, alloc_info);
+    if (result.isError()) return result.getError();
 
-    auto texture = texture_opt.getResult();
+    auto texture = result.getResult();
 
-    auto index = descriptor_set.addTexture(texture.view);
-    if (index.has_value() == false) return TextureError::OutOfDescriptors;
-
-    return texture_registry.create(device, texture, image_info, alloc_info);
+    return texture;
 }
 
 }  // namespace Graphics

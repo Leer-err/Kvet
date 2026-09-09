@@ -81,8 +81,7 @@ void RenderPass::createRenderEnviroment(Device& device) {
             .isCopySource()
             .isRenderTarget()
             .isShaderResource()
-            .create(device, engine_data.texture_registry,
-                    engine_data.descriptor_set)
+            .create(device)
             .getResult();
     // engine_data.descriptor_set.addTexture(render_target_texture);
 
@@ -91,8 +90,7 @@ void RenderPass::createRenderEnviroment(Device& device) {
                        config.render_height)
             .setName("Depth")
             .isDepthStencil()
-            .create(device, engine_data.texture_registry,
-                    engine_data.descriptor_set)
+            .create(device)
             .getResult();
 
     final_image = TextureBuilder(VK_FORMAT_R8G8B8A8_SRGB, config.render_width,
@@ -101,8 +99,7 @@ void RenderPass::createRenderEnviroment(Device& device) {
                       .isCopySource()
                       .isRenderTarget()
                       .isShaderResource()
-                      .create(device, engine_data.texture_registry,
-                              engine_data.descriptor_set)
+                      .create(device)
                       .getResult();
 }
 

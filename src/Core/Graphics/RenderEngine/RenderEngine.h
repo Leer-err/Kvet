@@ -5,7 +5,6 @@
 #include <cstdint>
 
 #include "CommandBuffer.h"
-#include "DescriptorSet.h"
 #include "Device.h"
 #include "EngineData.h"
 #include "Handles.h"
@@ -49,7 +48,6 @@ class RenderEngine final : public IRenderEngine {
 
     RenderingBackend backend;
 
-    DescriptorSet descriptor_set;
     ShaderRegistry shader_registry;
     MeshRegistry mesh_registry;
     PoolAllocator texture_allocator;
