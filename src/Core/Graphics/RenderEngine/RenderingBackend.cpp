@@ -4,6 +4,7 @@
 
 #include <array>
 
+#include "Buffer.h"
 #include "Device.h"
 #include "GraphicsConfig.h"
 #include "Handles.h"
@@ -52,9 +53,7 @@ FrameData RenderingBackend::beginFrame() {
     auto command_buffer = frame_in_flight.pool.getCommandBuffer();
     command_buffer.begin();
 
-    return FrameData{.frame_in_flight_index = frame_in_flight_index,
-                     .trace_ctx = trace_ctx,
-                     .cmd = command_buffer};
+    return FrameData{.trace_ctx = trace_ctx, .cmd = command_buffer};
 }
 
 void RenderingBackend::endFrame(TextureHandle rendered_image) {
@@ -94,6 +93,7 @@ void RenderingBackend::endFrame(TextureHandle rendered_image) {
     swap_chain.present();
 
     frame_in_flight_index = (frame_in_flight_index + 1) % MAX_FRAMES_IN_FLIGHT;
+    Buffer::setFrameInFlightIndex(frame_in_flight_index);
 }
 
 void RenderingBackend::copyToBackbuffer(const CommandBuffer& cmd,
@@ -146,10 +146,6 @@ void RenderingBackend::prepareBackbufferForPresentation(
     render_finished.subresourceRange.layerCount = 1;
 
     cmd.barrier(&render_finished, 1, nullptr, 0);
-}
-
-void RenderingBackend::setCurrentFrameIndex(uint32_t index) {
-    device.setFrameInFlightIndex(index);
 }
 
 void RenderingBackend::createSwapChain() {

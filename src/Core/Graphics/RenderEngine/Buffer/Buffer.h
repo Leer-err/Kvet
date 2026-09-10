@@ -12,8 +12,6 @@
 #include "EngineConstants.h"
 #include "Result.h"
 
-// #include "BufferState.h"
-
 namespace Graphics {
 
 enum class BufferError { OutOfMemory };
@@ -35,13 +33,11 @@ class Buffer {
     static Result<Buffer, BufferError> create(
         VkDevice device, VmaAllocator allocator,
         const VkBufferCreateInfo& buffer_info,
-        const VmaAllocationCreateInfo& alloc_info, bool is_chained,
-        const uint32_t& frame_in_flight_index);
+        const VmaAllocationCreateInfo& alloc_info, bool is_chained);
 
     Buffer(VmaAllocator allocator, const BufferChain& allocated_buffer,
            size_t size, const VkBufferCreateInfo& buffer_info,
-           const VmaAllocationCreateInfo& alloc_info,
-           const uint32_t& frame_in_flight_index);
+           const VmaAllocationCreateInfo& alloc_info);
     ~Buffer();
 
     Buffer& operator=(Buffer&& other) noexcept;
@@ -62,7 +58,11 @@ class Buffer {
                                          VkPipelineStageFlags2 dst_stages,
                                          VkAccessFlags2 dst_access);
 
+    static void setFrameInFlightIndex(uint32_t index);
+
    private:
+    static uint32_t frame_in_flight_index;
+
     static Result<AllocatedBuffer, BufferError> allocateSingleBuffer(
         VkDevice device, VmaAllocator allocator,
         const VkBufferCreateInfo& buffer_info,
@@ -75,44 +75,6 @@ class Buffer {
 
     BufferChain buffers;
     size_t size;
-
-    const uint32_t& frame_in_flight_index;
 };
-
-// using BufferHandle = uint32_t;
-
-// class BufferRegistry;
-// class BufferAllocator;
-
-// class Buffer {
-//    public:
-//     Buffer(BufferRegistry* registry, BufferAllocator* allocator,
-//            BufferHandle handle);
-
-//     template <typename T>
-//     void update(const std::span<T> data, size_t offset = 0) {
-//         update(std::bit_cast<uint8_t*>(data.data()), sizeof(T), offset);
-//     }
-//     template <typename T>
-//     void update(const T& data, size_t offset = 0) {
-//         update(std::bit_cast<uint8_t*>(&data), sizeof(T), offset);
-//     }
-//     void update(const uint8_t* data, size_t size, size_t offset = 0);
-
-//     uint8_t* getHostAddress() const;
-//     VkDeviceAddress getDeviceAddress() const;
-
-//     BufferState getState() const;
-
-//     VkBufferMemoryBarrier2 createBarrier(VkPipelineStageFlags2 src_stages,
-//                                          VkAccessFlags2 src_access,
-//                                          VkPipelineStageFlags2 dst_stages,
-//                                          VkAccessFlags2 dst_access);
-
-//    private:
-//     BufferHandle handle;
-//     BufferRegistry* registry;
-//     BufferAllocator* allocator;
-// };
 
 }  // namespace Graphics

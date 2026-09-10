@@ -1,6 +1,6 @@
 #include "Buffer.h"
 
-#include <vulkan/vulkan_core.h>
+#include <vulkan/vulkan.h>
 
 #include <array>
 #include <cstring>
@@ -9,11 +9,12 @@
 
 namespace Graphics {
 
+uint32_t Buffer::frame_in_flight_index = 0;
+
 Result<Buffer, BufferError> Buffer::create(
     VkDevice device, VmaAllocator allocator,
     const VkBufferCreateInfo& buffer_info,
-    const VmaAllocationCreateInfo& alloc_info, bool is_chained,
-    const uint32_t& frame_in_flight_index) {
+    const VmaAllocationCreateInfo& alloc_info, bool is_chained) {
     auto buffers = BufferChain{};
 
     if (is_chained) {
@@ -34,18 +35,14 @@ Result<Buffer, BufferError> Buffer::create(
         for (auto& buffer : buffers) buffer = buffer_result.getResult();
     }
 
-    return Buffer(allocator, buffers, buffer_info.size, buffer_info, alloc_info,
-                  frame_in_flight_index);
+    return Buffer(allocator, buffers, buffer_info.size, buffer_info,
+                  alloc_info);
 }
 
 Buffer::Buffer(VmaAllocator allocator, const BufferChain& allocated_buffers,
                size_t size, const VkBufferCreateInfo& buffer_info,
-               const VmaAllocationCreateInfo& alloc_info,
-               const uint32_t& frame_in_flight_index)
-    : allocator(allocator),
-      buffers(allocated_buffers),
-      size(size),
-      frame_in_flight_index(frame_in_flight_index) {}
+               const VmaAllocationCreateInfo& alloc_info)
+    : allocator(allocator), buffers(allocated_buffers), size(size) {}
 
 Buffer::~Buffer() {
     VkBuffer prev_buffer = VK_NULL_HANDLE;
@@ -69,10 +66,7 @@ Buffer& Buffer::operator=(Buffer&& other) noexcept {
 }
 
 Buffer::Buffer(Buffer&& other) noexcept
-    : allocator(other.allocator),
-      buffers(other.buffers),
-      size(other.size),
-      frame_in_flight_index(other.frame_in_flight_index) {
+    : allocator(other.allocator), buffers(other.buffers), size(other.size) {
     for (auto& buffer : other.buffers) buffer.buffer = VK_NULL_HANDLE;
 }
 
@@ -137,6 +131,10 @@ Result<Buffer::AllocatedBuffer, BufferError> Buffer::allocateSingleBuffer(
         buffer.mapped_address = std::bit_cast<uint8_t*>(info.pMappedData);
 
     return buffer;
+}
+
+void Buffer::setFrameInFlightIndex(uint32_t index) {
+    frame_in_flight_index = index;
 }
 
 }  // namespace Graphics

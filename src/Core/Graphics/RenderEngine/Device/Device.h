@@ -19,7 +19,6 @@
 #include "Registries.h"
 #include "Result.h"
 #include "Semaphore.h"
-#include "TextureState.h"
 
 namespace Graphics {
 
@@ -27,12 +26,6 @@ struct CommandBuffer;
 
 class Device {
    public:
-    struct AllocatedImage {
-        VkImage image;
-        VmaAllocation allocation;
-        VkImageView view;
-    };
-
     Device(const vkb::Instance& instance, const vkb::Device& device,
            VmaAllocator allocator);
     ~Device();
@@ -44,12 +37,10 @@ class Device {
     Result<TextureHandle, TextureError> createTexture(
         const VkImageCreateInfo& image_info,
         const VmaAllocationCreateInfo& alloc_info);
-    void destroyTexture(const TextureState& state);
 
     Result<BufferHandle, BufferError> createBuffer(
         const VkBufferCreateInfo& buffer_info,
         const VmaAllocationCreateInfo& alloc_info, bool is_chained);
-    void destroyBuffer(const Buffer& state);
 
     VkCommandPool createCommandPool(uint32_t queue_index);
     void resetCommandPool(VkCommandPool pool) const;
@@ -74,9 +65,6 @@ class Device {
 
     Semaphore createSemaphore();
 
-    void writeDescriptor(const VkDescriptorGetInfoEXT& info,
-                         size_t descriptor_size, void* dst) const;
-
     void waitIdle() const;
 
     VkInstance getInstance() const;
@@ -86,8 +74,6 @@ class Device {
 
     TracyVkCtx createTracingContext(const Queue& queue,
                                     const CommandBuffer& command_buffer) const;
-
-    void setFrameInFlightIndex(uint32_t index);
 
    private:
     BufferHandle createDescriptorBuffer(size_t set_size, size_t alignment);
@@ -103,9 +89,6 @@ class Device {
 
     VmaAllocator allocator;
 
-    IndexAllocator<TextureDescriptor> texture_descriptor_allocator;
-    IndexAllocator<SamplerDescriptor> sampler_descriptor_allocator;
-
     PoolAllocator buffer_allocator;
     BufferRegistry buffer_registry;
 
@@ -116,8 +99,8 @@ class Device {
     DeviceProperties properties;
 
     BufferHandle descriptors;
-
-    uint32_t frame_in_flight_index = 0;
+    IndexAllocator<TextureDescriptor> texture_descriptor_allocator;
+    IndexAllocator<SamplerDescriptor> sampler_descriptor_allocator;
 
     Logger logger;
 };

@@ -18,7 +18,6 @@
 #include "Logger.h"
 #include "LoggerFactory.h"
 #include "Texture.h"
-#include "TextureState.h"
 #include "VkBootstrap.h"
 
 constexpr auto TEXTURE_BINDING_INDEX = 0;
@@ -35,8 +34,6 @@ Device::Device(const vkb::Instance& instance, const vkb::Device& device,
     : instance(instance),
       device(device),
       allocator(allocator),
-      texture_descriptor_allocator(MAX_TEXTURE_DESCRIPTORS_COUNT),
-      sampler_descriptor_allocator(MAX_SAMPLER_DESCRIPTORS_COUNT),
       buffer_allocator(MAX_BUFFERS_COUNT, sizeof(Buffer), alignof(Buffer)),
       buffer_registry(buffer_allocator),
       texture_allocator(MAX_TEXTURE_DESCRIPTORS_COUNT, sizeof(Texture),
@@ -46,6 +43,8 @@ Device::Device(const vkb::Instance& instance, const vkb::Device& device,
       descriptors(createDescriptorBuffer(
           descriptor_layout.layout_size,
           properties.descriptor_buffer_properties.alignment)),
+      texture_descriptor_allocator(MAX_TEXTURE_DESCRIPTORS_COUNT),
+      sampler_descriptor_allocator(MAX_SAMPLER_DESCRIPTORS_COUNT),
       logger(LoggerFactory::getLogger("GraphicsDevice")) {
     properties = DeviceProperties::readProperties(device.physical_device);
 }
@@ -85,16 +84,11 @@ Result<TextureHandle, TextureError> Device::createTexture(
     return handle;
 }
 
-void Device::destroyTexture(const TextureState& state) {
-    vmaDestroyImage(allocator, state.texture, state.allocation);
-}
-
 Result<BufferHandle, BufferError> Device::createBuffer(
     const VkBufferCreateInfo& buffer_info,
     const VmaAllocationCreateInfo& alloc_info, bool is_chained) {
     auto buffer_result =
-        Buffer::create(device, allocator, buffer_info, alloc_info, is_chained,
-                       frame_in_flight_index);
+        Buffer::create(device, allocator, buffer_info, alloc_info, is_chained);
     if (buffer_result.isError()) return buffer_result.getError();
 
     auto handle = buffer_registry.create(buffer_result.getResult());
@@ -280,11 +274,6 @@ VkShaderModule Device::createShader(const uint32_t* shader_data,
     return module;
 }
 
-void Device::writeDescriptor(const VkDescriptorGetInfoEXT& info,
-                             size_t descriptor_size, void* dst) const {
-    vkGetDescriptorEXT(device, &info, descriptor_size, dst);
-}
-
 void Device::waitIdle() const { vkDeviceWaitIdle(device); }
 
 VkInstance Device::getInstance() const { return instance; }
@@ -297,16 +286,51 @@ VkPhysicalDevice Device::getPhysicalDevice() const {
 
 BufferRegistry& Device::getBufferRegistry() { return buffer_registry; }
 
-void Device::setFrameInFlightIndex(uint32_t index) {
-    frame_in_flight_index = index;
-}
-
 TracyVkCtx Device::createTracingContext(
     const Queue& queue, const CommandBuffer& command_buffer) const {
     return TracyVkContextCalibrated(
         device.physical_device, device, queue.queue, command_buffer.buffer,
         vkGetPhysicalDeviceCalibrateableTimeDomainsEXT,
         vkGetCalibratedTimestampsEXT);
+}
+
+void Device::writeTextureDescriptor(TextureDescriptor index,
+                                    VkImageView descriptor) {
+    auto descriptors_ptr = descriptors->getHostAddress() +
+                           descriptor_layout.texture_descriptors_count;
+    auto descriptor_ptr =
+        descriptors_ptr +
+        properties.descriptor_buffer_properties.texture_size * index;
+
+    VkDescriptorImageInfo image_descriptor_info = {};
+    image_descriptor_info.imageView = descriptor;
+    image_descriptor_info.imageLayout =
+        VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
+    VkDescriptorGetInfoEXT info{};
+    info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_GET_INFO_EXT;
+    info.type = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
+    info.data.pSampledImage = &image_descriptor_info;
+    vkGetDescriptorEXT(device, &info,
+                       properties.descriptor_buffer_properties.texture_size,
+                       descriptor_ptr);
+}
+
+void Device::writeSamplerDescriptor(SamplerDescriptor index,
+                                    VkSampler descriptor) {
+    auto descriptors_ptr = descriptors->getHostAddress() +
+                           descriptor_layout.sampler_descriptors_offset;
+    auto descriptor_ptr =
+        descriptors_ptr +
+        properties.descriptor_buffer_properties.sampler_size * index;
+
+    VkDescriptorGetInfoEXT info{};
+    info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_GET_INFO_EXT;
+    info.type = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
+    info.data.pSampler = &descriptor;
+    vkGetDescriptorEXT(device, &info,
+                       properties.descriptor_buffer_properties.texture_size,
+                       descriptor_ptr);
 }
 
 BufferHandle Device::createDescriptorBuffer(size_t set_size, size_t alignment) {
