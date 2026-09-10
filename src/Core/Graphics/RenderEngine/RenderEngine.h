@@ -7,6 +7,7 @@
 #include "CommandBuffer.h"
 #include "Device.h"
 #include "EngineData.h"
+#include "GraphicsResourceManager.h"
 #include "Handles.h"
 #include "IRenderEngine.h"
 #include "MeshRegistry.h"
@@ -50,10 +51,10 @@ class RenderEngine final : public IRenderEngine {
 
     ShaderRegistry shader_registry;
     MeshRegistry mesh_registry;
-    PoolAllocator texture_allocator;
-    TextureRegistry texture_registry;
 
     StagingBuffer staging_buffer;
+
+    GraphicsResourceManager resource_manager;
 
     RenderWorld world;
 

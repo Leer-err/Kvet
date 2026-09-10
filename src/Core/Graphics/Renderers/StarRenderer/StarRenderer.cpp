@@ -44,12 +44,12 @@ void StarRenderer::render(FrameGraph& frame_graph, const RenderWorld& world) {
             execution.draw(quad);
         });
 
-    // auto color_attachment = engine_data.texture_registry.getTexture("Color");
-    // pass.addColorAttachment(color_attachment.value(), {});
-    // auto depth_attachment = engine_data.texture_registry.getTexture("Depth");
-    // pass.setDepthAttachment(
-    //     depth_attachment.value(),
-    //     VkClearValue{.depthStencil = {.depth = 1, .stencil = 0}});
+    auto color_attachment = engine_data.resource_manager.getTexture("Color");
+    pass.addColorAttachment(color_attachment.value(), {});
+    auto depth_attachment = engine_data.resource_manager.getTexture("Depth");
+    pass.setDepthAttachment(
+        depth_attachment.value(),
+        VkClearValue{.depthStencil = {.depth = 1, .stencil = 0}});
 
     frame_graph.addGraphicsPass(pass);
 }

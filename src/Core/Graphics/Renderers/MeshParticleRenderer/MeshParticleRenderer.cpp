@@ -51,14 +51,11 @@ void MeshParticleRenderer::render(FrameGraph& frame_graph,
                 execution.draw(*mesh);
             });
 
-        // auto render_target =
-        // engine_data.texture_registry.getTexture("Color");
-        // pass.addColorAttachment(*render_target);
-        // auto depth = engine_data.texture_registry.getTexture("Depth");
-        // pass.setDepthAttachment(*depth);
-        // auto texture =
-        //     *engine_data.texture_registry.getTexture(particle.texture);
-        // pass.reads(texture, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+        auto render_target = engine_data.resource_manager.getTexture("Color");
+        pass.addColorAttachment(*render_target);
+        auto depth = engine_data.resource_manager.getTexture("Depth");
+        pass.setDepthAttachment(*depth);
+        pass.reads(particle.texture, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
         frame_graph.addGraphicsPass(pass);
     }

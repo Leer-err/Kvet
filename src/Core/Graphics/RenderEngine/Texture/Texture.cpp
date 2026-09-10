@@ -5,8 +5,6 @@
 
 #include <cassert>
 
-#include "TextureState.h"
-
 namespace Graphics {
 
 Result<Texture, TextureError> Texture::create(

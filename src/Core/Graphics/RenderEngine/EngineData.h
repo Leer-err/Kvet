@@ -1,5 +1,6 @@
 #pragma once
 
+#include "GraphicsResourceManager.h"
 #include "MeshRegistry.h"
 #include "Registries.h"
 #include "ShaderRegistry.h"
@@ -12,6 +13,8 @@ struct EngineData {
     MeshRegistry& mesh_registry;
 
     StagingBuffer& staging_buffer;
+
+    GraphicsResourceManager& resource_manager;
 };
 
 }  // namespace Graphics

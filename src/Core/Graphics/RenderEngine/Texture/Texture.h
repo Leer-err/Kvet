@@ -5,13 +5,13 @@
 
 #include <cstdint>
 
-#include "Buffer.h"
 #include "Descriptors.h"
 #include "IndexAllocator.h"
 #include "Result.h"
-#include "TextureState.h"
 
 namespace Graphics {
+
+enum class TextureError { OutOfDescriptors };
 
 class Texture {
    public:

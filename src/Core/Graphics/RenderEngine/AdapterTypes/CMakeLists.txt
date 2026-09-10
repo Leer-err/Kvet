@@ -1,4 +1,4 @@
-add_subdirectory(Buffer)
+
 add_subdirectory(Rasterizer)
 add_subdirectory(Sampler)
 add_subdirectory(GraphicsPipeline)
@@ -7,5 +7,4 @@ add_subdirectory(CommandPool)
 add_subdirectory(CommandBuffer)
 add_subdirectory(Semaphore)
 add_subdirectory(Shader)
-add_subdirectory(Image)
 add_subdirectory(DescriptorLayout)

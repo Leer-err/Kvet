@@ -1,8 +1,8 @@
 #pragma once
 
 #include "Handle.h"
-#include "ResourceRegistry.h"
 #include "Texture.h"
+#include "Buffer.h"
 
 namespace Graphics {
 

@@ -83,7 +83,6 @@ void RenderPass::createRenderEnviroment(Device& device) {
             .isShaderResource()
             .create(device)
             .getResult();
-    // engine_data.descriptor_set.addTexture(render_target_texture);
 
     depth_stencil_texture =
         TextureBuilder(device_properties.depth_format, config.render_width,
@@ -105,7 +104,7 @@ void RenderPass::createRenderEnviroment(Device& device) {
 
 void RenderPass::postProcessing(FrameGraph& frame_graph,
                                 const RenderWorld& world) {
-    // post_processing_pass.render(render_target_texture, frame_graph, world);
+    post_processing_pass.render(render_target_texture, frame_graph, world);
 
     // frame_data.cmd.bindRenderEnviroment(post_process_env);
 

@@ -37,7 +37,6 @@ CloudsRenderer::CloudsRenderer(Device& device, const EngineData& engine_data)
                          .isShaderResource()
                          .create(device)
                          .getResult();
-    // engine_data.descriptor_set.addTexture(clouds_texture);
     // engine_data.descriptor_set.addSampler(Sampler::linear(device));
 
     cloud_texture_pipeline =
@@ -58,8 +57,6 @@ CloudsRenderer::CloudsRenderer(Device& device, const EngineData& engine_data)
 }
 
 void CloudsRenderer::render(FrameGraph& frame_graph, const RenderWorld& world) {
-    // TracyVkZone(frame_data.trace_ctx, frame_data.cmd.buffer, "Clouds");
-
     clouds_data_buffer->update(world.getCloudsData());
 
     auto cloud_prepass = GraphicsPass(
@@ -69,7 +66,7 @@ void CloudsRenderer::render(FrameGraph& frame_graph, const RenderWorld& world) {
             execution.appendData(clouds_address);
             execution.draw(quad);
         });
-    // cloud_prepass.addColorAttachment(clouds_texture);
+    cloud_prepass.addColorAttachment(clouds_texture);
     frame_graph.addGraphicsPass(cloud_prepass);
 
     auto pass = GraphicsPass("Clouds", cloud_pipeline,
@@ -80,11 +77,11 @@ void CloudsRenderer::render(FrameGraph& frame_graph, const RenderWorld& world) {
                                  execution.appendData(push_constants);
                                  execution.draw(cloud_plane);
                              });
-    // pass.reads(clouds_texture, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-    // auto color_texture = *engine_data.texture_registry.getTexture("Color");
-    // pass.addColorAttachment(color_texture);
-    // auto depth_texture = *engine_data.texture_registry.getTexture("Depth");
-    // pass.setDepthAttachment(depth_texture);
+    pass.reads(clouds_texture, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+    auto color_texture = *engine_data.resource_manager.getTexture("Color");
+    pass.addColorAttachment(color_texture);
+    auto depth_texture = *engine_data.resource_manager.getTexture("Depth");
+    pass.setDepthAttachment(depth_texture);
     frame_graph.addGraphicsPass(pass);
 }
 

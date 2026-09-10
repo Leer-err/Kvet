@@ -9,7 +9,6 @@
 #include "GraphicsConfig.h"
 #include "Queue.h"
 #include "Semaphore.h"
-#include "TextureState.h"
 
 namespace Graphics {
 

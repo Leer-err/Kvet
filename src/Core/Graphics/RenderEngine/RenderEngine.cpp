@@ -27,8 +27,6 @@ RenderEngine::RenderEngine(const vkb::Instance& instance,
               surface),
       shader_registry(this->backend.getDevice()),
       mesh_registry(),
-      texture_allocator(1024, sizeof(Texture), alignof(Texture)),
-      texture_registry(texture_allocator),
       staging_buffer(this->backend.getDevice()) {}
 
 void RenderEngine::render() {
@@ -39,7 +37,6 @@ void RenderEngine::render() {
                                                    getEngineData());
 
     FrameData frame = backend.beginFrame();
-    backend.setCurrentFrameIndex(frame.frame_in_flight_index);
 
     FrameGraph frame_graph(getEngineData());
 
@@ -91,7 +88,8 @@ MeshHandle RenderEngine::addMesh(std::string_view name, const ::Mesh& mesh) {
 }
 
 EngineData RenderEngine::getEngineData() {
-    return EngineData{shader_registry, mesh_registry, staging_buffer};
+    return EngineData{shader_registry, mesh_registry, staging_buffer,
+                      resource_manager};
 }
 
 RenderWorld& RenderEngine::getRenderWorld() { return world; }
