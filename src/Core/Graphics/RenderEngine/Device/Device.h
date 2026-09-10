@@ -61,7 +61,7 @@ class Device {
     GraphicsPipeline createGraphicsPipeline(
         const VkGraphicsPipelineCreateInfo& pipeline_info);
 
-    VkSampler createSampler(const VkSamplerCreateInfo& sampler_info);
+    SamplerDescriptor createSampler(const VkSamplerCreateInfo& sampler_info);
 
     Semaphore createSemaphore();
 

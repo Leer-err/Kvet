@@ -118,9 +118,8 @@ Scene::Scene() {
     mesh_effect.spawn_rate = 1;
     mesh_effect.particle_lifetime = 1;
     mesh_effect.mesh = 0;
-    // renderer->addMesh
-    // (File::ModelReader("./Assets/Sphere.fbx").readMesh());
-    // mesh_effect.texture = *readTexture("./Assets/Tower.png");
+    renderer->addMesh(File::ModelReader("./Assets/Sphere.fbx").readMesh());
+    mesh_effect.texture = *readTexture("./Assets/Tower.png");
     renderer->getRenderWorld().addMeshEffect(mesh_effect);
 
     auto input = std::make_shared<Input::GameInputContext>();
@@ -148,14 +147,16 @@ Scene::Scene() {
     player.addScript(std::make_unique<MoveScript>(player, input));
 }
 
-void Scene::update(float deltaTime) {
+void Scene::update(float delta_time) {
     ZoneScoped;
 
     sky.draw();
-    world.update(deltaTime);
+    world.update(delta_time);
 
     auto renderer = Graphics::getRenderEngine();
-    renderer->getRenderWorld().update(deltaTime);
+    renderer->getRenderWorld().update(delta_time);
+    renderer->getRenderWorld().renderData().time += delta_time;
+    renderer->getRenderWorld().renderData().delta_time = delta_time;
 }
 
 void Scene::setupSystems() {

@@ -38,9 +38,14 @@ VFXWorld::ParticleBatch VFXWorld::getParticles() const {
         last_live_particle = *std::ranges::max_element(allocated_particles);
     }
 
+    std::vector<TextureHandle> used_textures;
+    for (const auto& effect : effects) {
+        used_textures.push_back(effect.getTexture());
+    }
+
     return ParticleBatch{
         std::span(sprite_particles.data(), last_live_particle + 1),
-        allocated_particles, last_live_particle};
+        allocated_particles, used_textures, last_live_particle};
 }
 
 VFXWorld::MeshParticleBatch VFXWorld::getMeshParticles() const {
@@ -50,9 +55,14 @@ VFXWorld::MeshParticleBatch VFXWorld::getMeshParticles() const {
         last_live_particle = *std::ranges::max_element(allocated_particles);
     }
 
+    std::vector<TextureHandle> used_textures;
+    for (const auto& effect : mesh_effects) {
+        used_textures.push_back(effect.getTexture());
+    }
+
     return MeshParticleBatch{
         std::span(mesh_particles.data(), last_live_particle + 1),
-        allocated_particles, last_live_particle};
+        allocated_particles, used_textures, last_live_particle};
 }
 
 }  // namespace Graphics

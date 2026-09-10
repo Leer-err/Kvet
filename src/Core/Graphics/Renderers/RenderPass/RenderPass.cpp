@@ -10,6 +10,7 @@
 #include "CameraData.h"
 #include "CloudsRenderer.h"
 #include "Device.h"
+#include "EngineData.h"
 #include "FrameGraph.h"
 #include "OverlayRenderer.h"
 #include "PostProcessingPass.h"
@@ -30,7 +31,7 @@ RenderPass::RenderPass(Device& device, const EngineData& engine_data)
       mesh_particle_renderer(device, engine_data),
       overlay_renderer(),
       post_processing_pass(device, engine_data) {
-    createRenderEnviroment(device);
+    createRenderEnviroment(device, engine_data);
 }
 
 TextureHandle RenderPass::render(const FrameData& frame_data,
@@ -44,8 +45,6 @@ TextureHandle RenderPass::render(const FrameData& frame_data,
     static_mesh_renderer.setCameraData(camera_data_address);
     particle_renderer.setCameraData(camera_data_address);
     mesh_particle_renderer.setCameraData(camera_data_address);
-
-    // TracyVkZone(frame_data.trace_ctx, frame_data.cmd.buffer, "Render pass");
 
     updateCameraBuffer(world);
 
@@ -66,7 +65,8 @@ void RenderPass::updateCameraBuffer(const RenderWorld& world) {
     camera_data_buffer->update(camera_data);
 }
 
-void RenderPass::createRenderEnviroment(Device& device) {
+void RenderPass::createRenderEnviroment(Device& device,
+                                        const EngineData& engine_data) {
     auto config = Config::App::get().getGraphicsConfig();
 
     auto width = config.render_width;
@@ -83,6 +83,7 @@ void RenderPass::createRenderEnviroment(Device& device) {
             .isShaderResource()
             .create(device)
             .getResult();
+    engine_data.resource_manager.addTexture("Color", render_target_texture);
 
     depth_stencil_texture =
         TextureBuilder(device_properties.depth_format, config.render_width,
@@ -91,6 +92,7 @@ void RenderPass::createRenderEnviroment(Device& device) {
             .isDepthStencil()
             .create(device)
             .getResult();
+    engine_data.resource_manager.addTexture("Depth", depth_stencil_texture);
 
     final_image = TextureBuilder(VK_FORMAT_R8G8B8A8_SRGB, config.render_width,
                                  config.render_height)
@@ -100,17 +102,12 @@ void RenderPass::createRenderEnviroment(Device& device) {
                       .isShaderResource()
                       .create(device)
                       .getResult();
+    engine_data.resource_manager.addTexture("RenderResult", final_image);
 }
 
 void RenderPass::postProcessing(FrameGraph& frame_graph,
                                 const RenderWorld& world) {
     post_processing_pass.render(render_target_texture, frame_graph, world);
-
-    // frame_data.cmd.bindRenderEnviroment(post_process_env);
-
-    // overlay_renderer.render(frame_data);
-
-    // frame_data.cmd.unbindRenderEnviroment();
 }
 
 BufferHandle RenderPass::createCameraBuffer(Device& device) {

@@ -6,7 +6,6 @@
 #include "Vector3.h"
 #include "Vector4.h"
 
-
 namespace Graphics {
 
 struct Particle {
@@ -17,7 +16,7 @@ struct Particle {
     float rotation;
     float lifetime;
     float age;
-    TextureHandle texture;
+    uint32_t texture;
 };
 
 struct MeshParticle {
@@ -25,7 +24,7 @@ struct MeshParticle {
     Quaternion orientation;
     float lifetime;
     float age;
-    TextureHandle texture;
+    uint32_t texture;
     MeshHandle mesh;
 };
 

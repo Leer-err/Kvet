@@ -45,6 +45,7 @@ SwapChain::SwapChain(Device& device, Queue presentation_queue, uint32_t width,
         auto& backbuffer = backbuffers[i];
 
         backbuffer.image = swap_cahin_images[i];
+        backbuffer.layout = VK_IMAGE_LAYOUT_UNDEFINED;
         backbuffer.width = width;
         backbuffer.height = height;
         backbuffer.format = format.format;
@@ -75,7 +76,7 @@ void SwapChain::present() {
     vkQueuePresentKHR(queue.queue, &info);
 }
 
-SwapChain::BackBuffer SwapChain::getBackbuffer(
+SwapChain::BackBuffer& SwapChain::getBackbuffer(
     const Semaphore& ready_for_render) {
     vkAcquireNextImageKHR(swap_chain.device, swap_chain, UINT64_MAX,
                           ready_for_render.semaphore, VK_NULL_HANDLE,

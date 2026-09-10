@@ -10,7 +10,6 @@
 #include "ParticleHandleAllocator.h"
 #include "Property.h"
 
-
 namespace Graphics {
 
 struct BoxEmitter {
@@ -28,6 +27,8 @@ class Effect {
     void update(float delta_time);
 
     void emit(float delta_time);
+
+    TextureHandle getTexture() const;
 
    private:
     ParticleHandleAllocator& allocator;
@@ -54,6 +55,8 @@ class MeshEffect {
     void update(float delta_time);
 
     void emit(float delta_time);
+
+    TextureHandle getTexture() const;
 
    private:
     ParticleHandleAllocator& allocator;

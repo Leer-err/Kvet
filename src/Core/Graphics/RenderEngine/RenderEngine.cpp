@@ -64,6 +64,8 @@ TextureHandle RenderEngine::addTexture(std::string_view name, void* data,
 
     auto image = builder.create(backend.getDevice()).getResult();
 
+    if (name != "") resource_manager.addTexture(name, image);
+
     staging_buffer.stageTexture(image, data, width * height * 4);
 
     return image;

@@ -113,7 +113,7 @@ void mesh_main(
 [[vk::binding(0, 0)]]
 Texture2D textures[];
 [[vk::binding(1, 0)]]
-SamplerState samplers;
+SamplerState samplers[];
 
 float3 quantize_color(float3 color) {
     return floor(color * (constants.parameters->color_count - 1) + 0.5) / (constants.parameters->color_count - 1);
@@ -124,7 +124,8 @@ float4 pixel_main(in VertexOutput data)
 {
     int2 pixel_coordinates = data.uv * constants.parameters->camera_dimensions;
 
-    float3 color = textures[constants.parameters->texture_index].Sample(samplers, data.uv).rgb;
+    float3 color = textures[constants.parameters->texture_index].Sample(samplers[0], data.uv).rgb;
+    return float4(color, 1);
 
     color = dithering8x8(color, constants.parameters->spread, pixel_coordinates);
 

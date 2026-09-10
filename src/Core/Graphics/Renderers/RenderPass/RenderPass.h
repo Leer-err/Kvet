@@ -28,7 +28,7 @@ class RenderPass {
 
     void updateCameraBuffer(const RenderWorld& world);
 
-    void createRenderEnviroment(Device& device);
+    void createRenderEnviroment(Device& device, const EngineData& engine_data);
 
     static BufferHandle createCameraBuffer(Device& device);
 

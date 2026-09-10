@@ -42,7 +42,7 @@ struct RenderData {
         uint32_t channel_color_count;
     };
 
-    float time;
+    float time = 0;
     float delta_time;
 
     Camera camera;

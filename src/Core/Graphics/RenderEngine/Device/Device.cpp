@@ -2,6 +2,7 @@
 
 #include <vulkan/vk_enum_string_helper.h>
 #include <vulkan/vulkan.h>
+#include <vulkan/vulkan_core.h>
 
 #include <array>
 #include <vector>
@@ -10,6 +11,7 @@
 #include "BufferBuilder.h"
 #include "CommandBuffer.h"
 #include "DescriptorLayout.h"
+#include "Descriptors.h"
 #include "DeviceProperties.h"
 #include "EngineConstants.h"
 #include "ExtensionFunctions.h"
@@ -81,7 +83,8 @@ Result<TextureHandle, TextureError> Device::createTexture(
                         texture_descriptor_allocator);
     auto handle = texture_registry.create(texture_result.getResult());
 
-    writeTextureDescriptor(handle->getDescriptor(), handle->getView());
+    if ((image_info.usage & VK_IMAGE_USAGE_SAMPLED_BIT) != 0)
+        writeTextureDescriptor(handle->getDescriptor(), handle->getView());
 
     return handle;
 }
@@ -206,11 +209,15 @@ GraphicsPipeline Device::createGraphicsPipeline(
     return GraphicsPipeline{pipeline, pipeline_info.layout, descriptors};
 }
 
-VkSampler Device::createSampler(const VkSamplerCreateInfo& sampler_info) {
+SamplerDescriptor Device::createSampler(
+    const VkSamplerCreateInfo& sampler_info) {
     VkSampler sampler = {};
     vkCreateSampler(device, &sampler_info, nullptr, &sampler);
 
-    return sampler;
+    auto index = *sampler_descriptor_allocator.allocate();
+    writeSamplerDescriptor(index, sampler);
+
+    return index;
 }
 
 Semaphore Device::createSemaphore() {
@@ -299,7 +306,7 @@ TracyVkCtx Device::createTracingContext(
 void Device::writeTextureDescriptor(TextureDescriptor index,
                                     VkImageView descriptor) {
     auto descriptors_ptr = descriptors->getHostAddress() +
-                           descriptor_layout.texture_descriptors_count;
+                           descriptor_layout.texture_descriptors_offset;
     auto descriptor_ptr =
         descriptors_ptr +
         properties.descriptor_buffer_properties.texture_size * index;
@@ -328,10 +335,10 @@ void Device::writeSamplerDescriptor(SamplerDescriptor index,
 
     VkDescriptorGetInfoEXT info{};
     info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_GET_INFO_EXT;
-    info.type = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
+    info.type = VK_DESCRIPTOR_TYPE_SAMPLER;
     info.data.pSampler = &descriptor;
     vkGetDescriptorEXT(device, &info,
-                       properties.descriptor_buffer_properties.texture_size,
+                       properties.descriptor_buffer_properties.sampler_size,
                        descriptor_ptr);
 }
 
@@ -341,7 +348,6 @@ BufferHandle Device::createDescriptorBuffer(size_t set_size, size_t alignment) {
     return BufferBuilder(aligned_size)
         .isDescriptorBuffer()
         .isCPUWritable(true, true)
-        .isChained()
         .create(*this)
         .getResult();
 }
