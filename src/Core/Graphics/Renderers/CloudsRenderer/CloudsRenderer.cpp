@@ -57,7 +57,14 @@ CloudsRenderer::CloudsRenderer(Device& device, const EngineData& engine_data)
 }
 
 void CloudsRenderer::render(FrameGraph& frame_graph, const RenderWorld& world) {
-    clouds_data_buffer->update(world.getCloudsData());
+    auto& data = world.renderData();
+    auto pipeline_data = Parameters{};
+    pipeline_data.time = data.time;
+    pipeline_data.color = data.clodus.color;
+    pipeline_data.cloud_plane_scale = data.clodus.cloud_plane_scale;
+    pipeline_data.height = data.clodus.height;
+
+    clouds_data_buffer->update(pipeline_data);
 
     auto cloud_prepass = GraphicsPass(
         "Cloud bake", cloud_pipeline, [this](GraphicsPassExecution& execution) {

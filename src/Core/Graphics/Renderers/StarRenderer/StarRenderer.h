@@ -15,6 +15,13 @@ class StarRenderer {
         VkDeviceAddress stars_data;
     };
 
+    struct Parameters {
+        float time;
+        float star_density;
+        float blinking_speed;
+        float blinking_strength;
+    };
+
    public:
     StarRenderer(Device& device, const EngineData& engine_data);
 

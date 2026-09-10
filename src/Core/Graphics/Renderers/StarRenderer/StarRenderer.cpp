@@ -33,16 +33,23 @@ StarRenderer::StarRenderer(Device& device, const EngineData& engine_data)
 }
 
 void StarRenderer::render(FrameGraph& frame_graph, const RenderWorld& world) {
-    auto pass = GraphicsPass(
-        "Stars", pipeline, [this, &world](GraphicsPassExecution& execution) {
-            auto stars_data = world.getStarsData();
-            stars_data_buffer->update(stars_data);
-            push_constants.stars_data = stars_data_buffer->getDeviceAddress();
+    auto& data = world.renderData();
 
-            execution.appendData(push_constants);
+    auto parameters = Parameters{};
+    parameters.time = data.time;
+    parameters.blinking_strength = data.stars.blinking_strength;
+    parameters.blinking_speed = data.stars.blinking_speed;
+    parameters.star_density = data.stars.star_density;
 
-            execution.draw(quad);
-        });
+    stars_data_buffer->update(parameters);
+    push_constants.stars_data = stars_data_buffer->getDeviceAddress();
+
+    auto pass = GraphicsPass("Stars", pipeline,
+                             [this, &world](GraphicsPassExecution& execution) {
+                                 execution.appendData(push_constants);
+
+                                 execution.draw(quad);
+                             });
 
     auto color_attachment = engine_data.resource_manager.getTexture("Color");
     pass.addColorAttachment(color_attachment.value(), {});

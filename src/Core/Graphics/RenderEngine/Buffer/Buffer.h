@@ -50,6 +50,11 @@ class Buffer {
     void update(const uint8_t* data, size_t size, size_t offset = 0);
 
     VkBuffer getHandle() const;
+
+    template <typename T>
+    T* getHostAddress() const {
+        return std::bit_cast<T*>(getHostAddress());
+    }
     uint8_t* getHostAddress() const;
     VkDeviceAddress getDeviceAddress() const;
 

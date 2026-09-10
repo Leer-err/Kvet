@@ -15,11 +15,8 @@ Stars::Stars()
 void Stars::draw() {
     ZoneScoped;
 
-    auto star_parameters = StarsData();
-    star_parameters.time = Engine::Engine::get().getTime();
+    auto star_parameters = render_world.renderData().stars;
     star_parameters.star_density = star_density;
-    star_parameters.blink_strength = blink_strength;
+    star_parameters.blinking_strength = blink_strength;
     star_parameters.blinking_speed = blinking_speed;
-
-    render_world.setStarsData(star_parameters);
 }

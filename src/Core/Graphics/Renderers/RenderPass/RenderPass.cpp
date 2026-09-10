@@ -61,7 +61,7 @@ TextureHandle RenderPass::render(const FrameData& frame_data,
 }
 
 void RenderPass::updateCameraBuffer(const RenderWorld& world) {
-    auto camera_data = world.getCameraData();
+    auto camera_data = world.renderData().camera;
 
     camera_data_buffer->update(camera_data);
 }

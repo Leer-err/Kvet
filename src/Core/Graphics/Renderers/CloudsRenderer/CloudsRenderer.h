@@ -18,6 +18,14 @@ class CloudsRenderer {
         VkDeviceAddress clouds_address;
     };
 
+    struct Parameters {
+        float time;
+
+        Vector3 color;
+        float height;
+        float cloud_plane_scale;
+    };
+
    public:
     CloudsRenderer(Device& device, const EngineData& engine_data);
 

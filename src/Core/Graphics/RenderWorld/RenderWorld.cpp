@@ -9,29 +9,9 @@ namespace Graphics {
 
 RenderWorld::RenderWorld() : next_handle(0), vfx_world(10000) {}
 
-void RenderWorld::setCameraData(const CameraData& data) {
-    this->camera_data = data;
-}
+RenderData& RenderWorld::renderData() { return render_data; }
 
-CameraData RenderWorld::getCameraData() const { return camera_data; }
-
-void RenderWorld::setStarsData(const StarsData& data) {
-    this->stars_data = data;
-}
-
-StarsData RenderWorld::getStarsData() const { return stars_data; }
-
-void RenderWorld::setPostProcessingData(const PostProcessingData& data) {
-    this->post_processing_data = data;
-}
-
-PostProcessingData RenderWorld::getPostProcessingData() const {
-    return post_processing_data;
-}
-
-void RenderWorld::setCloudsData(const CloudsData& data) { clouds_data = data; }
-
-CloudsData RenderWorld::getCloudsData() const { return clouds_data; }
+const RenderData& RenderWorld::renderData() const { return render_data; }
 
 OpaqueObjectHandle RenderWorld::addOpaqueObject(const RenderObjectData& data) {
     opaque_objects.emplace_back(data);

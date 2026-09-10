@@ -81,6 +81,8 @@ Result<TextureHandle, TextureError> Device::createTexture(
                         texture_descriptor_allocator);
     auto handle = texture_registry.create(texture_result.getResult());
 
+    writeTextureDescriptor(handle->getDescriptor(), handle->getView());
+
     return handle;
 }
 
