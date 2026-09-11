@@ -1,7 +1,5 @@
 #include "Scene.h"
 
-#include <stb_image.h>
-
 #include <fstream>
 #include <memory>
 #include <nlohmann/json.hpp>
@@ -25,72 +23,12 @@
 #include "TransformSystem.h"
 #include "Vector3.h"
 
-void from_json(const nlohmann::json& j, Vector3& vec) {
-    j.at("x").get_to(vec.x);
-    j.at("y").get_to(vec.y);
-    j.at("z").get_to(vec.z);
-}
-
-void from_json(const nlohmann::json& j, Vector4& vec) {
-    j.at("x").get_to(vec.x);
-    j.at("y").get_to(vec.y);
-    j.at("z").get_to(vec.z);
-    j.at("w").get_to(vec.w);
-}
-
-template <typename T>
-void from_json(const nlohmann::json& j, typename Property<T>::State& state) {
-    j.at("ratio").get_to(state.ratio);
-    j.at("value").get_to(state.value);
-}
-
-template <typename T>
-void from_json(const nlohmann::json& j, Property<T>& desc) {
-    auto type = j.at("type").get<std::string>();
-
-    if (type == "constant") {
-        auto value = j.at("value").get<T>();
-
-        desc = Property<T>::constant(value);
-    } else if (type == "random") {
-        auto min = j.at("min").get<T>();
-        auto max = j.at("max").get<T>();
-
-        desc = Property<T>::random(min, max);
-    } else if (type == "over_lifetime") {
-        auto states = std::vector<typename Property<T>::State>();
-        for (const auto& state_data : j.at("states")) {
-            auto time = state_data.at("time").get<float>();
-            auto value = state_data.at("value").get<T>();
-
-            states.emplace_back(time, value);
-        }
-
-        desc = Property<T>::overLifetime(states);
-    }
-}
-
-namespace Graphics {
-void from_json(const nlohmann::json& j, EffectDescription& desc) {
-    j.at("center").get_to(desc.center);
-    j.at("extents").get_to(desc.extents);
-    j.at("spawn_rate").get_to(desc.spawn_rate);
-    j.at("color").get_to(desc.color);
-    j.at("size").get_to(desc.size);
-}
-}  // namespace Graphics
-
 Scene::Scene() {
     setupSystems();
 
     camera = Camera::create(60, 16.f / 9, 0.1, 1000);
 
     auto renderer = Graphics::getRenderEngine();
-
-    int width;
-    int height;
-    int channels;
-    unsigned char* data;
 
     RenderObjectData tower_data =
         *readRenderObject("./Assets/Scene/Tower.json");
@@ -161,19 +99,6 @@ void Scene::update(float deltaTime) {
 void Scene::setupSystems() {
     world.addSystem<TransformSystem>();
     world.addSystem<ScriptSystem>();
-}
-
-std::optional<Graphics::TextureHandle> Scene::readTexture(
-    const std::filesystem::path& path) {
-    int width;
-    int height;
-    int channels;
-    unsigned char* texture_data;
-
-    auto renderer = Graphics::getRenderEngine();
-    texture_data =
-        stbi_load(path.string().c_str(), &width, &height, &channels, 0);
-    return renderer->addTexture(texture_data, width, height);
 }
 
 std::optional<RenderObjectData> Scene::readRenderObject(

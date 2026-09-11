@@ -12,6 +12,7 @@ target_link_libraries(File
         Config
         Types
         Assimp
+        STB
         nlohmann_json::nlohmann_json
         meshoptimizer
 )
