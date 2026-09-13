@@ -15,7 +15,7 @@ class Filesystem {
 
     Result<TextureFile, Error> getTexture(std::string_view path);
     Result<MeshFile, Error> getMesh(std::string_view path);
-    Result<Graphics::EffectDescription, Error> getEffect(std::string_view path);
+    Result<EffectFile, Error> getEffect(std::string_view path);
 
    private:
     std::filesystem::path base;

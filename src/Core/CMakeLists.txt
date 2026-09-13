@@ -9,6 +9,7 @@ target_include_directories(Core PUBLIC
 )
 
 target_link_libraries(Core PUBLIC 
+	AssetManager
 	Config
     Input
 	Logger
@@ -25,6 +26,7 @@ target_link_libraries(Core PUBLIC
 	EssentialsLoader
 )
 
+add_subdirectory(AssetManager)
 add_subdirectory(Logger)
 add_subdirectory(Types)
 add_subdirectory(Input)

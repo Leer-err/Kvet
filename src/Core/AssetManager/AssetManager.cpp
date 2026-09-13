@@ -1,8 +1,12 @@
 #include "AssetManager.h"
 
+#include "Filesystem.h"
+#include "GraphicsResourceManager.h"
+
 namespace Asset {
 
-Graphics::TextureHandle Manager::getTexture(std::string_view name) {
+Result<Graphics::TextureHandle, Error> Manager::getTexture(
+    std::string_view name) {
     auto handle_opt = Graphics::GraphicsResourceManager::getTexture(name);
     if (handle_opt.has_value()) return handle_opt.value();
 

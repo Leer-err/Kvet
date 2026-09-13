@@ -2,6 +2,9 @@
 
 #include <string_view>
 
+#include "Handles.h"
+#include "Result.h"
+
 namespace Asset {
 
 enum class Error {};

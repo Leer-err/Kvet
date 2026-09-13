@@ -9,6 +9,7 @@
 #include <filesystem>
 #include <fstream>
 #include <nlohmann/json.hpp>
+#include <nlohmann/json_fwd.hpp>
 #include <vector>
 
 #include "FileError.h"
@@ -18,9 +19,7 @@
 
 namespace fs = std::filesystem;
 
-using namespace nlohmann;
-
-namespace File {
+using json = nlohmann::json;
 
 void from_json(const json& j, Vector3& vec) {
     j.at("x").get_to(vec.x);
@@ -67,6 +66,8 @@ void from_json(const json& j, Property<T>& desc) {
     }
 }
 
+namespace File {
+
 Result<TextureFile, Error> readTexture(const std::filesystem::path& path) {
     int width;
     int height;
@@ -81,7 +82,7 @@ Result<TextureFile, Error> readTexture(const std::filesystem::path& path) {
 
     size_t texture_size = width * height * channels;
     auto texture =
-        TextureFile{path.stem(), static_cast<uint32_t>(width),
+        TextureFile{path.stem().string(), static_cast<uint32_t>(width),
                     static_cast<uint32_t>(height),
                     std::vector(texture_data, texture_data + texture_size)};
 
@@ -132,16 +133,17 @@ static std::vector<uint32_t> readIndices(const aiMesh* mesh) {
     return indices;
 }
 
-Result<MeshFile, Error> readMesh(const std::filesystem::path& path) {
+static Result<MeshFile, Error> readMesh(const std::filesystem::path& path) {
     static Assimp::Importer importer;
 
     if (fs::exists(path) == false) return Error::NotFound;
 
-    const aiScene* scene = importer.ReadFile(
-        path, aiProcess_CalcTangentSpace | aiProcess_Triangulate |
-                  aiProcess_JoinIdenticalVertices | aiProcess_MakeLeftHanded |
-                  aiProcess_FlipUVs | aiProcess_OptimizeGraph |
-                  aiProcess_SortByPType);
+    const aiScene* scene =
+        importer.ReadFile(path.string().c_str(),
+                          aiProcess_CalcTangentSpace | aiProcess_Triangulate |
+                              aiProcess_JoinIdenticalVertices |
+                              aiProcess_MakeLeftHanded | aiProcess_FlipUVs |
+                              aiProcess_OptimizeGraph | aiProcess_SortByPType);
 
     if (scene == nullptr) return Error::ParseError;
 
@@ -193,18 +195,17 @@ Result<MeshFile, Error> readMesh(const std::filesystem::path& path) {
         meshlets.push_back(meshlet);
     }
 
-    return MeshFile{path.stem(),      vertices,          meshlets,
-                    meshlet_vertices, meshlet_triangles, meshlet_count};
+    return MeshFile{path.stem().string(), vertices,          meshlets,
+                    meshlet_vertices,     meshlet_triangles, meshlet_count};
 }
 
-Result<Graphics::EffectDescription, Error> readEffect(
-    const std::filesystem::path& path) {
+static Result<EffectFile, Error> readEffect(const std::filesystem::path& path) {
     auto file = std::ifstream(path);
 
     auto data = json{};
     file >> data;
 
-    auto effect = Graphics::EffectDescription{};
+    auto effect = EffectFile{};
     data.at("center").get_to(effect.center);
     data.at("extents").get_to(effect.extents);
     data.at("spawn_rate").get_to(effect.spawn_rate);
@@ -212,9 +213,10 @@ Result<Graphics::EffectDescription, Error> readEffect(
     data.at("size").get_to(effect.size);
     data.at("rotation").get_to(effect.rotation);
     data.at("lifetime").get_to(effect.particle_lifetime);
+    data.at("texture").get_to(effect.texture_path);
 
     auto texture_path = data["texture"].get<std::string>();
-    effect.texture = *readTexture(texture_path);
+    auto texture = readTexture(texture_path);
 
     return effect;
 }

@@ -11,6 +11,8 @@ target_link_libraries(File
     PUBLIC
         Config
         Types
+        Utility
+        Graphics
         Assimp
         STB
         nlohmann_json::nlohmann_json
@@ -19,3 +21,4 @@ target_link_libraries(File
 
 add_subdirectory(ModelReader)
 add_subdirectory(ConfigSerializer)
+add_subdirectory(Filesystem)

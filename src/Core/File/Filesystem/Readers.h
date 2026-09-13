@@ -6,8 +6,10 @@
 #include <string>
 #include <vector>
 
+#include "EffectDescription.h"
 #include "FileError.h"
 #include "Meshlet.h"
+#include "Property.h"
 #include "Result.h"
 #include "VertexFormats.h"
 
@@ -34,11 +36,21 @@ struct MeshFile {
     size_t meshlet_count;
 };
 
+struct EffectFile {
+    Vector3 center;
+    Vector3 extents;
+    float spawn_rate;
+    Property<Vector4> color;
+    Property<float> size;
+    Property<float> rotation;
+    float particle_lifetime;
+    std::string texture_path;
+};
+
 Result<TextureFile, Error> readTexture(const std::filesystem::path& path);
 
 Result<MeshFile, Error> readMesh(const std::filesystem::path& path);
 
-Result<Graphics::EffectDescription, Error> readEffect(
-    const std::filesystem::path& path);
+Result<EffectFile, Error> readEffect(const std::filesystem::path& path);
 
 }  // namespace File
