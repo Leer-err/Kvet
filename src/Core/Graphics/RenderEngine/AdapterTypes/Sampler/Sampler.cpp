@@ -1,27 +1,32 @@
 #include "Sampler.h"
 
 #include <vulkan/vulkan.h>
-#include <vulkan/vulkan_core.h>
 
 #include "Device.h"
-#include "EngineData.h"
 
 namespace Graphics {
 
-VkSampler Sampler::point(Device& device) {
-    return createSampler(device, VK_FILTER_NEAREST, false, 0);
+SamplerDescriptor Sampler::point_sampler = 0;
+
+SamplerDescriptor Sampler::linear_sampler = 0;
+
+SamplerDescriptor Sampler::anisotropic_sampler = 0;
+
+SamplerDescriptor Sampler::point() { return point_sampler; }
+
+SamplerDescriptor Sampler::linear() { return linear_sampler; }
+
+SamplerDescriptor Sampler::anisotropic() { return anisotropic_sampler; }
+
+void Sampler::createSamplers(Device& device, float anisotropy) {
+    point_sampler = createSampler(device, VK_FILTER_NEAREST, false, 0);
+    linear_sampler = createSampler(device, VK_FILTER_LINEAR, false, 0);
+    // anisotropic_sampler =
+    //     createSampler(device, VK_FILTER_LINEAR, true, anisotropy);
 }
 
-VkSampler Sampler::linear(Device& device) {
-    return createSampler(device, VK_FILTER_LINEAR, false, 0);
-}
-
-VkSampler Sampler::anisotropic(Device& device, float anisotropy) {
-    return createSampler(device, VK_FILTER_LINEAR, true, anisotropy);
-}
-
-VkSampler Sampler::createSampler(Device& device, VkFilter filter,
-                                 bool anisotropic, float anisotropy) {
+SamplerDescriptor Sampler::createSampler(Device& device, VkFilter filter,
+                                         bool anisotropic, float anisotropy) {
     VkSamplerMipmapMode mipmap_mode;
     switch (filter) {
         case VK_FILTER_NEAREST:
@@ -31,7 +36,7 @@ VkSampler Sampler::createSampler(Device& device, VkFilter filter,
             mipmap_mode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
             break;
         default:
-            return VK_NULL_HANDLE;
+            return 0;
     }
 
     VkSamplerCreateInfo info = {};

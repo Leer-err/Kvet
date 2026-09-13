@@ -71,7 +71,7 @@ void Effect::emit(float delta_time) {
         particle.lifetime = lifetime;
 
         particle.position = Vector3(x_dist(gen), y_dist(gen), z_dist(gen));
-        particle.texture = texture;
+        particle.texture = texture->getDescriptor();
         particle.velocity = Vector3();
         particle.color = color.evaluate(0);
         particle.size = size.evaluate(0);
@@ -80,6 +80,8 @@ void Effect::emit(float delta_time) {
         particles[handle] = particle;
     }
 }
+
+TextureHandle Effect::getTexture() const { return texture; }
 
 MeshEffect::MeshEffect(const MeshEffectDescription& description,
                        ParticleHandleAllocator& allocator,
@@ -137,11 +139,13 @@ void MeshEffect::emit(float delta_time) {
 
         particle.position = Vector3(x_dist(gen), y_dist(gen), z_dist(gen));
         particle.orientation = Quaternion();
-        particle.texture = texture;
+        particle.texture = texture->getDescriptor();
         particle.mesh = mesh;
 
         particles[handle] = particle;
     }
 }
+
+TextureHandle MeshEffect::getTexture() const { return texture; }
 
 }  // namespace Graphics

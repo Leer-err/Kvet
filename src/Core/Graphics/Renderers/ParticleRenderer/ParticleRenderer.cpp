@@ -62,8 +62,8 @@ void ParticleRenderer::render(FrameGraph& frame_graph,
     pass.addColorAttachment(*render_target);
     auto depth = engine_data.resource_manager.getTexture("Depth");
     pass.setDepthAttachment(*depth);
-    // for (const auto& texture : particle_texture_descriptors)
-    //     pass.reads(texture, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+    for (const auto& texture : particles.used_textures)
+        pass.reads(texture, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
     frame_graph.addGraphicsPass(pass);
 }

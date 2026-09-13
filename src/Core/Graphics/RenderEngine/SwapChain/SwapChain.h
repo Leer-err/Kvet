@@ -2,6 +2,7 @@
 
 #include <VkBootstrap.h>
 #include <vulkan/vulkan.h>
+#include <vulkan/vulkan_core.h>
 
 #include <array>
 
@@ -17,6 +18,7 @@ class SwapChain {
     struct BackBuffer {
         VkImage image;
         VkFormat format;
+        VkImageLayout layout;
         uint32_t width;
         uint32_t height;
 
@@ -31,7 +33,7 @@ class SwapChain {
 
     void present();
 
-    BackBuffer getBackbuffer(const Semaphore& ready_for_render);
+    BackBuffer& getBackbuffer(const Semaphore& ready_for_render);
 
    private:
     static constexpr size_t SWAP_CHAIN_MAX_SIZE = 3;

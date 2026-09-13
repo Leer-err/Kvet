@@ -14,11 +14,13 @@ class VFXWorld {
     struct ParticleBatch {
         std::span<const Particle> particles;
         std::set<ParticleHandle> alive;
+        std::vector<TextureHandle> used_textures;
         ParticleHandle last_live_particle;
     };
     struct MeshParticleBatch {
         std::span<const MeshParticle> particles;
         std::set<ParticleHandle> alive;
+        std::vector<TextureHandle> used_textures;
         ParticleHandle last_live_particle;
     };
 

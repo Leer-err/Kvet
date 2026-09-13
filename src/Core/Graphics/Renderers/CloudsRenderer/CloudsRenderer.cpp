@@ -37,7 +37,6 @@ CloudsRenderer::CloudsRenderer(Device& device, const EngineData& engine_data)
                          .isShaderResource()
                          .create(device)
                          .getResult();
-    // engine_data.descriptor_set.addSampler(Sampler::linear(device));
 
     cloud_texture_pipeline =
         GraphicsPipelineBuilder(

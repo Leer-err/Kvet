@@ -9,7 +9,7 @@ class IndexAllocator {
     explicit IndexAllocator(T index_count) : count(index_count) {
         free_indices.reserve(count);
 
-        for (auto i = count; i > 0; i--) free_indices.push_back(i);
+        for (auto i = count; i > 0; i--) free_indices.push_back(i - 1);
     }
 
     std::optional<T> allocate() {

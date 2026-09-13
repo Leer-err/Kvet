@@ -29,8 +29,7 @@ StaticMeshRenderer::StaticMeshRenderer(Device& device,
                    .create(device, engine_data.shader_registry)
                    .getResult();
 
-    // sampler_index =
-    //     *engine_data.descriptor_set.addSampler(Sampler::linear(device));
+    sampler_index = Sampler::linear();
 }
 
 void StaticMeshRenderer::render(FrameGraph& frame_graph,

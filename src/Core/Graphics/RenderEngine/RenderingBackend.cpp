@@ -8,6 +8,7 @@
 #include "Device.h"
 #include "GraphicsConfig.h"
 #include "Handles.h"
+#include "Sampler.h"
 #include "SwapChain.h"
 #include "Texture.h"
 
@@ -32,6 +33,8 @@ RenderingBackend::RenderingBackend(const vkb::Instance& instance,
     pool.reset();
 
     createSwapChain();
+
+    Sampler::createSamplers(this->device, 2);
 }
 
 RenderingBackend::~RenderingBackend() {
@@ -108,7 +111,7 @@ void RenderingBackend::copyToBackbuffer(const CommandBuffer& cmd,
     barriers[0].srcAccessMask = VK_ACCESS_2_NONE;
     barriers[0].dstStageMask = VK_PIPELINE_STAGE_2_BLIT_BIT;
     barriers[0].dstAccessMask = VK_ACCESS_2_TRANSFER_WRITE_BIT;
-    barriers[0].oldLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+    barriers[0].oldLayout = backbuffer.layout;
     barriers[0].newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
     barriers[0].subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
     barriers[0].subresourceRange.baseMipLevel = 0;
@@ -121,6 +124,8 @@ void RenderingBackend::copyToBackbuffer(const CommandBuffer& cmd,
         VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT,
         VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT, VK_PIPELINE_STAGE_2_BLIT_BIT,
         VK_ACCESS_2_TRANSFER_READ_BIT);
+
+    backbuffer.layout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
 
     cmd.barrier(barriers);
     cmd.blitToBackbuffer(render_target, backbuffer);
@@ -137,13 +142,15 @@ void RenderingBackend::prepareBackbufferForPresentation(
     render_finished.srcAccessMask = VK_ACCESS_2_TRANSFER_WRITE_BIT;
     render_finished.dstStageMask = VK_PIPELINE_STAGE_2_NONE;
     render_finished.dstAccessMask = VK_ACCESS_2_NONE;
-    render_finished.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+    render_finished.oldLayout = backbuffer.layout;
     render_finished.newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
     render_finished.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
     render_finished.subresourceRange.baseMipLevel = 0;
     render_finished.subresourceRange.levelCount = 1;
     render_finished.subresourceRange.baseArrayLayer = 0;
     render_finished.subresourceRange.layerCount = 1;
+
+    backbuffer.layout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 
     cmd.barrier(&render_finished, 1, nullptr, 0);
 }

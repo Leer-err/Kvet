@@ -99,6 +99,6 @@ float4 pixel_main(in float2 uv : TEXCOORD, in float4 color : COLOR0, in uint32_t
 {
     uint32_t sampler_index = 0;
     float4 final_color = color;
-    final_color *= textures[texture_index].Sample(samplers[sampler_index], uv);
+    final_color *= textures[texture_index].Sample(samplers[0], uv);
     return final_color;
 }

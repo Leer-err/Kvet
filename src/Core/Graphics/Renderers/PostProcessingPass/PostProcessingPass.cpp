@@ -40,8 +40,7 @@ PostProcessingPass::PostProcessingPass(Device& device,
     data.color_count = 32;
     data.sampler_index = 0;
 
-    // data.sampler_index =
-    //     *engine_data.descriptor_set.addSampler(Sampler::point(device));
+    data.sampler_index = Sampler::point();
 
     Overlay::get().add<OverlayElements::SliderFloat>(
         "Graphics/Post processing", "Dithering spread",
