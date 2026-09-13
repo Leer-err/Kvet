@@ -53,7 +53,7 @@ TextureHandle RenderPass::render(const FrameData& frame_data,
     static_mesh_renderer.render(frame_graph, world);
     // clouds_renderer.render(frame_graph, world);
     particle_renderer.render(frame_graph, world);
-    mesh_particle_renderer.render(frame_graph, world);
+    // mesh_particle_renderer.render(frame_graph, world);
 
     postProcessing(frame_graph, world);
 
@@ -77,29 +77,29 @@ void RenderPass::createRenderEnviroment(Device& device) {
     render_target_texture =
         TextureBuilder(VK_FORMAT_R8G8B8A8_SRGB, config.render_width,
                        config.render_height)
-            .setName("Color")
             .isCopySource()
             .isRenderTarget()
             .isShaderResource()
             .create(device)
             .getResult();
+    engine_data.resource_manager.addTexture("Color", render_target_texture);
 
     depth_stencil_texture =
         TextureBuilder(device_properties.depth_format, config.render_width,
                        config.render_height)
-            .setName("Depth")
             .isDepthStencil()
             .create(device)
             .getResult();
+    engine_data.resource_manager.addTexture("Depth", depth_stencil_texture);
 
     final_image = TextureBuilder(VK_FORMAT_R8G8B8A8_SRGB, config.render_width,
                                  config.render_height)
-                      .setName("RenderResult")
                       .isCopySource()
                       .isRenderTarget()
                       .isShaderResource()
                       .create(device)
                       .getResult();
+    engine_data.resource_manager.addTexture("RenderResult", final_image);
 }
 
 void RenderPass::postProcessing(FrameGraph& frame_graph,

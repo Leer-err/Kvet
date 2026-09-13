@@ -37,9 +37,9 @@ struct RenderData {
     };
 
     struct PostProcessing {
-        float dithering_spread;
+        float dithering_spread = 0.03f;
 
-        uint32_t channel_color_count;
+        uint32_t channel_color_count = 32;
     };
 
     float time;

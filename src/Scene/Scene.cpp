@@ -30,25 +30,25 @@ Scene::Scene() {
 
     auto renderer = Graphics::getRenderEngine();
 
-    RenderObjectData tower_data =
-        *readRenderObject("./Assets/Scene/Tower.json");
-    renderer->getRenderWorld().addOpaqueObject(tower_data);
+    // RenderObjectData tower_data =
+    //     *readRenderObject("./Assets/Scene/Tower.json");
+    // renderer->getRenderWorld().addOpaqueObject(tower_data);
 
-    RenderObjectData gem_data = *readRenderObject("./Assets/Scene/Gem.json");
-    renderer->getRenderWorld().addOpaqueObject(gem_data);
+    // RenderObjectData gem_data = *readRenderObject("./Assets/Scene/Gem.json");
+    // renderer->getRenderWorld().addOpaqueObject(gem_data);
 
-    RenderObjectData island_data =
-        *readRenderObject("./Assets/Scene/Island.json");
-    renderer->getRenderWorld().addOpaqueObject(island_data);
+    // RenderObjectData island_data =
+    //     *readRenderObject("./Assets/Scene/Island.json");
+    // renderer->getRenderWorld().addOpaqueObject(island_data);
 
-    auto orb = *readEffect("./Assets/Scene/Effects/Orb.json");
-    renderer->getRenderWorld().addEffect(orb);
-    auto lightning1 = *readEffect("./Assets/Scene/Effects/Lightning1.json");
-    renderer->getRenderWorld().addEffect(lightning1);
-    auto lightning3 = *readEffect("./Assets/Scene/Effects/Lightning3.json");
-    renderer->getRenderWorld().addEffect(lightning3);
-    auto lightning4 = *readEffect("./Assets/Scene/Effects/Lightning4.json");
-    renderer->getRenderWorld().addEffect(lightning4);
+    // auto orb = *readEffect("./Assets/Scene/Effects/Orb.json");
+    // renderer->getRenderWorld().addEffect(orb);
+    // auto lightning1 = *readEffect("./Assets/Scene/Effects/Lightning1.json");
+    // renderer->getRenderWorld().addEffect(lightning1);
+    // auto lightning3 = *readEffect("./Assets/Scene/Effects/Lightning3.json");
+    // renderer->getRenderWorld().addEffect(lightning3);
+    // auto lightning4 = *readEffect("./Assets/Scene/Effects/Lightning4.json");
+    // renderer->getRenderWorld().addEffect(lightning4);
 
     auto mesh_effect = Graphics::MeshEffectDescription{};
     mesh_effect.center = {0, 0, 0};
@@ -99,45 +99,4 @@ void Scene::update(float deltaTime) {
 void Scene::setupSystems() {
     world.addSystem<TransformSystem>();
     world.addSystem<ScriptSystem>();
-}
-
-std::optional<RenderObjectData> Scene::readRenderObject(
-    const std::filesystem::path& path) {
-    auto file = std::ifstream(path);
-
-    auto data = nlohmann::json();
-    file >> data;
-
-    auto mesh_path = data["mesh"].get<std::string>();
-    auto albedo_path = data["albedo"].get<std::string>();
-    auto position = data["position"].get<Vector3>();
-
-    auto mesh_data = File::ModelReader(mesh_path).readMesh();
-    auto renderer = Graphics::getRenderEngine();
-    auto albedo = *readTexture(albedo_path);
-    auto mesh = renderer->addMesh(mesh_data);
-
-    return RenderObjectData{position, albedo, mesh};
-}
-
-std::optional<Graphics::EffectDescription> Scene::readEffect(
-    const std::filesystem::path& path) {
-    auto file = std::ifstream(path);
-
-    auto data = nlohmann::json();
-    file >> data;
-
-    auto effect = Graphics::EffectDescription{};
-    data.at("center").get_to(effect.center);
-    data.at("extents").get_to(effect.extents);
-    data.at("spawn_rate").get_to(effect.spawn_rate);
-    data.at("color").get_to(effect.color);
-    data.at("size").get_to(effect.size);
-    data.at("rotation").get_to(effect.rotation);
-    data.at("lifetime").get_to(effect.particle_lifetime);
-
-    auto texture_path = data["texture"].get<std::string>();
-    effect.texture = *readTexture(texture_path);
-
-    return effect;
 }

@@ -66,7 +66,7 @@ void LookScript::preRender() {
 
     auto& data = render_world.renderData().camera;
     data.view_projection = projection * view;
-    data.view_projection = projection * view_camera_centered;
+    data.view_projection_camera_centered = projection * view_camera_centered;
     data.right = right;
     data.up = up;
 }

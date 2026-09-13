@@ -60,9 +60,9 @@ TextureHandle RenderEngine::addTexture(std::string_view name, void* data,
     auto builder = TextureBuilder(VK_FORMAT_R8G8B8A8_SRGB, width, height)
                        .isShaderResource()
                        .isCopyDestination();
-    if (name != "") builder.setName(name);
 
     auto image = builder.create(backend.getDevice()).getResult();
+    if (name != "") resource_manager.addTexture(name, image);
 
     staging_buffer.stageTexture(image, data, width * height * 4);
 

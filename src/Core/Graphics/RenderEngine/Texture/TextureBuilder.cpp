@@ -18,11 +18,6 @@ TextureBuilder::TextureBuilder(VkFormat format, uint32_t width, uint32_t height)
     alloc_info.usage = VMA_MEMORY_USAGE_AUTO;
 }
 
-TextureBuilder& TextureBuilder::setName(std::string_view texture_name) {
-    name = texture_name;
-    return *this;
-}
-
 TextureBuilder& TextureBuilder::isShaderResource() {
     image_info.usage |= VK_IMAGE_USAGE_SAMPLED_BIT;
     return *this;
