@@ -11,13 +11,19 @@ namespace File {
 
 class Filesystem {
    public:
-    explicit Filesystem(const std::filesystem::path& base);
+    Filesystem& operator=(const Filesystem&) = delete;
+    Filesystem(const Filesystem&) = delete;
+    Filesystem& operator=(Filesystem&&) = delete;
+    Filesystem(Filesystem&&) = delete;
 
-    Result<TextureFile, Error> getTexture(std::string_view path);
-    Result<MeshFile, Error> getMesh(std::string_view path);
-    Result<EffectFile, Error> getEffect(std::string_view path);
+    static Result<TextureFile, Error> getTexture(std::string_view path);
+    static Result<MeshFile, Error> getMesh(std::string_view path);
+    static Result<EffectFile, Error> getEffect(std::string_view path);
 
    private:
+    explicit Filesystem(const std::filesystem::path& base);
+    static Filesystem& get();
+
     std::filesystem::path base;
 };
 

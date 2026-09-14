@@ -5,7 +5,9 @@
 namespace Graphics {
 
 class Texture;
+class Mesh;
 
 using TextureHandle = Handle<Texture>;
+using MeshHandle = Handle<Mesh>;
 
 }  // namespace Graphics

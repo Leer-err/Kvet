@@ -7,6 +7,7 @@
 #include <tracy/Tracy.hpp>
 #include <vector>
 
+#include "AssetManager/AssetManager.h"
 #include "Camera.h"
 #include "EffectDescription.h"
 #include "Entity.h"
@@ -34,7 +35,8 @@ Scene::Scene() {
     //     *readRenderObject("./Assets/Scene/Tower.json");
     // renderer->getRenderWorld().addOpaqueObject(tower_data);
 
-    // RenderObjectData gem_data = *readRenderObject("./Assets/Scene/Gem.json");
+    // RenderObjectData gem_data =
+    // *readRenderObject("./Assets/Scene/Gem.json");
     // renderer->getRenderWorld().addOpaqueObject(gem_data);
 
     // RenderObjectData island_data =
@@ -43,11 +45,14 @@ Scene::Scene() {
 
     // auto orb = *readEffect("./Assets/Scene/Effects/Orb.json");
     // renderer->getRenderWorld().addEffect(orb);
-    // auto lightning1 = *readEffect("./Assets/Scene/Effects/Lightning1.json");
+    // auto lightning1 =
+    // *readEffect("./Assets/Scene/Effects/Lightning1.json");
     // renderer->getRenderWorld().addEffect(lightning1);
-    // auto lightning3 = *readEffect("./Assets/Scene/Effects/Lightning3.json");
+    // auto lightning3 =
+    // *readEffect("./Assets/Scene/Effects/Lightning3.json");
     // renderer->getRenderWorld().addEffect(lightning3);
-    // auto lightning4 = *readEffect("./Assets/Scene/Effects/Lightning4.json");
+    // auto lightning4 =
+    // *readEffect("./Assets/Scene/Effects/Lightning4.json");
     // renderer->getRenderWorld().addEffect(lightning4);
 
     // auto mesh_effect = Graphics::MeshEffectDescription{};

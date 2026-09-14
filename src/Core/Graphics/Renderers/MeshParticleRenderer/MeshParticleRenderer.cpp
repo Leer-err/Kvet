@@ -39,17 +39,16 @@ void MeshParticleRenderer::render(FrameGraph& frame_graph,
     for (int i = 0; i < particles.particles.size(); i++) {
         const auto& particle = particles.particles[i];
 
-        auto pass = GraphicsPass(
-            "MeshParticles", pipeline,
-            [this, particle, i](GraphicsPassExecution& execution) {
-                push_constants.particles_data =
-                    particle_buffer->getDeviceAddress() +
-                    i * sizeof(MeshParticle);
+        auto pass =
+            GraphicsPass("MeshParticles", pipeline,
+                         [this, particle, i](GraphicsPassExecution& execution) {
+                             push_constants.particles_data =
+                                 particle_buffer->getDeviceAddress() +
+                                 i * sizeof(MeshParticle);
 
-                execution.appendData(push_constants);
-                auto mesh = engine_data.mesh_registry.getMesh(particle.mesh);
-                execution.draw(*mesh);
-            });
+                             execution.appendData(push_constants);
+                             execution.draw(particle.mesh.get());
+                         });
 
         auto render_target = engine_data.resource_manager.getTexture("Color");
         pass.addColorAttachment(*render_target);

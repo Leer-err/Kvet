@@ -50,10 +50,10 @@ class ResourceRegistry final : public ResourceRegistryBase {
 template <typename T>
 class ResourceIndex {
    public:
-    void add(std::string_view name, const Handle<T>& resource) {
+    bool add(std::string_view name, const Handle<T>& resource) {
         assert(name != "");
 
-        index.emplace(name, resource);
+        return index.emplace(name, resource).second;
     }
 
     std::optional<Handle<T>> get(std::string_view name) const {

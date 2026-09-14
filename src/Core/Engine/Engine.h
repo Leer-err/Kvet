@@ -4,7 +4,7 @@
 #include <chrono>
 #include <thread>
 
-#include "IRenderEngine.h"
+#include "Graphics.h"
 #include "IScene.h"
 
 // #include "Scene.h"

@@ -14,5 +14,5 @@ class Stars {
     float blinking_speed;
     float blink_strength;
 
-    Graphics::RenderWorld& render_world;
+    Graphics::IRenderWorld* render_world;
 };

@@ -64,7 +64,7 @@ void LookScript::preRender() {
     Matrix view = Matrix::view(position, forward, up);
     Matrix view_camera_centered = Matrix::view(Vector3(), forward, up);
 
-    auto& data = render_world.renderData().camera;
+    auto& data = render_world->renderData().camera;
     data.view_projection = projection * view;
     data.view_projection_camera_centered = projection * view_camera_centered;
     data.right = right;

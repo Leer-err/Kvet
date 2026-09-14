@@ -9,7 +9,6 @@
 #include "EngineData.h"
 #include "GraphicsResourceManager.h"
 #include "Handles.h"
-#include "IRenderEngine.h"
 #include "MeshRegistry.h"
 #include "Queue.h"
 #include "RenderPass.h"
@@ -30,14 +29,8 @@ class RenderEngine final : public IRenderEngine {
     void reinitWindowDependentResources();
     void render() override;
 
-    RenderWorld& getRenderWorld() override;
-
-    TextureHandle addTexture(void* data, uint32_t width,
-                             uint32_t height) override;
-    TextureHandle addTexture(std::string_view name, void* data, uint32_t width,
-                             uint32_t height) override;
-    MeshHandle addMesh(const ::Mesh& mesh) override;
-    MeshHandle addMesh(std::string_view name, const ::Mesh& mesh) override;
+    IRenderWorld* getRenderWorld() const override;
+    IResourceManager* getResourceManager() const override;
 
     EngineData getEngineData();
 
@@ -54,7 +47,7 @@ class RenderEngine final : public IRenderEngine {
 
     StagingBuffer staging_buffer;
 
-    GraphicsResourceManager resource_manager;
+    ResourceManager resource_manager;
 
     RenderWorld world;
 

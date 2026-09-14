@@ -6,6 +6,7 @@
 #include "CameraData.h"
 #include "CloudsData.h"
 #include "EffectDescription.h"
+#include "Graphics.h"
 #include "PostProcessingData.h"
 #include "RenderObjectData.h"
 #include "StarsData.h"
@@ -15,54 +16,18 @@ namespace Graphics {
 
 using OpaqueObjectHandle = uint32_t;
 
-struct RenderData {
-    struct Camera {
-        Matrix view_projection;
-        Matrix view_projection_camera_centered;
-        Vector3 up;
-        Vector3 right;
-    };
-
-    struct Stars {
-        float star_density;
-        float blinking_speed;
-        float blinking_strength;
-    };
-
-    struct Clouds {
-        Vector3 color;
-        float time;
-        float height;
-        float cloud_plane_scale;
-    };
-
-    struct PostProcessing {
-        float dithering_spread = 0.03f;
-
-        uint32_t channel_color_count = 32;
-    };
-
-    float time = 0;
-    float delta_time;
-
-    Camera camera;
-    Stars stars;
-    Clouds clodus;
-    PostProcessing post_processing;
-};
-
-class RenderWorld {
+class RenderWorld : public IRenderWorld {
    public:
     RenderWorld();
 
-    RenderData& renderData();
-    const RenderData& renderData() const;
+    RenderData& renderData() override;
+    const RenderData& renderData() const override;
 
-    OpaqueObjectHandle addOpaqueObject(const RenderObjectData& data);
+    void addRenderObject(const RenderObjectData& data) override;
     RenderObjectData& getOpaqueObject(const OpaqueObjectHandle& handle);
     std::span<const RenderObjectData> getOpaqueObjects() const;
 
-    void addEffect(const EffectDescription& description);
+    void addEffect(const EffectDescription& description) override;
     void addMeshEffect(const MeshEffectDescription& description);
 
     void update(float delta_time);

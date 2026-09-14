@@ -75,7 +75,7 @@ MeshHandle RenderEngine::addMesh(const ::Mesh& mesh) {
     auto device_mesh =
         MeshBuilder(mesh).create(backend.getDevice(), staging_buffer);
 
-    auto handle = mesh_registry.addMesh(device_mesh);
+    auto handle = resource_manager.addMesh(device_mesh);
 
     return handle;
 }
@@ -94,6 +94,6 @@ EngineData RenderEngine::getEngineData() {
                       resource_manager};
 }
 
-RenderWorld& RenderEngine::getRenderWorld() { return world; }
+IRenderWorld* RenderEngine::getRenderWorld() { return world; }
 
 }  // namespace Graphics

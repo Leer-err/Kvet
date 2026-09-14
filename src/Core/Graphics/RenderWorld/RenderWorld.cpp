@@ -13,7 +13,7 @@ RenderData& RenderWorld::renderData() { return render_data; }
 
 const RenderData& RenderWorld::renderData() const { return render_data; }
 
-OpaqueObjectHandle RenderWorld::addOpaqueObject(const RenderObjectData& data) {
+OpaqueObjectHandle RenderWorld::addRenderObject(const RenderObjectData& data) {
     opaque_objects.emplace_back(data);
 
     return next_handle++;

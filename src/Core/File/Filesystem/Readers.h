@@ -37,13 +37,17 @@ struct MeshFile {
 };
 
 struct EffectFile {
+    std::string name;
+
     Vector3 center;
     Vector3 extents;
     float spawn_rate;
+    float particle_lifetime;
+
     Property<Vector4> color;
     Property<float> size;
     Property<float> rotation;
-    float particle_lifetime;
+
     std::string texture_path;
 };
 

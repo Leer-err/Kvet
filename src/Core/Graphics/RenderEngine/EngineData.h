@@ -14,7 +14,7 @@ struct EngineData {
 
     StagingBuffer& staging_buffer;
 
-    GraphicsResourceManager& resource_manager;
+    ResourceManager& resource_manager;
 };
 
 }  // namespace Graphics

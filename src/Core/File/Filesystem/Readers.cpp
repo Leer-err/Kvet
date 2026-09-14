@@ -133,7 +133,7 @@ static std::vector<uint32_t> readIndices(const aiMesh* mesh) {
     return indices;
 }
 
-static Result<MeshFile, Error> readMesh(const std::filesystem::path& path) {
+Result<MeshFile, Error> readMesh(const std::filesystem::path& path) {
     static Assimp::Importer importer;
 
     if (fs::exists(path) == false) return Error::NotFound;
@@ -199,7 +199,7 @@ static Result<MeshFile, Error> readMesh(const std::filesystem::path& path) {
                     meshlet_vertices,     meshlet_triangles, meshlet_count};
 }
 
-static Result<EffectFile, Error> readEffect(const std::filesystem::path& path) {
+Result<EffectFile, Error> readEffect(const std::filesystem::path& path) {
     auto file = std::ifstream(path);
 
     auto data = json{};

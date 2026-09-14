@@ -11,10 +11,12 @@ enum class Error {};
 
 class Manager {
    public:
-    Result<Graphics::TextureHandle, Error> getTexture(std::string_view name);
+    static Result<Graphics::TextureHandle, Error> getTexture(
+        std::string_view name);
+    static Result<Graphics::MeshHandle, Error> getMesh(std::string_view name);
 
    private:
-    Manager& get();
+    static Manager& get();
 };
 
 }  // namespace Asset

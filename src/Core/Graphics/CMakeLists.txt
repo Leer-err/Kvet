@@ -14,6 +14,7 @@ target_link_libraries(Graphics
         Logger
         Types
         Utility
+        File
         meshoptimizer
         Tracy::TracyClient
         SDL3::SDL3

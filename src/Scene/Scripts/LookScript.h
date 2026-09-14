@@ -30,5 +30,5 @@ class LookScript final : public IScript {
 
     std::shared_ptr<Input::GameInputContext> input;
 
-    Graphics::RenderWorld& render_world;
+    Graphics::IRenderWorld* render_world;
 };
