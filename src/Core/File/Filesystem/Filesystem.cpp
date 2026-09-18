@@ -4,8 +4,6 @@
 
 namespace File {
 
-Filesystem::Filesystem(const std::filesystem::path& base) : base(base) {}
-
 Result<TextureFile, Error> Filesystem::getTexture(std::string_view path) {
     auto full_path = get().base / path;
 
@@ -22,6 +20,11 @@ Result<EffectFile, Error> Filesystem::getEffect(std::string_view path) {
     auto full_path = get().base / path;
 
     return readEffect(full_path);
+}
+
+Filesystem& Filesystem::get() {
+    static Filesystem instance;
+    return instance;
 }
 
 }  // namespace File

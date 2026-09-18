@@ -3,9 +3,7 @@
 #include <filesystem>
 
 #include "Graphics.h"
-#include "IRenderEngine.h"
 #include "LoggerFactory.h"
-#include "ModelReader.h"
 
 namespace fs = std::filesystem;
 
@@ -17,11 +15,11 @@ constexpr auto MESHES_LIST = {"Sphere.fbx", "SkySphere.fbx", "Quad.fbx",
 
 static bool readMesh(const fs::path& path,
                      Graphics::IRenderEngine* render_engine) {
-    File::ModelReader reader(path.string());
+    // File::ModelReader reader(path.string());
 
-    auto mesh = reader.readMesh();
+    // auto mesh = reader.readMesh();
 
-    render_engine->addMesh(path.stem().string(), mesh);
+    // render_engine->addMesh(path.stem().string(), mesh);
 
     return true;
 }

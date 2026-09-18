@@ -13,7 +13,6 @@
 #include "GraphicsPipeline.h"
 #include "Handles.h"
 #include "Logger.h"
-#include "MeshRegistry.h"
 #include "PoolAllocator.h"
 #include "Queue.h"
 #include "Registries.h"
@@ -41,6 +40,11 @@ class Device {
     Result<BufferHandle, BufferError> createBuffer(
         const VkBufferCreateInfo& buffer_info,
         const VmaAllocationCreateInfo& alloc_info, bool is_chained);
+
+    Result<MeshHandle, BufferError> createMesh(
+        BufferHandle vertex_buffer, BufferHandle meshlet_buffer,
+        BufferHandle meshlet_vertices_buffer,
+        BufferHandle meshlet_triangles_buffer, uint32_t meshlet_count);
 
     VkCommandPool createCommandPool(uint32_t queue_index);
     void resetCommandPool(VkCommandPool pool) const;
@@ -94,6 +98,9 @@ class Device {
 
     PoolAllocator texture_allocator;
     TextureRegistry texture_registry;
+
+    PoolAllocator mesh_allocator;
+    MeshRegistry mesh_registry;
 
     DescriptorLayout descriptor_layout;
     DeviceProperties properties;

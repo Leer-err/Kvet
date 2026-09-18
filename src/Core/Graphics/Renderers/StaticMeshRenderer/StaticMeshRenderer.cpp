@@ -38,21 +38,19 @@ void StaticMeshRenderer::render(FrameGraph& frame_graph,
         std::bit_cast<ModelBuffer*>(model_data_buffer->getHostAddress());
     auto objects = world.getOpaqueObjects();
 
-    auto pass = GraphicsPass(
-        "Static mesh", pipeline,
-        [this, objects](GraphicsPassExecution& execution) {
-            auto buffer_address = model_data_buffer->getDeviceAddress();
+    auto pass = GraphicsPass("Static mesh", pipeline,
+                             [this, objects](GraphicsPassExecution& execution) {
+                                 auto buffer_address =
+                                     model_data_buffer->getDeviceAddress();
 
-            for (int i = 0; i < objects.size(); i++) {
-                const auto& model = objects[i];
-                auto mesh = engine_data.mesh_registry.getMesh(model.mesh);
-
-                push_constants.model_data =
-                    buffer_address + sizeof(ModelData) * i;
-                execution.appendData(push_constants);
-                execution.draw(*mesh);
-            }
-        });
+                                 for (int i = 0; i < objects.size(); i++) {
+                                     const auto& model = objects[i];
+                                     push_constants.model_data =
+                                         buffer_address + sizeof(ModelData) * i;
+                                     execution.appendData(push_constants);
+                                     execution.draw(model.mesh);
+                                 }
+                             });
 
     for (int i = 0; i < objects.size(); i++) {
         const auto& model = objects[i];

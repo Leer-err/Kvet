@@ -31,11 +31,11 @@ class StarRenderer {
 
    private:
     static BufferHandle createStarsBuffer(Device& device);
-    static Mesh createSkyMesh(const EngineData& engine_data);
+    static MeshHandle createSkyMesh(const EngineData& engine_data);
 
     EngineData engine_data;
 
-    Mesh quad;
+    MeshHandle quad;
 
     GraphicsPipeline pipeline;
 

@@ -1,9 +1,10 @@
 #pragma once
 
-#include <vulkan/vulkan_core.h>
+#include <vulkan/vulkan.h>
 
 #include "EngineData.h"
 #include "FrameGraph.h"
+#include "Graphics.h"
 #include "RenderWorld.h"
 
 namespace Graphics {
@@ -25,7 +26,7 @@ class ParticleRenderer {
     void setCameraData(VkDeviceAddress camera_data);
 
    private:
-    static Mesh createQuadMesh(const EngineData& engine_data);
+    static MeshHandle createQuadMesh(const EngineData& engine_data);
     static BufferHandle createParticleBuffer(Device& device);
     static BufferHandle createLiveParticleBuffer(Device& device);
 
@@ -36,7 +37,7 @@ class ParticleRenderer {
 
     GraphicsPipeline pipeline;
     PushConstants push_constants;
-    Mesh quad;
+    MeshHandle quad;
 };
 
 }  // namespace Graphics

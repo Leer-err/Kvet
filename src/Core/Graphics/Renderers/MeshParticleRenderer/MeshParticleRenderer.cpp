@@ -47,7 +47,7 @@ void MeshParticleRenderer::render(FrameGraph& frame_graph,
                                  i * sizeof(MeshParticle);
 
                              execution.appendData(push_constants);
-                             execution.draw(particle.mesh.get());
+                             execution.draw(particle.mesh);
                          });
 
         auto render_target = engine_data.resource_manager.getTexture("Color");
@@ -65,8 +65,8 @@ void MeshParticleRenderer::setCameraData(VkDeviceAddress data) {
     push_constants.camera_data = data;
 }
 
-Mesh MeshParticleRenderer::createQuadMesh(const EngineData& engine_data) {
-    return *engine_data.mesh_registry.getMesh("Quad");
+MeshHandle MeshParticleRenderer::createQuadMesh(const EngineData& engine_data) {
+    return *engine_data.resource_manager.getMesh("Quad");
 }
 
 BufferHandle MeshParticleRenderer::createParticleBuffer(Device& device) {

@@ -8,6 +8,7 @@
 #include "CommandBuffer.h"
 #include "Device.h"
 #include "EngineData.h"
+#include "Graphics.h"
 #include "GraphicsPipeline.h"
 #include "RenderEnviroment.h"
 #include "Texture.h"
@@ -196,21 +197,21 @@ void GraphicsPassExecution::appendData(const uint8_t* data, size_t data_size) {
     current_push_constant_offset += data_size;
 }
 
-void GraphicsPassExecution::draw(const Mesh& mesh) { draw(mesh, 1); }
+void GraphicsPassExecution::draw(const MeshHandle& mesh) { draw(mesh, 1); }
 
-void GraphicsPassExecution::draw(const Mesh& mesh, size_t count) {
+void GraphicsPassExecution::draw(const MeshHandle& mesh, size_t count) {
     MeshBuffers push_data = {};
 
-    push_data.vertices = mesh.vertex_buffer->getDeviceAddress();
+    push_data.vertices = mesh->vertex_buffer->getDeviceAddress();
     push_data.meshlet_triangles =
-        mesh.meshlet_triangles_buffer->getDeviceAddress();
+        mesh->meshlet_triangles_buffer->getDeviceAddress();
     push_data.meshlet_vertices =
-        mesh.meshlet_vertices_buffer->getDeviceAddress();
-    push_data.meshlets = mesh.meshlet_buffer->getDeviceAddress();
+        mesh->meshlet_vertices_buffer->getDeviceAddress();
+    push_data.meshlets = mesh->meshlet_buffer->getDeviceAddress();
 
     command_buffer.pushConstants(pipeline, &push_data, 0);
 
-    command_buffer.draw(mesh.meshlet_count, count);
+    command_buffer.draw(mesh->meshlet_count, count);
 
     current_push_constant_offset = sizeof(MeshBuffers);
 }

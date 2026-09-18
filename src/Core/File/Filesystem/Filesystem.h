@@ -11,6 +11,8 @@ namespace File {
 
 class Filesystem {
    public:
+    Filesystem() = default;
+
     Filesystem& operator=(const Filesystem&) = delete;
     Filesystem(const Filesystem&) = delete;
     Filesystem& operator=(Filesystem&&) = delete;
@@ -21,7 +23,6 @@ class Filesystem {
     static Result<EffectFile, Error> getEffect(std::string_view path);
 
    private:
-    explicit Filesystem(const std::filesystem::path& base);
     static Filesystem& get();
 
     std::filesystem::path base;

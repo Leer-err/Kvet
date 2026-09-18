@@ -5,6 +5,7 @@
 #include "EngineData.h"
 #include "FrameData.h"
 #include "FrameGraph.h"
+#include "Graphics.h"
 #include "PostProcessingData.h"
 #include "RenderWorld.h"
 
@@ -29,13 +30,14 @@ class PostProcessingPass {
                 const RenderWorld& world);
 
    private:
-    static Mesh createSqreenQuad(Device& device, const EngineData& engine_data);
+    static MeshHandle createSqreenQuad(Device& device,
+                                       const EngineData& engine_data);
     static BufferHandle createDataBuffer(Device& device);
 
     EngineData engine_data;
 
     GraphicsPipeline pipeline;
-    Mesh quad;
+    MeshHandle quad;
 
     BufferHandle dithering_data_buffer;
     PostProcessingData data;

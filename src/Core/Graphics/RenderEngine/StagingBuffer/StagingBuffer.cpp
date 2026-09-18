@@ -47,6 +47,11 @@ void StagingBuffer::stageBuffer(BufferHandle destination, const void* data,
     host_data_used += data_size;
 }
 
+void StagingBuffer::stageBuffer(BufferHandle destination,
+                                std::span<const uint8_t> data) {
+    stageBuffer(destination, data.data(), data.size());
+}
+
 size_t StagingBuffer::getTexelBlockSize(VkFormat format) {
     if (format == VK_FORMAT_R8G8B8A8_SRGB) return 4;
 

@@ -15,6 +15,7 @@
 #include "DeviceProperties.h"
 #include "EngineConstants.h"
 #include "ExtensionFunctions.h"
+#include "GraphicsMesh.h"
 #include "GraphicsPipeline.h"
 #include "Handles.h"
 #include "Logger.h"
@@ -41,6 +42,9 @@ Device::Device(const vkb::Instance& instance, const vkb::Device& device,
       texture_allocator(MAX_TEXTURE_DESCRIPTORS_COUNT, sizeof(Texture),
                         alignof(Texture)),
       texture_registry(texture_allocator),
+      mesh_allocator(MAX_TEXTURE_DESCRIPTORS_COUNT, sizeof(Mesh),
+                     alignof(Mesh)),
+      mesh_registry(mesh_allocator),
       descriptor_layout(createDescriptorLayout(device)),
       descriptors(createDescriptorBuffer(
           descriptor_layout.layout_size,
@@ -97,6 +101,17 @@ Result<BufferHandle, BufferError> Device::createBuffer(
     if (buffer_result.isError()) return buffer_result.getError();
 
     auto handle = buffer_registry.create(buffer_result.getResult());
+
+    return handle;
+}
+
+Result<MeshHandle, BufferError> Device::createMesh(
+    BufferHandle vertex_buffer, BufferHandle meshlet_buffer,
+    BufferHandle meshlet_vertices_buffer, BufferHandle meshlet_triangles_buffer,
+    uint32_t meshlet_count) {
+    auto handle = mesh_registry.create(vertex_buffer, meshlet_buffer,
+                                       meshlet_vertices_buffer,
+                                       meshlet_triangles_buffer, meshlet_count);
 
     return handle;
 }

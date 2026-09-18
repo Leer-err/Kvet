@@ -9,12 +9,13 @@ target_include_directories(Graphics PUBLIC
 )
 
 target_link_libraries(Graphics
-    PRIVATE 
+    PUBLIC
         Window
         Logger
         Types
         Utility
         File
+    PRIVATE 
         meshoptimizer
         Tracy::TracyClient
         SDL3::SDL3

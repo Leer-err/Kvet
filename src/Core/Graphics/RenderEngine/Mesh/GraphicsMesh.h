@@ -1,9 +1,11 @@
 #pragma once
 
 #include "Buffer.h"
-#include "Handles.h"
+#include "Handle.h"
 
 namespace Graphics {
+
+using BufferHandle = Handle<Buffer>;
 
 struct Mesh {
     Mesh(BufferHandle vertex_buffer, BufferHandle meshlet_buffer,

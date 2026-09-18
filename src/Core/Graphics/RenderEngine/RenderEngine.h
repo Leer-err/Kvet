@@ -9,7 +9,6 @@
 #include "EngineData.h"
 #include "GraphicsResourceManager.h"
 #include "Handles.h"
-#include "MeshRegistry.h"
 #include "Queue.h"
 #include "RenderPass.h"
 #include "RenderWorld.h"
@@ -29,8 +28,10 @@ class RenderEngine final : public IRenderEngine {
     void reinitWindowDependentResources();
     void render() override;
 
-    IRenderWorld* getRenderWorld() const override;
-    IResourceManager* getResourceManager() const override;
+    IRenderWorld* getRenderWorld() override;
+    const IRenderWorld* getRenderWorld() const override;
+    IResourceManager* getResourceManager() override;
+    const IResourceManager* getResourceManager() const override;
 
     EngineData getEngineData();
 
@@ -43,7 +44,6 @@ class RenderEngine final : public IRenderEngine {
     RenderingBackend backend;
 
     ShaderRegistry shader_registry;
-    MeshRegistry mesh_registry;
 
     StagingBuffer staging_buffer;
 

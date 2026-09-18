@@ -66,9 +66,6 @@ void Engine::update(IScene* scene, float delta_time) {
     scene->update(delta_time);
 
     renderer->render();
-    auto& render_data = renderer->getRenderWorld().renderData();
-    render_data.time += delta_time;
-    render_data.delta_time = delta_time;
 
     FrameMark;
 }

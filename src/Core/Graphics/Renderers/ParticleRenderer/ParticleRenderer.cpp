@@ -72,8 +72,8 @@ void ParticleRenderer::setCameraData(VkDeviceAddress data) {
     push_constants.camera_data = data;
 }
 
-Mesh ParticleRenderer::createQuadMesh(const EngineData& engine_data) {
-    return *engine_data.mesh_registry.getMesh("Quad");
+MeshHandle ParticleRenderer::createQuadMesh(const EngineData& engine_data) {
+    return *engine_data.resource_manager.getMesh("Quad");
 }
 
 BufferHandle ParticleRenderer::createParticleBuffer(Device& device) {

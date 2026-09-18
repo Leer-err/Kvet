@@ -11,10 +11,10 @@
 #include "Camera.h"
 #include "EffectDescription.h"
 #include "Entity.h"
+#include "Filesystem/Filesystem.h"
 #include "GameInputContext.h"
 #include "Graphics.h"
 #include "LookScript.h"
-#include "ModelReader.h"
 #include "MoveScript.h"
 #include "PhysicalInput.h"
 #include "Property.h"
@@ -43,8 +43,7 @@ Scene::Scene() {
     //     *readRenderObject("./Assets/Scene/Island.json");
     // renderer->getRenderWorld().addOpaqueObject(island_data);
 
-    // auto orb = *readEffect("./Assets/Scene/Effects/Orb.json");
-    // renderer->getRenderWorld().addEffect(orb);
+    readEffect("./Assets/Scene/Effects/Orb.json");
     // auto lightning1 =
     // *readEffect("./Assets/Scene/Effects/Lightning1.json");
     // renderer->getRenderWorld().addEffect(lightning1);
@@ -97,12 +96,33 @@ void Scene::update(float delta_time) {
     world.update(delta_time);
 
     auto renderer = Graphics::getRenderEngine();
-    renderer->getRenderWorld().update(delta_time);
-    renderer->getRenderWorld().renderData().time += delta_time;
-    renderer->getRenderWorld().renderData().delta_time = delta_time;
+    // renderer->getRenderWorld()->update(delta_time);
+    renderer->getRenderWorld()->renderData().time += delta_time;
+    renderer->getRenderWorld()->renderData().delta_time = delta_time;
 }
 
 void Scene::setupSystems() {
     world.addSystem<TransformSystem>();
     world.addSystem<ScriptSystem>();
+}
+
+void Scene::readEffect(std::string_view name) {
+    auto renderer = Graphics::getRenderEngine();
+
+    auto result = File::Filesystem::getEffect(name);
+    auto effect_file = result.getResult();
+
+    auto texture = Asset::Manager::getTexture(effect_file.texture_path);
+    if (texture.isError()) return;
+
+    auto effect_description =
+        Graphics::EffectDescription{effect_file.center,
+                                    effect_file.extents,
+                                    effect_file.spawn_rate,
+                                    effect_file.color,
+                                    effect_file.size,
+                                    effect_file.rotation,
+                                    effect_file.particle_lifetime,
+                                    texture.getResult()};
+    renderer->getRenderWorld()->addEffect(effect_description);
 }

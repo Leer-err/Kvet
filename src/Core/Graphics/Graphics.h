@@ -4,10 +4,9 @@
 #include <string_view>
 
 #include "EffectDescription.h"
-#include "Filesystem/Readers.h"
+#include "Files.h"
 #include "Handle.h"
 #include "Matrix.h"
-#include "MeshHandle.h"
 #include "RenderObjectData.h"
 
 namespace Graphics {
@@ -79,8 +78,10 @@ class IRenderEngine {
    public:
     virtual void render() = 0;
 
-    virtual IRenderWorld* getRenderWorld() const = 0;
-    virtual IResourceManager* getResourceManager() const = 0;
+    virtual const IRenderWorld* getRenderWorld() const = 0;
+    virtual IRenderWorld* getRenderWorld() = 0;
+    virtual const IResourceManager* getResourceManager() const = 0;
+    virtual IResourceManager* getResourceManager() = 0;
 };
 
 bool init();

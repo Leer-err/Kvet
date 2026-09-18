@@ -4,24 +4,29 @@
 
 #include "Device.h"
 #include "GraphicsMesh.h"
-#include "Mesh.h"
 #include "StagingBuffer.h"
 
 namespace Graphics {
 
 class MeshBuilder {
    public:
-    MeshBuilder(const void* vertex_data, size_t vertex_data_size,
-                const void* index_data, size_t index_data_size);
-    MeshBuilder(const ::Mesh& mesh);
+    MeshBuilder(std::span<const uint8_t> vertex_buffer,
+                std::span<const uint8_t> meshlet_buffer,
+                std::span<const uint8_t> meshlet_vertices,
+                std::span<const uint8_t> meshlet_triangles);
+    MeshBuilder(const uint8_t* vertex_buffer, size_t vertex_buffer_size,
+                const uint8_t* meshlet_buffer, size_t meshlet_buffer_size,
+                const uint8_t* meshlet_vertices, size_t meshlet_vertices_size,
+                const uint8_t* meshlet_triangles,
+                size_t meshlet_triangles_size);
 
     Mesh create(Device& device, StagingBuffer& staging_buffer);
 
    private:
-    const void* vertex_data;
-    size_t vertex_data_size;
-    const void* index_data;
-    size_t index_data_size;
+    std::span<const uint8_t> vertex_data;
+    std::span<const uint8_t> meshlet_data;
+    std::span<const uint8_t> meshlet_vertices_data;
+    std::span<const uint8_t> meshlet_triangles_data;
 };
 
 }  // namespace Graphics

@@ -75,8 +75,8 @@ BufferHandle StarRenderer::createStarsBuffer(Device& device) {
         .getResult();
 }
 
-Mesh StarRenderer::createSkyMesh(const EngineData& engine_data) {
-    return engine_data.mesh_registry.getMesh("SkySphere").value();
+MeshHandle StarRenderer::createSkyMesh(const EngineData& engine_data) {
+    return engine_data.resource_manager.getMesh("SkySphere").value();
 }
 
 }  // namespace Graphics

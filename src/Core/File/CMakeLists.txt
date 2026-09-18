@@ -13,12 +13,13 @@ target_link_libraries(File
         Types
         Utility
         Graphics
+    PRIVATE
         Assimp
         STB
         nlohmann_json::nlohmann_json
         meshoptimizer
 )
 
-add_subdirectory(ModelReader)
+# add_subdirectory(ModelReader)
 add_subdirectory(ConfigSerializer)
 add_subdirectory(Filesystem)

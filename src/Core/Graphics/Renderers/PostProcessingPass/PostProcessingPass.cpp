@@ -9,6 +9,7 @@
 #include "Device.h"
 #include "EngineData.h"
 #include "FrameGraph.h"
+#include "Graphics.h"
 #include "GraphicsPipelineBuilder.h"
 #include "MeshBuilder.h"
 #include "Overlay.h"
@@ -71,9 +72,9 @@ void PostProcessingPass::render(TextureHandle input_image,
     frame_graph.addGraphicsPass(pass);
 }
 
-Mesh PostProcessingPass::createSqreenQuad(Device& device,
-                                          const EngineData& engine_data) {
-    return *engine_data.mesh_registry.getMesh("Quad");
+MeshHandle PostProcessingPass::createSqreenQuad(Device& device,
+                                                const EngineData& engine_data) {
+    return engine_data.resource_manager.getMesh("Quad").value();
 }
 
 BufferHandle PostProcessingPass::createDataBuffer(Device& device) {

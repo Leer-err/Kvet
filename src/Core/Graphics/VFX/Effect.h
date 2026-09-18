@@ -4,7 +4,6 @@
 
 #include "EffectDescription.h"
 #include "Handles.h"
-#include "MeshHandle.h"
 #include "Particle.h"
 #include "ParticleHandle.h"
 #include "ParticleHandleAllocator.h"

@@ -26,7 +26,7 @@ class MeshParticleRenderer {
     void setCameraData(VkDeviceAddress camera_data);
 
    private:
-    static Mesh createQuadMesh(const EngineData& engine_data);
+    static MeshHandle createQuadMesh(const EngineData& engine_data);
     static BufferHandle createParticleBuffer(Device& device);
     static BufferHandle createLiveParticleBuffer(Device& device);
 

@@ -8,15 +8,19 @@
 #include "Handles.h"
 #include "Readers.h"
 #include "ResourceRegistry.h"
+#include "StagingBuffer.h"
 
 namespace Graphics {
 
 class Texture;
 
 using TextureIndex = ResourceIndex<Texture>;
+using MeshIndex = ResourceIndex<Mesh>;
 
 class ResourceManager final : public IResourceManager {
    public:
+    ResourceManager(Device& device, StagingBuffer& staging_buffer);
+
     bool addTexture(std::string_view name, TextureHandle texture);
     std::optional<TextureHandle> addTexture(
         const File::TextureFile& file) override;
@@ -27,8 +31,10 @@ class ResourceManager final : public IResourceManager {
 
    private:
     TextureIndex texture_index;
+    MeshIndex mesh_index;
 
     Device& device;
+    StagingBuffer& staging_buffer;
 };
 
 }  // namespace Graphics

@@ -1,12 +1,9 @@
 #pragma once
 
-#include <filesystem>
-#include <optional>
+#include <string_view>
 
 #include "Camera.h"
-#include "Handles.h"
 #include "IScene.h"
-#include "RenderObjectData.h"
 #include "Sky.h"
 #include "World.h"
 
@@ -17,12 +14,7 @@ class Scene : public IScene {
     void update(float deltaTime) override;
 
    private:
-    static std::optional<RenderObjectData> readRenderObject(
-        const std::filesystem::path& path);
-    static std::optional<Graphics::EffectDescription> readEffect(
-        const std::filesystem::path& path);
-    static std::optional<Graphics::TextureHandle> readTexture(
-        const std::filesystem::path& path);
+    static void readEffect(std::string_view name);
 
     void setupSystems();
 

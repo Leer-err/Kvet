@@ -13,6 +13,7 @@
 #include "CommandBuffer.h"
 #include "EngineData.h"
 #include "FrameData.h"
+#include "Graphics.h"
 #include "GraphicsMesh.h"
 #include "GraphicsPipeline.h"
 #include "Texture.h"
@@ -30,8 +31,8 @@ class GraphicsPassExecution {
         appendData(std::bit_cast<uint8_t*>(&data), sizeof(T));
     }
     void appendData(const uint8_t* data, size_t data_size);
-    void draw(const Mesh& mesh);
-    void draw(const Mesh& mesh, size_t count);
+    void draw(const MeshHandle& mesh);
+    void draw(const MeshHandle& mesh, size_t count);
 
    private:
     CommandBuffer command_buffer;

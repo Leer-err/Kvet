@@ -3,6 +3,7 @@
 #include <vulkan/vulkan.h>
 
 #include <cstddef>
+#include <span>
 #include <vector>
 
 #include "Buffer.h"
@@ -37,6 +38,7 @@ class StagingBuffer {
                       size_t data_size);
     void stageBuffer(BufferHandle destination, const void* data,
                      size_t data_size);
+    void stageBuffer(BufferHandle destination, std::span<const uint8_t> data);
 
     void flush(const CommandBuffer& cmd);
 
