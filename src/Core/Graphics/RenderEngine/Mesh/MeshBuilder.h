@@ -20,7 +20,8 @@ class MeshBuilder {
                 const uint8_t* meshlet_triangles,
                 size_t meshlet_triangles_size);
 
-    Mesh create(Device& device, StagingBuffer& staging_buffer);
+    Result<MeshHandle, BufferError> create(Device& device,
+                                           StagingBuffer& staging_buffer);
 
    private:
     std::span<const uint8_t> vertex_data;

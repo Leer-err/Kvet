@@ -31,6 +31,7 @@ RenderEngine::RenderEngine(const vkb::Instance& instance,
 
 void RenderEngine::render() {
     ZoneScoped;
+    world.update();
 
     if (!render_pass)
         render_pass = std::make_unique<RenderPass>(this->backend.getDevice(),

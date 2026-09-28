@@ -43,16 +43,10 @@ Scene::Scene() {
     //     *readRenderObject("./Assets/Scene/Island.json");
     // renderer->getRenderWorld().addOpaqueObject(island_data);
 
-    readEffect("./Assets/Scene/Effects/Orb.json");
-    // auto lightning1 =
-    // *readEffect("./Assets/Scene/Effects/Lightning1.json");
-    // renderer->getRenderWorld().addEffect(lightning1);
-    // auto lightning3 =
-    // *readEffect("./Assets/Scene/Effects/Lightning3.json");
-    // renderer->getRenderWorld().addEffect(lightning3);
-    // auto lightning4 =
-    // *readEffect("./Assets/Scene/Effects/Lightning4.json");
-    // renderer->getRenderWorld().addEffect(lightning4);
+    readEffect("Scene/Effects/Orb.json");
+    readEffect("Scene/Effects/Lightning1.json");
+    readEffect("Scene/Effects/Lightning3.json");
+    readEffect("Scene/Effects/Lightning4.json");
 
     // auto mesh_effect = Graphics::MeshEffectDescription{};
     // mesh_effect.center = {0, 0, 0};

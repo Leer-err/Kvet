@@ -6,6 +6,7 @@ target_link_libraries(EssentialsLoader
         Logger
         Graphics
         Utility
+        AssetManager
 )
 
 target_sources(EssentialsLoader PRIVATE

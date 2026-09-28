@@ -2,6 +2,7 @@
 
 #include <filesystem>
 
+#include "AssetManager.h"
 #include "Graphics.h"
 #include "LoggerFactory.h"
 
@@ -13,20 +14,14 @@ constexpr auto TEXTURES_LIST = {""};
 constexpr auto MESHES_LIST = {"Sphere.fbx", "SkySphere.fbx", "Quad.fbx",
                               "ScreenQuad.fbx"};
 
-static bool readMesh(const fs::path& path,
-                     Graphics::IRenderEngine* render_engine) {
-    // File::ModelReader reader(path.string());
-
-    // auto mesh = reader.readMesh();
-
-    // render_engine->addMesh(path.stem().string(), mesh);
+static bool readMesh(std::string_view path) {
+    Asset::Manager::getMesh(path);
 
     return true;
 }
 
 bool load() {
     auto logger = LoggerFactory::getLogger("EssentialsLoader");
-    auto render_engine = Graphics::getRenderEngine();
 
     auto base = fs::path("./Assets/");
 
@@ -37,9 +32,7 @@ bool load() {
     }
 
     for (const auto& mesh : MESHES_LIST) {
-        auto path = base / mesh;
-
-        if (readMesh(path, render_engine) == false) {
+        if (readMesh(mesh) == false) {
             result = false;
             logger.error("Failed to load mesh: {}", mesh);
         }

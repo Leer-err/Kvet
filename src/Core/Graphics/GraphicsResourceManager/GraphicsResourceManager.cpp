@@ -34,6 +34,7 @@ std::optional<TextureHandle> ResourceManager::addTexture(
     if (texture_result.isError()) return std::nullopt;
 
     auto handle = texture_result.getResult();
+    staging_buffer.stageTexture(handle, file.data.data(), file.data.size());
 
     if (texture_index.add(file.name, handle) == false) return std::nullopt;
 
@@ -47,7 +48,7 @@ std::optional<TextureHandle> ResourceManager::getTexture(
 
 std::optional<MeshHandle> ResourceManager::addMesh(const File::MeshFile& mesh) {
     auto vertex_data_ptr = std::bit_cast<uint8_t*>(mesh.vertices.data());
-    auto meshlet_data_ptr = std::bit_cast<uint8_t*>(mesh.meshlets.size());
+    auto meshlet_data_ptr = std::bit_cast<uint8_t*>(mesh.meshlets.data());
     auto meshlet_vertices_data_ptr =
         std::bit_cast<uint8_t*>(mesh.meshlet_vertices.data());
     auto meshlet_triangles_data_ptr =
@@ -62,14 +63,16 @@ std::optional<MeshHandle> ResourceManager::addMesh(const File::MeshFile& mesh) {
                     mesh.meshlet_triangles.size() * sizeof(uint8_t))
             .create(device, staging_buffer);
 
-    // if (texture_result.isError()) return std::nullopt;
+    if (mesh_result.isError()) return std::nullopt;
 
-    // auto handle = texture_result.getResult();
+    auto handle = mesh_result.getResult();
 
-    // if (mesh_index.add(mesh.name, handle) == false) return std::nullopt;
+    if (mesh_index.add(mesh.name, handle) == false) return std::nullopt;
 
     return MeshHandle();
 }
 
-std::optional<MeshHandle> ResourceManager::getMesh(std::string_view name) {}
+std::optional<MeshHandle> ResourceManager::getMesh(std::string_view name) {
+    return mesh_index.get(name);
+}
 }  // namespace Graphics

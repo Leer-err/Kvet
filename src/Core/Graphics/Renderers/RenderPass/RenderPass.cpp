@@ -52,7 +52,7 @@ TextureHandle RenderPass::render(const FrameData& frame_data,
     static_mesh_renderer.render(frame_graph, world);
     // clouds_renderer.render(frame_graph, world);
     particle_renderer.render(frame_graph, world);
-    // mesh_particle_renderer.render(frame_graph, world);
+    mesh_particle_renderer.render(frame_graph, world);
 
     postProcessing(frame_graph, world);
 

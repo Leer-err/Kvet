@@ -42,6 +42,6 @@ VFXWorld::MeshParticleBatch RenderWorld::getMeshParticles() const {
     return vfx_world.getMeshParticles();
 }
 
-void RenderWorld::update(float delta_time) { vfx_world.update(delta_time); }
+void RenderWorld::update() { vfx_world.update(render_data.delta_time); }
 
 }  // namespace Graphics

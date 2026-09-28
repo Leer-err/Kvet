@@ -16,18 +16,19 @@ MeshBuilder::MeshBuilder(std::span<const uint8_t> vertex_buffer,
       meshlet_vertices_data(meshlet_vertices),
       meshlet_triangles_data(meshlet_triangles) {}
 
-MeshBuilder::MeshBuilder(
-    const uint8_t* vertex_buffer, size_t vertex_buffer_size,
-    const uint8_t* meshlet_buffer, size_t meshlet_buffer_size,
-    const uint8_t* meshlet_vertices, size_t meshlet_vertices_size,
-    const uint8_t* meshlet_triangles, size_t meshlet_triangles_size)
-    : vertex_data(vertex_buffer, vertex_buffer_size),
-      meshlet_data(meshlet_buffer, meshlet_buffer_size),
+MeshBuilder::MeshBuilder(const uint8_t* vertices, size_t vertex_buffer_size,
+                         const uint8_t* meshlets, size_t meshlet_buffer_size,
+                         const uint8_t* meshlet_vertices,
+                         size_t meshlet_vertices_size,
+                         const uint8_t* meshlet_triangles,
+                         size_t meshlet_triangles_size)
+    : vertex_data(vertices, vertex_buffer_size),
+      meshlet_data(meshlets, meshlet_buffer_size),
       meshlet_vertices_data(meshlet_vertices, meshlet_vertices_size),
       meshlet_triangles_data(meshlet_triangles, meshlet_triangles_size) {}
 
-Graphics::Mesh MeshBuilder::create(Device& device,
-                                   StagingBuffer& staging_buffer) {
+Result<MeshHandle, BufferError> MeshBuilder::create(
+    Device& device, StagingBuffer& staging_buffer) {
     auto vertex_buffer = BufferBuilder(vertex_data.size())
                              .isShaderResource()
                              .isCopyDestination()
@@ -57,9 +58,9 @@ Graphics::Mesh MeshBuilder::create(Device& device,
     staging_buffer.stageBuffer(meshlet_triangles_buffer,
                                meshlet_triangles_data);
 
-    return Mesh(vertex_buffer, meshlet_buffer, meshlet_vertices_buffer,
-                meshlet_triangles_buffer,
-                meshlet_data.size() / sizeof(Meshlet));
+    return device.createMesh(vertex_buffer, meshlet_buffer,
+                             meshlet_vertices_buffer, meshlet_triangles_buffer,
+                             meshlet_data.size() / sizeof(Meshlet));
 }
 
 }  // namespace Graphics

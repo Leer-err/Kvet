@@ -30,7 +30,7 @@ class RenderWorld : public IRenderWorld {
     void addEffect(const EffectDescription& description) override;
     void addMeshEffect(const MeshEffectDescription& description);
 
-    void update(float delta_time);
+    void update();
 
     VFXWorld::ParticleBatch getParticles() const;
     VFXWorld::MeshParticleBatch getMeshParticles() const;

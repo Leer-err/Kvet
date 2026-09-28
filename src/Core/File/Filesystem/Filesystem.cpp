@@ -4,6 +4,8 @@
 
 namespace File {
 
+Filesystem::Filesystem() : base(BASE_PATH) {}
+
 Result<TextureFile, Error> Filesystem::getTexture(std::string_view path) {
     auto full_path = get().base / path;
 
