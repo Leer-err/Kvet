@@ -24,7 +24,7 @@ bool ResourceManager::addTexture(std::string_view name, TextureHandle texture) {
 }
 
 std::optional<TextureHandle> ResourceManager::addTexture(
-    const File::TextureFile& file) {
+    const File::Texture& file) {
     auto texture_result =
         TextureBuilder(VK_FORMAT_R8G8B8A8_SRGB, file.width, file.height)
             .isShaderResource()
@@ -46,7 +46,7 @@ std::optional<TextureHandle> ResourceManager::getTexture(
     return texture_index.get(name);
 }
 
-std::optional<MeshHandle> ResourceManager::addMesh(const File::MeshFile& mesh) {
+std::optional<MeshHandle> ResourceManager::addMesh(const File::Mesh& mesh) {
     auto vertex_data_ptr = std::bit_cast<uint8_t*>(mesh.vertices.data());
     auto meshlet_data_ptr = std::bit_cast<uint8_t*>(mesh.meshlets.data());
     auto meshlet_vertices_data_ptr =

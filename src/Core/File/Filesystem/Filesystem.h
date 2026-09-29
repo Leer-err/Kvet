@@ -1,13 +1,64 @@
 #pragma once
 
+#include <cstdint>
 #include <filesystem>
 #include <string>
+#include <vector>
 
 #include "FileError.h"
-#include "Readers.h"
+#include "Meshlet.h"
+#include "Property.h"
+#include "Quaternion.h"
 #include "Result.h"
+#include "Vector3.h"
+#include "Vector4.h"
+#include "VertexFormats.h"
 
 namespace File {
+
+struct Texture {
+    std::string name;
+
+    uint32_t width;
+    uint32_t height;
+
+    std::vector<uint8_t> data;
+};
+
+struct Mesh {
+    std::string name;
+
+    std::vector<Vertex> vertices;
+
+    std::vector<Meshlet> meshlets;
+    std::vector<uint32_t> meshlet_vertices;
+    std::vector<uint8_t> meshlet_triangles;
+
+    size_t meshlet_count;
+};
+
+struct Effect {
+    std::string name;
+
+    Vector3 center;
+    Vector3 extents;
+    float spawn_rate;
+    float particle_lifetime;
+
+    Property<Vector4> color;
+    Property<float> size;
+    Property<float> rotation;
+
+    std::string texture_path;
+};
+
+struct RenderObject {
+    Vector3 position;
+    Quaternion orientation;
+
+    std::string mesh_file;
+    std::string albedo_file;
+};
 
 class Filesystem {
     static constexpr auto BASE_PATH = "./Assets";
@@ -18,9 +69,10 @@ class Filesystem {
     Filesystem& operator=(Filesystem&&) = delete;
     Filesystem(Filesystem&&) = delete;
 
-    static Result<TextureFile, Error> getTexture(std::string_view path);
-    static Result<MeshFile, Error> getMesh(std::string_view path);
-    static Result<EffectFile, Error> getEffect(std::string_view path);
+    static Result<Texture, Error> getTexture(std::string_view path);
+    static Result<Mesh, Error> getMesh(std::string_view path);
+    static Result<Effect, Error> getEffect(std::string_view path);
+    static Result<RenderObject, Error> getRenderObject(std::string_view path);
 
    private:
     Filesystem();

@@ -4,7 +4,7 @@
 #include <string_view>
 
 #include "EffectDescription.h"
-#include "Files.h"
+#include "Filesystem.h"
 #include "Handle.h"
 #include "Matrix.h"
 #include "RenderObjectData.h"
@@ -56,11 +56,10 @@ struct RenderData {
 class IResourceManager {
    public:
     virtual std::optional<TextureHandle> addTexture(
-        const File::TextureFile& texture) = 0;
+        const File::Texture& texture) = 0;
     virtual std::optional<TextureHandle> getTexture(std::string_view name) = 0;
 
-    virtual std::optional<MeshHandle> addMesh(
-        const File::MeshFile& texture) = 0;
+    virtual std::optional<MeshHandle> addMesh(const File::Mesh& texture) = 0;
     virtual std::optional<MeshHandle> getMesh(std::string_view name) = 0;
 };
 

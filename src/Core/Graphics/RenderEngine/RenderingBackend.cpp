@@ -3,6 +3,7 @@
 #include <vulkan/vulkan_core.h>
 
 #include <array>
+#include <tracy/Tracy.hpp>
 
 #include "Buffer.h"
 #include "Device.h"

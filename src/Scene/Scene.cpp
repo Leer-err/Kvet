@@ -29,24 +29,14 @@ Scene::Scene() {
 
     camera = Camera::create(60, 16.f / 9, 0.1, 1000);
 
-    auto renderer = Graphics::getRenderEngine();
+    readRenderObject("Scene/Tower");
+    readRenderObject("Scene/Island");
+    readRenderObject("Scene/Gem");
 
-    // RenderObjectData tower_data =
-    //     *readRenderObject("./Assets/Scene/Tower.json");
-    // renderer->getRenderWorld().addOpaqueObject(tower_data);
-
-    // RenderObjectData gem_data =
-    // *readRenderObject("./Assets/Scene/Gem.json");
-    // renderer->getRenderWorld().addOpaqueObject(gem_data);
-
-    // RenderObjectData island_data =
-    //     *readRenderObject("./Assets/Scene/Island.json");
-    // renderer->getRenderWorld().addOpaqueObject(island_data);
-
-    readEffect("Scene/Effects/Orb.json");
-    readEffect("Scene/Effects/Lightning1.json");
-    readEffect("Scene/Effects/Lightning3.json");
-    readEffect("Scene/Effects/Lightning4.json");
+    readEffect("Scene/Effects/Orb");
+    readEffect("Scene/Effects/Lightning1");
+    readEffect("Scene/Effects/Lightning3");
+    readEffect("Scene/Effects/Lightning4");
 
     // auto mesh_effect = Graphics::MeshEffectDescription{};
     // mesh_effect.center = {0, 0, 0};
@@ -90,9 +80,9 @@ void Scene::update(float delta_time) {
     world.update(delta_time);
 
     auto renderer = Graphics::getRenderEngine();
-    // renderer->getRenderWorld()->update(delta_time);
-    renderer->getRenderWorld()->renderData().time += delta_time;
-    renderer->getRenderWorld()->renderData().delta_time = delta_time;
+    auto& render_data = renderer->getRenderWorld()->renderData();
+    render_data.time += delta_time;
+    render_data.delta_time = delta_time;
 }
 
 void Scene::setupSystems() {
@@ -101,6 +91,26 @@ void Scene::setupSystems() {
 }
 
 void Scene::readEffect(std::string_view name) {
+    auto renderer = Graphics::getRenderEngine();
+
+    auto result = File::Filesystem::getRenderObject(name);
+    auto render_object_file = result.getResult();
+
+    auto albedo = Asset::Manager::getTexture(render_object_file.albedo_file);
+    if (albedo.isError()) return;
+
+    auto mesh = Asset::Manager::getMesh(render_object_file.mesh_file);
+    if (mesh.isError()) return;
+
+    auto render_object = RenderObjectData{};
+    render_object.position = render_object_file.position;
+    render_object.mesh = mesh.getResult();
+    render_object.albedo = albedo.getResult();
+
+    renderer->getRenderWorld()->addRenderObject(render_object);
+}
+
+void Scene::readRenderObject(std::string_view name) {
     auto renderer = Graphics::getRenderEngine();
 
     auto result = File::Filesystem::getEffect(name);

@@ -15,6 +15,7 @@ class Scene : public IScene {
 
    private:
     static void readEffect(std::string_view name);
+    static void readRenderObject(std::string_view name);
 
     void setupSystems();
 
