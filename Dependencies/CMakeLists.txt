@@ -3,25 +3,20 @@ cmake_minimum_required (VERSION 3.21)
 include(FetchContent)
 include(ExternalProject)
 
-FetchContent_Declare(
-	tracy
-	GIT_REPOSITORY https://github.com/wolfpld/tracy.git
-	GIT_TAG v0.12.2
-	GIT_SHALLOW TRUE
-	GIT_PROGRESS TRUE
-)
-FetchContent_MakeAvailable(tracy)
+add_library(tracy INTERFACE)
 
-# add_custom_command(
-# 	OUTPUT
-#         ${CMAKE_BINARY_DIR}/bin/TracyClientd.dll
-#     COMMAND 
-# 		${CMAKE_COMMAND} -E copy ${tracy_BINARY_DIR}/TracyClientd.dll ${CMAKE_BINARY_DIR}/bin
-#     DEPENDS ${EXECUTABLE_NAME}
-# )
-# add_custom_target(copy_tracy_libs ALL
-#     DEPENDS ${CMAKE_BINARY_DIR}/bin/TracyClientd.dll
-# )
+target_include_directories(tracy INTERFACE
+	${CMAKE_CURRENT_SOURCE_DIR}/tracy/public
+)
+
+target_link_directories(tracy INTERFACE
+	${CMAKE_CURRENT_SOURCE_DIR}/tracy/build
+)
+
+target_link_libraries(tracy 
+	INTERFACE
+		TracyClient
+)
 
 #PhysX
 
@@ -143,7 +138,7 @@ target_sources(ImGuiLib PRIVATE
 )
 
 target_link_libraries(ImGuiLib PRIVATE
-	SDL3::SDL3
+	sdl
 	vulkan-interface
 )
 
@@ -180,7 +175,20 @@ add_subdirectory(glm EXCLUDE_FROM_ALL)
 
 # SDL3
 
-add_subdirectory(sdl EXCLUDE_FROM_ALL)
+add_library(sdl INTERFACE)
+
+target_include_directories(sdl INTERFACE
+	${CMAKE_CURRENT_SOURCE_DIR}/sdl/include
+)
+
+target_link_directories(sdl INTERFACE
+	${CMAKE_CURRENT_SOURCE_DIR}/sdl/build
+)
+
+target_link_libraries(sdl 
+	INTERFACE
+		SDL3
+)
 
 # vk-bootstrap
 

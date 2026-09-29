@@ -17,8 +17,8 @@ target_link_libraries(Graphics
         File
     PRIVATE 
         meshoptimizer
-        Tracy::TracyClient
-        SDL3::SDL3
+        tracy
+        sdl
         ImGuiLib
         vulkan-interface
         vulkan-allocator

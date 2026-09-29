@@ -6,7 +6,7 @@ target_link_libraries(ECS
     PRIVATE
         Utility
         Types
-        Tracy::TracyClient
+        tracy
 )
 
 add_subdirectory(Component)
