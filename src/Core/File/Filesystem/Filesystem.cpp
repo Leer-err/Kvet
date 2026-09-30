@@ -88,7 +88,7 @@ Result<Texture, Error> Filesystem::getTexture(std::string_view path) {
 
     size_t texture_size = width * height * channels;
     auto texture =
-        Texture{full_path.stem().string(), static_cast<uint32_t>(width),
+        Texture{std::string(path), static_cast<uint32_t>(width),
                 static_cast<uint32_t>(height),
                 std::vector(texture_data, texture_data + texture_size)};
 
@@ -204,8 +204,8 @@ Result<Mesh, Error> Filesystem::getMesh(std::string_view path) {
         meshlets.push_back(meshlet);
     }
 
-    return Mesh{full_path.stem().string(), vertices,          meshlets,
-                meshlet_vertices,          meshlet_triangles, meshlet_count};
+    return Mesh{std::string(path), vertices,          meshlets,
+                meshlet_vertices,  meshlet_triangles, meshlet_count};
 }
 
 Result<Effect, Error> Filesystem::getEffect(std::string_view path) {

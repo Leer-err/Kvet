@@ -74,7 +74,7 @@ void PostProcessingPass::render(TextureHandle input_image,
 
 MeshHandle PostProcessingPass::createSqreenQuad(Device& device,
                                                 const EngineData& engine_data) {
-    return engine_data.resource_manager.getMesh("Quad").value();
+    return engine_data.resource_manager.getMesh("Base/Quad").value();
 }
 
 BufferHandle PostProcessingPass::createDataBuffer(Device& device) {
