@@ -14,6 +14,7 @@
 #include "FileError.h"
 #include "Property.h"
 #include "Quaternion.h"
+#include "Vector3.h"
 #include "Vector4.h"
 #include "meshoptimizer.h"
 
@@ -217,7 +218,6 @@ Result<Effect, Error> Filesystem::getEffect(std::string_view path) {
     file >> data;
 
     auto effect = Effect{};
-    data.at("center").get_to(effect.center);
     data.at("extents").get_to(effect.extents);
     data.at("spawn_rate").get_to(effect.spawn_rate);
     data.at("color").get_to(effect.color);
@@ -239,16 +239,39 @@ Result<RenderObject, Error> Filesystem::getRenderObject(std::string_view path) {
     file >> data;
 
     auto render_object = RenderObject{};
-    data.at("position").get_to(render_object.position);
     data.at("mesh").get_to(render_object.mesh_file);
     data.at("albedo").get_to(render_object.albedo_file);
 
-    auto pitch = data["pitch"].get<float>();
-    auto yaw = data["yaw"].get<float>();
-    auto roll = data["roll"].get<float>();
-    render_object.orientation = Quaternion(pitch, yaw, roll);
-
     return render_object;
+}
+
+Result<Scene, Error> Filesystem::getScene(std::string_view path) {
+    auto full_path = get().base / path;
+    full_path.replace_extension("json");
+
+    auto file = std::ifstream(full_path);
+
+    auto data = json{};
+    file >> data;
+
+    auto scene = Scene{};
+    auto effects = data["effects"];
+    for (const auto& effect : effects) {
+        auto position = effect["position"].get<Vector3>();
+        auto description = effect["description"].get<std::string>();
+
+        scene.effects.emplace_back(position, description);
+    }
+
+    auto render_objects = data["render_objects"];
+    for (const auto& render_object : render_objects) {
+        auto position = render_object["position"].get<Vector3>();
+        auto description = render_object["description"].get<std::string>();
+
+        scene.render_objects.emplace_back(position, description);
+    }
+
+    return scene;
 }
 
 Filesystem& Filesystem::get() {

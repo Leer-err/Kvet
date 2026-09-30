@@ -36,7 +36,7 @@ SwapChain::SwapChain(Device& device, Queue presentation_queue, uint32_t width,
     format.colorSpace = VK_COLORSPACE_SRGB_NONLINEAR_KHR;
 
     swap_chain = device.createSwapChain(
-        format, mode, swap_chain_size,
+        format, mode, width, height, swap_chain_size,
         VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT);
 
     auto swap_cahin_images = swap_chain.get_images().value();

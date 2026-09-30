@@ -40,7 +40,6 @@ struct Mesh {
 struct Effect {
     std::string name;
 
-    Vector3 center;
     Vector3 extents;
     float spawn_rate;
     float particle_lifetime;
@@ -53,11 +52,23 @@ struct Effect {
 };
 
 struct RenderObject {
-    Vector3 position;
-    Quaternion orientation;
-
     std::string mesh_file;
     std::string albedo_file;
+};
+
+struct Scene {
+    struct Effect {
+        Vector3 position;
+        std::string description;
+    };
+
+    struct RenderObject {
+        Vector3 position;
+        std::string description;
+    };
+
+    std::vector<Effect> effects;
+    std::vector<RenderObject> render_objects;
 };
 
 class Filesystem {
@@ -73,6 +84,7 @@ class Filesystem {
     static Result<Mesh, Error> getMesh(std::string_view path);
     static Result<Effect, Error> getEffect(std::string_view path);
     static Result<RenderObject, Error> getRenderObject(std::string_view path);
+    static Result<Scene, Error> getScene(std::string_view path);
 
    private:
     Filesystem();

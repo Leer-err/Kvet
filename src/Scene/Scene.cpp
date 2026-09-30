@@ -29,14 +29,9 @@ Scene::Scene() {
 
     camera = Camera::create(60, 16.f / 9, 0.1, 1000);
 
-    readRenderObject("Scene/Tower");
-    readRenderObject("Scene/Island");
-    readRenderObject("Scene/Gem");
+    auto scene = File::Filesystem::getScene("Scene");
 
-    readEffect("Scene/Effects/Orb");
-    readEffect("Scene/Effects/Lightning1");
-    readEffect("Scene/Effects/Lightning3");
-    readEffect("Scene/Effects/Lightning4");
+    parseScene(scene.getResult());
 
     // auto mesh_effect = Graphics::MeshEffectDescription{};
     // mesh_effect.center = {0, 0, 0};
@@ -90,43 +85,43 @@ void Scene::setupSystems() {
     world.addSystem<ScriptSystem>();
 }
 
-void Scene::readEffect(std::string_view name) {
+void Scene::parseScene(const File::Scene& scene) {
     auto renderer = Graphics::getRenderEngine();
 
-    auto result = File::Filesystem::getRenderObject(name);
-    auto render_object_file = result.getResult();
+    for (const auto& effect : scene.effects) {
+        auto result = File::Filesystem::getEffect(effect.description);
+        auto effect_file = result.getResult();
 
-    auto albedo = Asset::Manager::getTexture(render_object_file.albedo_file);
-    if (albedo.isError()) return;
+        auto texture = Asset::Manager::getTexture(effect_file.texture_path);
+        if (texture.isError()) return;
 
-    auto mesh = Asset::Manager::getMesh(render_object_file.mesh_file);
-    if (mesh.isError()) return;
+        auto effect_description =
+            Graphics::EffectDescription{effect.position,
+                                        effect_file.extents,
+                                        effect_file.spawn_rate,
+                                        effect_file.color,
+                                        effect_file.size,
+                                        effect_file.rotation,
+                                        effect_file.particle_lifetime,
+                                        texture.getResult()};
+        renderer->getRenderWorld()->addEffect(effect_description);
+    }
 
-    auto render_object = RenderObjectData{};
-    render_object.position = render_object_file.position;
-    render_object.mesh = mesh.getResult();
-    render_object.albedo = albedo.getResult();
+    for (const auto& render_object : scene.render_objects) {
+        auto result =
+            File::Filesystem::getRenderObject(render_object.description);
+        auto render_object_file = result.getResult();
 
-    renderer->getRenderWorld()->addRenderObject(render_object);
-}
+        auto texture =
+            Asset::Manager::getTexture(render_object_file.albedo_file);
+        if (texture.isError()) return;
+        auto mesh = Asset::Manager::getMesh(render_object_file.mesh_file);
+        if (mesh.isError()) return;
 
-void Scene::readRenderObject(std::string_view name) {
-    auto renderer = Graphics::getRenderEngine();
-
-    auto result = File::Filesystem::getEffect(name);
-    auto effect_file = result.getResult();
-
-    auto texture = Asset::Manager::getTexture(effect_file.texture_path);
-    if (texture.isError()) return;
-
-    auto effect_description =
-        Graphics::EffectDescription{effect_file.center,
-                                    effect_file.extents,
-                                    effect_file.spawn_rate,
-                                    effect_file.color,
-                                    effect_file.size,
-                                    effect_file.rotation,
-                                    effect_file.particle_lifetime,
-                                    texture.getResult()};
-    renderer->getRenderWorld()->addEffect(effect_description);
+        auto render_object_data = RenderObjectData{};
+        render_object_data.position = render_object.position;
+        render_object_data.mesh = mesh.getResult();
+        render_object_data.albedo = texture.getResult();
+        renderer->getRenderWorld()->addRenderObject(render_object_data);
+    }
 }

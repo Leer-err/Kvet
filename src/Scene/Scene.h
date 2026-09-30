@@ -3,6 +3,7 @@
 #include <string_view>
 
 #include "Camera.h"
+#include "Filesystem.h"
 #include "IScene.h"
 #include "Sky.h"
 #include "World.h"
@@ -14,8 +15,7 @@ class Scene : public IScene {
     void update(float deltaTime) override;
 
    private:
-    static void readEffect(std::string_view name);
-    static void readRenderObject(std::string_view name);
+    void parseScene(const File::Scene& scene);
 
     void setupSystems();
 

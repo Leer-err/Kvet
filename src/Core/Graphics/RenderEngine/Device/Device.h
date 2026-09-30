@@ -31,6 +31,7 @@ class Device {
 
     vkb::Swapchain createSwapChain(VkSurfaceFormatKHR format,
                                    VkPresentModeKHR present_mode,
+                                   uint32_t width, uint32_t height,
                                    size_t image_count, VkImageUsageFlags flags);
 
     Result<TextureHandle, TextureError> createTexture(

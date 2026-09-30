@@ -63,6 +63,7 @@ Device::~Device() {
 
 vkb::Swapchain Device::createSwapChain(VkSurfaceFormatKHR format,
                                        VkPresentModeKHR present_mode,
+                                       uint32_t width, uint32_t height,
                                        size_t image_count,
                                        VkImageUsageFlags flags) {
     vkb::SwapchainBuilder swapchain_builder{device};
@@ -71,6 +72,7 @@ vkb::Swapchain Device::createSwapChain(VkSurfaceFormatKHR format,
     swapchain_builder.add_fallback_present_mode(present_mode);
     swapchain_builder.set_desired_min_image_count(image_count);
     swapchain_builder.set_image_usage_flags(flags);
+    swapchain_builder.set_desired_extent(width, height);
 
     auto swap_ret = swapchain_builder.build();
     if (!swap_ret) {

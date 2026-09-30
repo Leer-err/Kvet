@@ -6,7 +6,6 @@
 #include <optional>
 #include <span>
 
-#include "Files.h"
 #include "Graphics.h"
 #include "MeshBuilder.h"
 #include "Meshlet.h"
@@ -69,7 +68,7 @@ std::optional<MeshHandle> ResourceManager::addMesh(const File::Mesh& mesh) {
 
     if (mesh_index.add(mesh.name, handle) == false) return std::nullopt;
 
-    return MeshHandle();
+    return handle;
 }
 
 std::optional<MeshHandle> ResourceManager::getMesh(std::string_view name) {

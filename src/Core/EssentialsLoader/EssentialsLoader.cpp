@@ -11,8 +11,8 @@ namespace fs = std::filesystem;
 namespace Essentials {
 
 constexpr auto TEXTURES_LIST = {""};
-constexpr auto MESHES_LIST = {"Sphere.fbx", "SkySphere.fbx", "Quad.fbx",
-                              "ScreenQuad.fbx"};
+constexpr auto MESHES_LIST = {"Base/Sphere", "Base/SkySphere", "Base/Quad",
+                              "Base/ScreenQuad"};
 
 static bool readMesh(std::string_view path) {
     Asset::Manager::getMesh(path);
@@ -23,13 +23,7 @@ static bool readMesh(std::string_view path) {
 bool load() {
     auto logger = LoggerFactory::getLogger("EssentialsLoader");
 
-    auto base = fs::path("./Assets/");
-
     auto result = true;
-
-    for (const auto& texture : TEXTURES_LIST) {
-        auto path = base / texture;
-    }
 
     for (const auto& mesh : MESHES_LIST) {
         if (readMesh(mesh) == false) {

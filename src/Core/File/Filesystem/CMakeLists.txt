@@ -1,5 +1,4 @@
 target_sources(File PRIVATE
-    Readers.cpp
     Filesystem.cpp
 )
 

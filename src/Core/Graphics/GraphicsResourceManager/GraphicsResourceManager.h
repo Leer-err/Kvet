@@ -6,7 +6,6 @@
 #include "Device.h"
 #include "Graphics.h"
 #include "Handles.h"
-#include "Readers.h"
 #include "ResourceRegistry.h"
 #include "StagingBuffer.h"
 
