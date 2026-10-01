@@ -4,6 +4,7 @@
 #include <string_view>
 
 #include "Device.h"
+#include "Filesystem.h"
 #include "Graphics.h"
 #include "Handles.h"
 #include "ResourceRegistry.h"
@@ -25,8 +26,13 @@ class ResourceManager final : public IResourceManager {
     std::optional<TextureHandle> addTexture(const File::Texture& file) override;
     std::optional<TextureHandle> getTexture(std::string_view name) override;
 
-    std::optional<MeshHandle> addMesh(const File::Mesh& texture) override;
+    std::optional<MeshHandle> addMesh(const File::Mesh& mesh) override;
     std::optional<MeshHandle> getMesh(std::string_view name) override;
+
+    std::optional<GraphicsPipelineHandle> addPipeline(
+        const File::Pipeline& shader) override;
+    std::optional<GraphicsPipelineHandle> getPipeline(
+        std::string_view name) override;
 
    private:
     TextureIndex texture_index;

@@ -281,7 +281,8 @@ Result<Scene, Error> Filesystem::getScene(std::string_view path) {
     return scene;
 }
 
-Result<Shader, Error> Filesystem::getShader(std::string_view path) {
+Result<std::vector<uint8_t>, Error> Filesystem::getShader(
+    std::string_view path) {
     auto full_path = get().base / path;
     full_path.replace_extension("spv");
 
@@ -297,8 +298,10 @@ Result<Shader, Error> Filesystem::getShader(std::string_view path) {
     file.read(data_ptr, file_size);
     file.close();
 
-    return Shader{file_buffer};
+    return file_buffer;
 }
+
+Result<Pipeline, Error> Filesystem::getPipeline(std::string_view path) {}
 
 Filesystem& Filesystem::get() {
     static Filesystem instance;

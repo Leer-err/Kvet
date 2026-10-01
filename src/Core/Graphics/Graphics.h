@@ -59,8 +59,13 @@ class IResourceManager {
         const File::Texture& texture) = 0;
     virtual std::optional<TextureHandle> getTexture(std::string_view name) = 0;
 
-    virtual std::optional<MeshHandle> addMesh(const File::Mesh& texture) = 0;
+    virtual std::optional<MeshHandle> addMesh(const File::Mesh& mesh) = 0;
     virtual std::optional<MeshHandle> getMesh(std::string_view name) = 0;
+
+    virtual std::optional<GraphicsPipelineHandle> addPipeline(
+        const File::Pipeline& shader) = 0;
+    virtual std::optional<GraphicsPipelineHandle> getPipeline(
+        std::string_view name) = 0;
 };
 
 class IRenderWorld {

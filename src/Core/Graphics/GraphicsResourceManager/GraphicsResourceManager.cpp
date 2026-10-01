@@ -7,6 +7,7 @@
 #include <span>
 
 #include "Graphics.h"
+#include "GraphicsPipelineBuilder.h"
 #include "MeshBuilder.h"
 #include "Meshlet.h"
 #include "StagingBuffer.h"
@@ -74,4 +75,26 @@ std::optional<MeshHandle> ResourceManager::addMesh(const File::Mesh& mesh) {
 std::optional<MeshHandle> ResourceManager::getMesh(std::string_view name) {
     return mesh_index.get(name);
 }
+
+std::optional<GraphicsPipelineHandle> ResourceManager::addPipeline(
+    const File::Pipeline& pipeline) {
+    auto pipeline_builder = GraphicsPipelineBuilder(pipeline.data);
+    if (pipeline.depth_test_enable == false)
+        pipeline_builder.disableDepthTest();
+    if (pipeline.depth_write_enble == true) pipeline_builder.writesDepth();
+
+    auto pipeline_result = pipeline_builder.create(device);
+    if (pipeline_result.isError()) return std::nullopt;
+
+    auto handle = pipeline_result.getResult();
+    if (pipeline_index.add(pipeline.name, handle) == false) return std::nullopt;
+
+    return handle;
+}
+
+std::optional<GraphicsPipelineHandle> ResourceManager::getPipeline(
+    std::string_view name) {
+    return pipeline_index.get(name);
+}
+
 }  // namespace Graphics

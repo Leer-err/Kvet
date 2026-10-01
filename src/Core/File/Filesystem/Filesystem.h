@@ -16,8 +16,13 @@
 
 namespace File {
 
-struct Shader {
+struct Pipeline {
+    std::string name;
+
     std::vector<uint8_t> data;
+
+    bool depth_test_enable;
+    bool depth_write_enble;
 };
 
 struct Texture {
@@ -89,7 +94,8 @@ class Filesystem {
     static Result<Effect, Error> getEffect(std::string_view path);
     static Result<RenderObject, Error> getRenderObject(std::string_view path);
     static Result<Scene, Error> getScene(std::string_view path);
-    static Result<Shader, Error> getShader(std::string_view path);
+    static Result<std::vector<uint8_t>, Error> getShader(std::string_view path);
+    static Result<Pipeline, Error> getPipeline(std::string_view path);
 
    private:
     Filesystem();
