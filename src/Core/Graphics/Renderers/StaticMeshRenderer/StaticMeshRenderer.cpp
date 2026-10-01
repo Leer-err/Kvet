@@ -7,6 +7,7 @@
 
 #include "BufferBuilder.h"
 #include "Device.h"
+#include "Filesystem.h"
 #include "FrameData.h"
 #include "FrameGraph.h"
 #include "GraphicsPipelineBuilder.h"
@@ -20,13 +21,12 @@ namespace Graphics {
 StaticMeshRenderer::StaticMeshRenderer(Device& device,
                                        const EngineData& engine_data)
     : engine_data(engine_data), model_data_buffer(createModelBuffer(device)) {
-    pipeline = GraphicsPipelineBuilder(
-                   "./Assets/Shaders/Pipelines/StaticModel/StaticModel.spv",
-                   "mesh_main",
-                   "./Assets/Shaders/Pipelines/StaticModel/StaticModel.spv",
-                   "pixel_main")
+    auto shader =
+        File::Filesystem::getShader("Shaders/Pipelines/StaticModel/StaticModel")
+            .getResult();
+    pipeline = GraphicsPipelineBuilder(shader.data)
                    .writesDepth()
-                   .create(device, engine_data.shader_registry)
+                   .create(device)
                    .getResult();
 
     sampler_index = Sampler::linear();

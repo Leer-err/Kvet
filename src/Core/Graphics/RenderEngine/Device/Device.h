@@ -58,8 +58,7 @@ class Device {
     void waitFence(VkFence fence);
     void resetFence(VkFence fence) const;
 
-    VkShaderModule createShader(const uint32_t* shader_data,
-                                size_t shader_data_size);
+    Result<Shader, ShaderError> createShader(std::span<const uint8_t> bytecode);
 
     VkPipelineLayout createPipelineLayout(
         const std::vector<size_t>& push_constant_ranges);

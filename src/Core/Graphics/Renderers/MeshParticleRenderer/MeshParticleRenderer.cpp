@@ -16,13 +16,11 @@ namespace Graphics {
 MeshParticleRenderer::MeshParticleRenderer(Device& device,
                                            const EngineData& engine_data)
     : engine_data(engine_data), particle_buffer(createParticleBuffer(device)) {
-    pipeline = GraphicsPipelineBuilder(
-                   "./Assets/Shaders/Pipelines/Particles/MeshParticles.spv",
-                   "mesh_main",
-                   "./Assets/Shaders/Pipelines/Particles/MeshParticles.spv",
-                   "pixel_main")
-                   .create(device, engine_data.shader_registry)
-                   .getResult();
+    auto shader =
+        File::Filesystem::getShader("Shaders/Pipelines/Particles/MeshParticles")
+            .getResult();
+
+    pipeline = GraphicsPipelineBuilder(shader.data).create(device).getResult();
 }
 
 void MeshParticleRenderer::render(FrameGraph& frame_graph,

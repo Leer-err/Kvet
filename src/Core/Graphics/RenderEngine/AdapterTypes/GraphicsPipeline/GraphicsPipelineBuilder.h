@@ -4,10 +4,10 @@
 
 #include <string>
 
+#include "Device.h"
 #include "GraphicsPipeline.h"
 #include "Result.h"
 #include "Shader.h"
-#include "ShaderRegistry.h"
 
 namespace Graphics {
 
@@ -15,10 +15,7 @@ class GraphicsPipelineBuilder {
    public:
     enum class Error { ShaderNotBuilt, VertexInputTypeNotSupported };
 
-    GraphicsPipelineBuilder(const std::string& mesh_shader_filename,
-                            const std::string& mesh_shader_entrypoint,
-                            const std::string& pixel_shader_filename,
-                            const std::string& pixel_shader_entrypoint);
+    GraphicsPipelineBuilder(std::span<const uint8_t> shader_bytecode);
 
     GraphicsPipelineBuilder& setRasterizer(
         VkPipelineRasterizationStateCreateInfo rasterizer);
@@ -28,19 +25,17 @@ class GraphicsPipelineBuilder {
     GraphicsPipelineBuilder& writesDepth();
     GraphicsPipelineBuilder& disableDepthTest();
 
-    Result<GraphicsPipeline, Error> create(Device& device,
-                                           ShaderRegistry& shader_registry);
+    Result<GraphicsPipeline, Error> create(Device& device);
 
    private:
-    Result<Shader, GraphicsPipelineBuilder::Error> createShader(
-        Device& device, ShaderRegistry& shader_registry,
-        const std::string& filename, const std::string& entrypoint,
-        VkShaderStageFlagBits stage);
+    static Result<std::vector<size_t>, GraphicsPipelineBuilder::Error>
+    pushConstantsSize(std::span<const uint8_t> bytecode);
 
-    const std::string& mesh_shader_filename;
-    const std::string& mesh_shader_entrypoint;
-    const std::string& pixel_shader_filename;
-    const std::string& pixel_shader_entrypoint;
+    Result<Shader, GraphicsPipelineBuilder::Error> createShader(
+        Device& device, const std::string& filename,
+        const std::string& entrypoint, VkShaderStageFlagBits stage);
+
+    std::span<const uint8_t> shader_bytecode;
 
     bool depth_write = false;
     bool depth_enabled = true;

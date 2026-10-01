@@ -16,6 +16,10 @@
 
 namespace File {
 
+struct Shader {
+    std::vector<uint8_t> data;
+};
+
 struct Texture {
     std::string name;
 
@@ -85,6 +89,7 @@ class Filesystem {
     static Result<Effect, Error> getEffect(std::string_view path);
     static Result<RenderObject, Error> getRenderObject(std::string_view path);
     static Result<Scene, Error> getScene(std::string_view path);
+    static Result<Shader, Error> getShader(std::string_view path);
 
    private:
     Filesystem();

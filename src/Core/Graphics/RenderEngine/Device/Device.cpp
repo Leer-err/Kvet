@@ -5,6 +5,7 @@
 #include <vulkan/vulkan_core.h>
 
 #include <array>
+#include <span>
 #include <vector>
 
 #include "Buffer.h"
@@ -20,6 +21,8 @@
 #include "Handles.h"
 #include "Logger.h"
 #include "LoggerFactory.h"
+#include "Result.h"
+#include "Shader.h"
 #include "Texture.h"
 #include "VkBootstrap.h"
 
@@ -29,6 +32,7 @@ constexpr auto SAMPLER_BINDING_INDEX = 1;
 constexpr auto MAX_TEXTURE_DESCRIPTORS_COUNT = 1000;
 constexpr auto MAX_SAMPLER_DESCRIPTORS_COUNT = 1000;
 constexpr auto MAX_BUFFERS_COUNT = 1000;
+constexpr auto MAX_MESHES_COUNT = 1000;
 
 namespace Graphics {
 
@@ -42,8 +46,7 @@ Device::Device(const vkb::Instance& instance, const vkb::Device& device,
       texture_allocator(MAX_TEXTURE_DESCRIPTORS_COUNT, sizeof(Texture),
                         alignof(Texture)),
       texture_registry(texture_allocator),
-      mesh_allocator(MAX_TEXTURE_DESCRIPTORS_COUNT, sizeof(Mesh),
-                     alignof(Mesh)),
+      mesh_allocator(MAX_MESHES_COUNT, sizeof(Mesh), alignof(Mesh)),
       mesh_registry(mesh_allocator),
       descriptor_layout(createDescriptorLayout(device)),
       descriptors(createDescriptorBuffer(
@@ -287,17 +290,9 @@ DescriptorLayout Device::createDescriptorLayout(VkDevice device) {
     return layout;
 }
 
-VkShaderModule Device::createShader(const uint32_t* shader_data,
-                                    size_t shader_data_size) {
-    VkShaderModuleCreateInfo info = {};
-    info.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-    info.pCode = shader_data;
-    info.codeSize = shader_data_size;
-
-    VkShaderModule module = {};
-    vkCreateShaderModule(device, &info, nullptr, &module);
-
-    return module;
+Result<Shader, ShaderError> Device::createShader(
+    std::span<const uint8_t> bytecode) {
+    return Shader::create(device, bytecode);
 }
 
 void Device::waitIdle() const { vkDeviceWaitIdle(device); }

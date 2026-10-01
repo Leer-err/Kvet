@@ -1,5 +1,5 @@
 target_sources(Graphics PRIVATE
-    ShaderBuilder.cpp
+    Shader.cpp
 )
 
 target_include_directories(Graphics PRIVATE

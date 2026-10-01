@@ -2,7 +2,6 @@
 add_subdirectory(Rasterizer)
 add_subdirectory(Sampler)
 add_subdirectory(GraphicsPipeline)
-add_subdirectory(InputLayout)
 add_subdirectory(CommandPool)
 add_subdirectory(CommandBuffer)
 add_subdirectory(Semaphore)

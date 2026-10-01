@@ -6,6 +6,7 @@
 #include <stb_image.h>
 
 #include <assimp/Importer.hpp>
+#include <bit>
 #include <filesystem>
 #include <fstream>
 #include <nlohmann/json.hpp>
@@ -217,6 +218,8 @@ Result<Effect, Error> Filesystem::getEffect(std::string_view path) {
     auto data = json{};
     file >> data;
 
+    file.close();
+
     auto effect = Effect{};
     data.at("extents").get_to(effect.extents);
     data.at("spawn_rate").get_to(effect.spawn_rate);
@@ -238,6 +241,8 @@ Result<RenderObject, Error> Filesystem::getRenderObject(std::string_view path) {
     auto data = json{};
     file >> data;
 
+    file.close();
+
     auto render_object = RenderObject{};
     data.at("mesh").get_to(render_object.mesh_file);
     data.at("albedo").get_to(render_object.albedo_file);
@@ -253,6 +258,8 @@ Result<Scene, Error> Filesystem::getScene(std::string_view path) {
 
     auto data = json{};
     file >> data;
+
+    file.close();
 
     auto scene = Scene{};
     auto effects = data["effects"];
@@ -272,6 +279,25 @@ Result<Scene, Error> Filesystem::getScene(std::string_view path) {
     }
 
     return scene;
+}
+
+Result<Shader, Error> Filesystem::getShader(std::string_view path) {
+    auto full_path = get().base / path;
+    full_path.replace_extension("spv");
+
+    auto file = std::ifstream(full_path, std::ios::binary | std::ios::ate);
+
+    if (file.is_open() == false) return Error::NotFound;
+
+    auto file_size = file.tellg();
+    auto file_buffer = std::vector<uint8_t>(file_size);
+    file.seekg(0);
+
+    auto data_ptr = std::bit_cast<char*>(file_buffer.data());
+    file.read(data_ptr, file_size);
+    file.close();
+
+    return Shader{file_buffer};
 }
 
 Filesystem& Filesystem::get() {

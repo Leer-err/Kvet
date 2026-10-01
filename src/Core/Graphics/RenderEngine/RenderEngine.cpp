@@ -25,7 +25,6 @@ RenderEngine::RenderEngine(const vkb::Instance& instance,
                            const VmaAllocator& allocator, VkSurfaceKHR surface)
     : backend(instance, device, graphics_queue, presentation_queue, allocator,
               surface),
-      shader_registry(this->backend.getDevice()),
       staging_buffer(this->backend.getDevice()),
       resource_manager(this->backend.getDevice(), staging_buffer) {}
 
@@ -50,7 +49,7 @@ void RenderEngine::render() {
 }
 
 EngineData RenderEngine::getEngineData() {
-    return EngineData{shader_registry, staging_buffer, resource_manager};
+    return EngineData{staging_buffer, resource_manager};
 }
 
 const IRenderWorld* RenderEngine::getRenderWorld() const { return &world; }

@@ -1,36 +1,31 @@
 #include "GraphicsPipelineBuilder.h"
 
+#include <spirv_reflect.h>
 #include <vulkan/vulkan.h>
+#include <vulkan/vulkan_core.h>
 
 #include <array>
 
 #include "GraphicsPipeline.h"
-#include "InputLayout.h"
-#include "InputLayoutBuilder.h"
 #include "Rasterizer.h"
 #include "Shader.h"
-#include "ShaderBuilder.h"
 
 namespace Graphics {
 
 GraphicsPipelineBuilder::GraphicsPipelineBuilder(
-    const std::string& mesh_shader_filename,
-    const std::string& mesh_shader_entrypoint,
-    const std::string& pixel_shader_filename,
-    const std::string& pixel_shader_entrypoint)
-    : mesh_shader_filename(mesh_shader_filename),
-      mesh_shader_entrypoint(mesh_shader_entrypoint),
-      pixel_shader_filename(pixel_shader_filename),
-      pixel_shader_entrypoint(pixel_shader_entrypoint),
+    std::span<const uint8_t> shader_bytecode)
+    : shader_bytecode(shader_bytecode),
       render_target_format(VK_FORMAT_R8G8B8A8_SRGB),
       rasterization_state(Graphics::Rasterizer::fill()) {}
 
-static VkPipelineShaderStageCreateInfo getStageInfo(const Shader& shader) {
+static VkPipelineShaderStageCreateInfo getStageInfo(
+    const Shader& shader, std::string_view entrypoint,
+    VkShaderStageFlagBits stage) {
     VkPipelineShaderStageCreateInfo stage_info = {};
     stage_info.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-    stage_info.stage = shader.stage;
-    stage_info.module = shader.shader;
-    stage_info.pName = shader.entrypoint.c_str();
+    stage_info.stage = stage;
+    stage_info.module = shader.getShader();
+    stage_info.pName = entrypoint.data();
 
     return stage_info;
 }
@@ -51,41 +46,44 @@ GraphicsPipelineBuilder& GraphicsPipelineBuilder::writesDepth() {
     return *this;
 }
 
-Result<GraphicsPipeline, GraphicsPipelineBuilder::Error>
-GraphicsPipelineBuilder::create(Device& device,
-                                ShaderRegistry& shader_registry) {
-    auto mesh_shader_result =
-        createShader(device, shader_registry, mesh_shader_filename,
-                     mesh_shader_entrypoint, VK_SHADER_STAGE_MESH_BIT_EXT);
-    auto pixel_shader_result =
-        createShader(device, shader_registry, pixel_shader_filename,
-                     pixel_shader_entrypoint, VK_SHADER_STAGE_FRAGMENT_BIT);
+Result<std::vector<size_t>, GraphicsPipelineBuilder::Error>
+GraphicsPipelineBuilder::pushConstantsSize(std::span<const uint8_t> bytecode) {
+    SpvReflectShaderModule module;
+    SpvReflectResult result =
+        spvReflectCreateShaderModule(bytecode.size(), bytecode.data(), &module);
+    if (result != SPV_REFLECT_RESULT_SUCCESS) return Error::ShaderNotBuilt;
 
-    if (mesh_shader_result.isError() || pixel_shader_result.isError())
+    uint32_t var_count = 0;
+    result = spvReflectEnumeratePushConstantBlocks(&module, &var_count, NULL);
+    if (result != SPV_REFLECT_RESULT_SUCCESS) return Error::ShaderNotBuilt;
+
+    auto push_vars = new SpvReflectBlockVariable*[var_count];
+    result =
+        spvReflectEnumeratePushConstantBlocks(&module, &var_count, push_vars);
+    if (result != SPV_REFLECT_RESULT_SUCCESS) {
+        delete[] push_vars;
         return Error::ShaderNotBuilt;
-
-    auto vertex_shader = mesh_shader_result.getResult();
-    auto pixel_shader = pixel_shader_result.getResult();
-
-    auto input_layout_result =
-        InputLayoutBuilder(shader_registry, mesh_shader_filename).create();
-
-    if (input_layout_result.isError()) {
-        switch (input_layout_result.getError()) {
-            case InputLayoutBuilder::Error::FileNotFound:
-            case InputLayoutBuilder::Error::ParseError:
-                return Error::ShaderNotBuilt;
-            case InputLayoutBuilder::Error::UnsupportedElementFormat:
-                return Error::VertexInputTypeNotSupported;
-        }
     }
 
-    auto input_layout = input_layout_result.getResult();
+    auto constants = std::vector<size_t>{var_count};
+    for (int i = 0; i < var_count; i++) constants[i] = push_vars[i]->size;
+
+    delete[] push_vars;
+
+    return constants;
+}
+
+Result<GraphicsPipeline, GraphicsPipelineBuilder::Error>
+GraphicsPipelineBuilder::create(Device& device) {
+    auto shader_result = device.createShader(shader_bytecode);
+    if (shader_result.isError()) return Error::ShaderNotBuilt;
+    auto shader = shader_result.getResult();
 
     auto device_properties = device.getDeviceProperties();
 
-    std::array shader_stages = {getStageInfo(vertex_shader),
-                                getStageInfo(pixel_shader)};
+    std::array shader_stages = {
+        getStageInfo(shader, "mesh_main", VK_SHADER_STAGE_MESH_BIT_EXT),
+        getStageInfo(shader, "pixel_main", VK_SHADER_STAGE_FRAGMENT_BIT)};
     VkPipelineInputAssemblyStateCreateInfo input_assembly_state = {};
     input_assembly_state.sType =
         VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
@@ -148,6 +146,8 @@ GraphicsPipelineBuilder::create(Device& device,
         VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
     multisampling_state.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
 
+    auto constants_size = pushConstantsSize(shader_bytecode);
+    if (constants_size.isError()) return constants_size.getError();
     VkGraphicsPipelineCreateInfo pipeline_info = {};
     pipeline_info.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
     pipeline_info.pNext = &rendering;
@@ -162,23 +162,10 @@ GraphicsPipelineBuilder::create(Device& device,
     pipeline_info.pColorBlendState = &color_blend_state;
     pipeline_info.pDynamicState = &dynamic_state;
     pipeline_info.layout =
-        device.createPipelineLayout(input_layout.push_constants);
+        device.createPipelineLayout(constants_size.getResult());
     pipeline_info.flags = VK_PIPELINE_CREATE_DESCRIPTOR_BUFFER_BIT_EXT;
 
     return device.createGraphicsPipeline(pipeline_info);
 }
 
-Result<Shader, GraphicsPipelineBuilder::Error>
-GraphicsPipelineBuilder::createShader(Device& device,
-                                      ShaderRegistry& shader_registry,
-                                      const std::string& filename,
-                                      const std::string& entrypoint,
-                                      VkShaderStageFlagBits stage) {
-    auto shader_build_result =
-        ShaderBuilder(filename, entrypoint, stage).create(shader_registry);
-
-    if (shader_build_result.isError()) return Error::ShaderNotBuilt;
-
-    return shader_build_result.getResult();
-}
 }  // namespace Graphics

@@ -13,7 +13,6 @@
 #include "RenderPass.h"
 #include "RenderWorld.h"
 #include "RenderingBackend.h"
-#include "ShaderRegistry.h"
 #include "StagingBuffer.h"
 #include "VkBootstrap.h"
 
@@ -42,8 +41,6 @@ class RenderEngine final : public IRenderEngine {
     void waitRenderFinished();
 
     RenderingBackend backend;
-
-    ShaderRegistry shader_registry;
 
     StagingBuffer staging_buffer;
 
