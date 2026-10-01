@@ -15,14 +15,6 @@ class ResourceRegistryBase {
     explicit ResourceRegistryBase(PoolAllocator& allocator)
         : allocator(allocator) {}
 
-    uint8_t* allocate() {
-        auto memory = allocator.allocate();
-        if (memory == nullptr) return nullptr;
-
-        ref_counters.emplace(memory, 1);
-        return memory;
-    }
-
     void acquire(uint8_t* ptr) {
         auto it = ref_counters.find(ptr);
         assert(it != ref_counters.end());
@@ -42,6 +34,14 @@ class ResourceRegistryBase {
     }
 
    protected:
+    uint8_t* allocate() {
+        auto memory = allocator.allocate();
+        if (memory == nullptr) return nullptr;
+
+        ref_counters.emplace(memory, 1);
+        return memory;
+    }
+
     virtual void remove(uint8_t* ptr) {
         allocator.free(std::bit_cast<uint8_t*>(ptr));
     }

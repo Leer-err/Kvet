@@ -21,14 +21,14 @@ struct CommandBuffer {
     void blitToBackbuffer(TextureHandle src, SwapChain::BackBuffer& dst) const;
 
     template <typename T>
-    void pushConstants(const GraphicsPipeline& pipeline, const T* constants,
+    void pushConstants(GraphicsPipelineHandle pipeline, const T* constants,
                        size_t constant_offset) const {
         pushConstants(pipeline, constants, constant_offset, sizeof(T));
     }
-    void pushConstants(const GraphicsPipeline& pipeline, const void* constants,
+    void pushConstants(GraphicsPipelineHandle pipeline, const void* constants,
                        size_t constant_offset, size_t constant_size) const;
 
-    void setPipeline(const GraphicsPipeline& pipeline) const;
+    void setPipeline(GraphicsPipelineHandle pipeline) const;
 
     void bindRenderEnviroment(const RenderEnviroment& env) const;
     void unbindRenderEnviroment() const;
@@ -56,6 +56,8 @@ struct CommandBuffer {
     VkCommandBufferSubmitInfo submit() const;
 
     VkCommandBuffer buffer;
+
+    static BufferHandle descriptor_buffer;
 };
 
 }  // namespace Graphics

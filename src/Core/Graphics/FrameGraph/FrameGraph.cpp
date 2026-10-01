@@ -116,7 +116,7 @@ void Pass::writes(TextureHandle texture, VkImageLayout layout) {
 std::string_view Pass::getName() const { return name; }
 
 GraphicsPass::GraphicsPass(
-    std::string_view name, const GraphicsPipeline& pipeline,
+    std::string_view name, GraphicsPipelineHandle pipeline,
     const std::function<void(GraphicsPassExecution&)>& executor)
     : Pass(name), pipeline(pipeline), executor(executor) {}
 
@@ -180,7 +180,7 @@ struct MeshBuffers {
 };
 
 GraphicsPassExecution::GraphicsPassExecution(
-    const CommandBuffer& command_buffer, const GraphicsPipeline& pipeline)
+    const CommandBuffer& command_buffer, GraphicsPipelineHandle pipeline)
     : command_buffer(command_buffer),
       pipeline(pipeline),
       current_push_constant_offset(sizeof(MeshBuffers)) {

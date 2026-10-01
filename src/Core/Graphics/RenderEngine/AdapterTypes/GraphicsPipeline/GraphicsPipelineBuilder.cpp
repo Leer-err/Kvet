@@ -47,23 +47,25 @@ GraphicsPipelineBuilder& GraphicsPipelineBuilder::writesDepth() {
     return *this;
 }
 
-Result<std::vector<size_t>, GraphicsPipelineBuilder::Error>
+Result<std::vector<size_t>, GraphicsPipeline::Error>
 GraphicsPipelineBuilder::pushConstantsSize(std::span<const uint8_t> bytecode) {
     SpvReflectShaderModule module;
     SpvReflectResult result =
         spvReflectCreateShaderModule(bytecode.size(), bytecode.data(), &module);
-    if (result != SPV_REFLECT_RESULT_SUCCESS) return Error::ShaderNotBuilt;
+    if (result != SPV_REFLECT_RESULT_SUCCESS)
+        return GraphicsPipeline::Error::ShaderNotBuilt;
 
     uint32_t var_count = 0;
     result = spvReflectEnumeratePushConstantBlocks(&module, &var_count, NULL);
-    if (result != SPV_REFLECT_RESULT_SUCCESS) return Error::ShaderNotBuilt;
+    if (result != SPV_REFLECT_RESULT_SUCCESS)
+        return GraphicsPipeline::Error::ShaderNotBuilt;
 
     auto push_vars = new SpvReflectBlockVariable*[var_count];
     result =
         spvReflectEnumeratePushConstantBlocks(&module, &var_count, push_vars);
     if (result != SPV_REFLECT_RESULT_SUCCESS) {
         delete[] push_vars;
-        return Error::ShaderNotBuilt;
+        return GraphicsPipeline::Error::ShaderNotBuilt;
     }
 
     auto constants = std::vector<size_t>{var_count};
@@ -74,10 +76,10 @@ GraphicsPipelineBuilder::pushConstantsSize(std::span<const uint8_t> bytecode) {
     return constants;
 }
 
-Result<GraphicsPipeline, GraphicsPipelineBuilder::Error>
+Result<GraphicsPipelineHandle, GraphicsPipeline::Error>
 GraphicsPipelineBuilder::create(Device& device) {
     auto shader_result = device.createShader(shader_bytecode);
-    if (shader_result.isError()) return Error::ShaderNotBuilt;
+    if (shader_result.isError()) return GraphicsPipeline::Error::ShaderNotBuilt;
     auto shader = shader_result.getResult();
 
     auto device_properties = device.getDeviceProperties();
@@ -86,13 +88,22 @@ GraphicsPipelineBuilder::create(Device& device) {
         getStageInfo(shader, "mesh_main", VK_SHADER_STAGE_MESH_BIT_EXT),
         getStageInfo(shader, "pixel_main", VK_SHADER_STAGE_FRAGMENT_BIT)};
 
-    auto blending_state = blendingSettings(true);
-    auto rendering = renderingSettings(device_properties, render_target_format);
+    auto blend_attachment = blendingSettings(true);
+    auto rendering =
+        renderingSettings(device_properties, &render_target_format);
     auto input_assembly_state = inputAssemblySettings();
     auto viewport_state = viewportSettings();
     auto multisampling_state = multisamplingSettings();
     auto depth_stencil_state = depthSettings(depth_enabled, depth_write);
     auto dynamic_state = dynamicStateSettings();
+
+    VkPipelineColorBlendStateCreateInfo blending_state = {};
+    blending_state.sType =
+        VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
+    blending_state.logicOpEnable = VK_FALSE;
+    blending_state.logicOp = VK_LOGIC_OP_COPY;
+    blending_state.attachmentCount = 1;
+    blending_state.pAttachments = &blend_attachment;
 
     auto constants_size = pushConstantsSize(shader_bytecode);
     if (constants_size.isError()) return constants_size.getError();
@@ -116,29 +127,21 @@ GraphicsPipelineBuilder::create(Device& device) {
     return device.createGraphicsPipeline(pipeline_info);
 }
 
-VkPipelineColorBlendStateCreateInfo GraphicsPipelineBuilder::blendingSettings(
+VkPipelineColorBlendAttachmentState GraphicsPipelineBuilder::blendingSettings(
     bool alpha_blend_enable) {
-    VkPipelineColorBlendAttachmentState blendAttachment = {};
-    blendAttachment.colorWriteMask =
+    VkPipelineColorBlendAttachmentState attachment = {};
+    attachment.colorWriteMask =
         VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT |
         VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
-    blendAttachment.blendEnable = alpha_blend_enable;
-    blendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
-    blendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
-    blendAttachment.colorBlendOp = VK_BLEND_OP_ADD;
-    blendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
-    blendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
-    blendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
+    attachment.blendEnable = alpha_blend_enable;
+    attachment.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
+    attachment.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+    attachment.colorBlendOp = VK_BLEND_OP_ADD;
+    attachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
+    attachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
+    attachment.alphaBlendOp = VK_BLEND_OP_ADD;
 
-    VkPipelineColorBlendStateCreateInfo color_blend_state = {};
-    color_blend_state.sType =
-        VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
-    color_blend_state.logicOpEnable = VK_FALSE;
-    color_blend_state.logicOp = VK_LOGIC_OP_COPY;
-    color_blend_state.attachmentCount = 1;
-    color_blend_state.pAttachments = &blendAttachment;
-
-    return color_blend_state;
+    return attachment;
 }
 
 VkPipelineMultisampleStateCreateInfo
@@ -164,21 +167,21 @@ VkPipelineDepthStencilStateCreateInfo GraphicsPipelineBuilder::depthSettings(
 }
 
 VkPipelineRenderingCreateInfo GraphicsPipelineBuilder::renderingSettings(
-    const DeviceProperties& properties, VkFormat render_target_format) {
+    const DeviceProperties& properties, const VkFormat* render_target_format) {
     VkPipelineRenderingCreateInfo rendering = {};
     rendering.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO;
     rendering.depthAttachmentFormat = properties.depth_format;
     rendering.stencilAttachmentFormat = properties.depth_format;
     rendering.colorAttachmentCount = 1;
-    rendering.pColorAttachmentFormats = &render_target_format;
+    rendering.pColorAttachmentFormats = render_target_format;
 
     return rendering;
 }
 
 VkPipelineDynamicStateCreateInfo
 GraphicsPipelineBuilder::dynamicStateSettings() {
-    constexpr std::array dynamic_states = {VK_DYNAMIC_STATE_VIEWPORT,
-                                           VK_DYNAMIC_STATE_SCISSOR};
+    static constexpr std::array dynamic_states = {VK_DYNAMIC_STATE_VIEWPORT,
+                                                  VK_DYNAMIC_STATE_SCISSOR};
 
     VkPipelineDynamicStateCreateInfo dynamic_state = {};
     dynamic_state.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;

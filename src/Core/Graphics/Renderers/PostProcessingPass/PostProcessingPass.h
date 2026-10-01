@@ -36,7 +36,7 @@ class PostProcessingPass {
 
     EngineData engine_data;
 
-    GraphicsPipeline pipeline;
+    GraphicsPipelineHandle pipeline;
     MeshHandle quad;
 
     BufferHandle dithering_data_buffer;

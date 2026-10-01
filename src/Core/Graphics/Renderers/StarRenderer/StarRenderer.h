@@ -37,7 +37,7 @@ class StarRenderer {
 
     MeshHandle quad;
 
-    GraphicsPipeline pipeline;
+    GraphicsPipelineHandle pipeline;
 
     BufferHandle stars_data_buffer;
 

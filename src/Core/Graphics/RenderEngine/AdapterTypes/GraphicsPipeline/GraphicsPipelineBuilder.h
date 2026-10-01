@@ -13,8 +13,6 @@ namespace Graphics {
 
 class GraphicsPipelineBuilder {
    public:
-    enum class Error { ShaderNotBuilt, VertexInputTypeNotSupported };
-
     GraphicsPipelineBuilder(std::span<const uint8_t> shader_bytecode);
 
     GraphicsPipelineBuilder& setRasterizer(
@@ -25,23 +23,25 @@ class GraphicsPipelineBuilder {
     GraphicsPipelineBuilder& writesDepth();
     GraphicsPipelineBuilder& disableDepthTest();
 
-    Result<GraphicsPipeline, Error> create(Device& device);
+    Result<GraphicsPipelineHandle, GraphicsPipeline::Error> create(
+        Device& device);
 
    private:
-    static Result<std::vector<size_t>, GraphicsPipelineBuilder::Error>
+    static Result<std::vector<size_t>, GraphicsPipeline::Error>
     pushConstantsSize(std::span<const uint8_t> bytecode);
 
-    Result<Shader, GraphicsPipelineBuilder::Error> createShader(
+    Result<Shader, GraphicsPipeline::Error> createShader(
         Device& device, const std::string& filename,
         const std::string& entrypoint, VkShaderStageFlagBits stage);
 
-    static VkPipelineColorBlendStateCreateInfo blendingSettings(
+    static VkPipelineColorBlendAttachmentState blendingSettings(
         bool alpha_blend_enable);
     static VkPipelineMultisampleStateCreateInfo multisamplingSettings();
     static VkPipelineDepthStencilStateCreateInfo depthSettings(bool test,
                                                                bool write);
     static VkPipelineRenderingCreateInfo renderingSettings(
-        const DeviceProperties& properties, VkFormat render_target_format);
+        const DeviceProperties& properties,
+        const VkFormat* render_target_format);
     static VkPipelineDynamicStateCreateInfo dynamicStateSettings();
     static VkPipelineViewportStateCreateInfo viewportSettings();
     static VkPipelineInputAssemblyStateCreateInfo inputAssemblySettings();

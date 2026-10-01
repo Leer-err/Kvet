@@ -33,6 +33,7 @@ constexpr auto MAX_TEXTURE_DESCRIPTORS_COUNT = 1000;
 constexpr auto MAX_SAMPLER_DESCRIPTORS_COUNT = 1000;
 constexpr auto MAX_BUFFERS_COUNT = 1000;
 constexpr auto MAX_MESHES_COUNT = 1000;
+constexpr auto MAX_PIPELINES_COUNT = 1000;
 
 namespace Graphics {
 
@@ -48,6 +49,9 @@ Device::Device(const vkb::Instance& instance, const vkb::Device& device,
       texture_registry(texture_allocator),
       mesh_allocator(MAX_MESHES_COUNT, sizeof(Mesh), alignof(Mesh)),
       mesh_registry(mesh_allocator),
+      pipeline_allocator(MAX_PIPELINES_COUNT, sizeof(GraphicsPipeline),
+                         alignof(GraphicsPipeline)),
+      pipeline_registry(pipeline_allocator),
       descriptor_layout(createDescriptorLayout(device)),
       descriptors(createDescriptorBuffer(
           descriptor_layout.layout_size,
@@ -56,6 +60,7 @@ Device::Device(const vkb::Instance& instance, const vkb::Device& device,
       sampler_descriptor_allocator(MAX_SAMPLER_DESCRIPTORS_COUNT),
       logger(LoggerFactory::getLogger("GraphicsDevice")) {
     properties = DeviceProperties::readProperties(device.physical_device);
+    CommandBuffer::descriptor_buffer = descriptors;
 }
 
 Device::~Device() {
@@ -220,13 +225,13 @@ VkPipelineLayout Device::createPipelineLayout(
     return pipeline_layout;
 }
 
-GraphicsPipeline Device::createGraphicsPipeline(
+Result<GraphicsPipelineHandle, GraphicsPipeline::Error>
+Device::createGraphicsPipeline(
     const VkGraphicsPipelineCreateInfo& pipeline_info) {
-    VkPipeline pipeline;
-    VkResult result = vkCreateGraphicsPipelines(
-        device, VK_NULL_HANDLE, 1, &pipeline_info, nullptr, &pipeline);
+    auto pipeline_result = GraphicsPipeline::create(device, pipeline_info);
+    if (pipeline_result.isError()) return pipeline_result.getError();
 
-    return GraphicsPipeline{pipeline, pipeline_info.layout, descriptors};
+    return pipeline_registry.create(pipeline_result.getResult());
 }
 
 SamplerDescriptor Device::createSampler(

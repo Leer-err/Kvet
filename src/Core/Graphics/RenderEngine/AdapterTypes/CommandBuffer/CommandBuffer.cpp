@@ -1,7 +1,6 @@
 #include "CommandBuffer.h"
 
 #include <vulkan/vulkan.h>
-#include <vulkan/vulkan_core.h>
 
 #include <cstddef>
 
@@ -11,6 +10,8 @@
 #include "Texture.h"
 
 namespace Graphics {
+
+BufferHandle CommandBuffer::descriptor_buffer = {};
 
 struct MeshData {
     VkDeviceAddress vertices;
@@ -79,31 +80,31 @@ void CommandBuffer::blitToBackbuffer(TextureHandle src,
     vkCmdBlitImage2(buffer, &info);
 }
 
-void CommandBuffer::pushConstants(const GraphicsPipeline& pipeline,
+void CommandBuffer::pushConstants(GraphicsPipelineHandle pipeline,
                                   const void* constants, size_t constant_offset,
                                   size_t constant_size) const {
     constexpr VkShaderStageFlags stages = VK_SHADER_STAGE_TASK_BIT_EXT |
                                           VK_SHADER_STAGE_MESH_BIT_EXT |
                                           VK_SHADER_STAGE_FRAGMENT_BIT;
 
-    vkCmdPushConstants(buffer, pipeline.layout, stages, constant_offset,
+    vkCmdPushConstants(buffer, pipeline->getLayout(), stages, constant_offset,
                        constant_size, constants);
 }
 
-void CommandBuffer::setPipeline(const GraphicsPipeline& pipeline) const {
+void CommandBuffer::setPipeline(GraphicsPipelineHandle pipeline) const {
     vkCmdBindPipeline(buffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-                      pipeline.pipeline);
+                      pipeline->getPipeline());
 
     VkDescriptorBufferBindingInfoEXT info = {};
     info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_BUFFER_BINDING_INFO_EXT;
-    info.address = pipeline.descriptors->getDeviceAddress();
+    info.address = descriptor_buffer->getDeviceAddress();
     info.usage = VK_BUFFER_USAGE_RESOURCE_DESCRIPTOR_BUFFER_BIT_EXT;
     vkCmdBindDescriptorBuffersEXT(buffer, 1, &info);
 
     uint32_t indices = {};
     VkDeviceSize offsets = {};
     vkCmdSetDescriptorBufferOffsetsEXT(buffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-                                       pipeline.layout, 0, 1, &indices,
+                                       pipeline->getLayout(), 0, 1, &indices,
                                        &offsets);
 }
 

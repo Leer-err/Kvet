@@ -2,6 +2,7 @@
 
 #include "Buffer.h"
 #include "GraphicsMesh.h"
+#include "GraphicsPipeline.h"
 #include "Handle.h"
 #include "Texture.h"
 
@@ -10,5 +11,6 @@ namespace Graphics {
 using TextureHandle = Handle<Texture>;
 using BufferHandle = Handle<Buffer>;
 using MeshHandle = Handle<Mesh>;
+using GraphicsPipelineHandle = Handle<GraphicsPipeline>;
 
 }  // namespace Graphics

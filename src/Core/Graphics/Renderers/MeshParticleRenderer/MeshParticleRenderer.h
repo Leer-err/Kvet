@@ -33,7 +33,7 @@ class MeshParticleRenderer {
 
     BufferHandle particle_buffer;
 
-    GraphicsPipeline pipeline;
+    GraphicsPipelineHandle pipeline;
     PushConstants push_constants;
 };
 

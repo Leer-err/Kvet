@@ -16,6 +16,7 @@
 #include "Graphics.h"
 #include "GraphicsMesh.h"
 #include "GraphicsPipeline.h"
+#include "Handles.h"
 #include "Texture.h"
 
 namespace Graphics {
@@ -23,7 +24,7 @@ namespace Graphics {
 class GraphicsPassExecution {
    public:
     GraphicsPassExecution(const CommandBuffer& command_buffer,
-                          const GraphicsPipeline& pipeline);
+                          GraphicsPipelineHandle pipeline);
     ~GraphicsPassExecution();
 
     template <typename T>
@@ -37,7 +38,7 @@ class GraphicsPassExecution {
    private:
     CommandBuffer command_buffer;
 
-    GraphicsPipeline pipeline;
+    GraphicsPipelineHandle pipeline;
     size_t current_push_constant_offset;
 };
 
@@ -79,7 +80,7 @@ class GraphicsPass : public Pass {
     };
 
    public:
-    GraphicsPass(std::string_view name, const GraphicsPipeline& pipeline,
+    GraphicsPass(std::string_view name, GraphicsPipelineHandle pipeline,
                  const std::function<void(GraphicsPassExecution&)>& executor);
 
     void addColorAttachment(TextureHandle texture);
@@ -91,7 +92,7 @@ class GraphicsPass : public Pass {
     void execute(const CommandBuffer& command_buffer);
 
    private:
-    GraphicsPipeline pipeline;
+    GraphicsPipelineHandle pipeline;
 
     std::vector<Attachment> color_attachments;
     std::optional<Attachment> depth_attachment;

@@ -35,7 +35,7 @@ class ParticleRenderer {
     BufferHandle particle_buffer;
     BufferHandle live_particles_buffer;
 
-    GraphicsPipeline pipeline;
+    GraphicsPipelineHandle pipeline;
     PushConstants push_constants;
     MeshHandle quad;
 };

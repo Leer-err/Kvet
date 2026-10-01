@@ -9,6 +9,7 @@
 #include "EngineData.h"
 #include "FrameData.h"
 #include "FrameGraph.h"
+#include "Handles.h"
 #include "Matrix.h"
 #include "RenderWorld.h"
 
@@ -41,7 +42,7 @@ class StaticMeshRenderer {
     static BufferHandle createModelBuffer(Device& device);
     EngineData engine_data;
 
-    GraphicsPipeline pipeline;
+    GraphicsPipelineHandle pipeline;
 
     BufferHandle model_data_buffer;
 

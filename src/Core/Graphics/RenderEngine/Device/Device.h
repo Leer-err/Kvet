@@ -18,6 +18,7 @@
 #include "Registries.h"
 #include "Result.h"
 #include "Semaphore.h"
+#include "Shader.h"
 
 namespace Graphics {
 
@@ -62,8 +63,8 @@ class Device {
 
     VkPipelineLayout createPipelineLayout(
         const std::vector<size_t>& push_constant_ranges);
-    GraphicsPipeline createGraphicsPipeline(
-        const VkGraphicsPipelineCreateInfo& pipeline_info);
+    Result<GraphicsPipelineHandle, GraphicsPipeline::Error>
+    createGraphicsPipeline(const VkGraphicsPipelineCreateInfo& pipeline_info);
 
     SamplerDescriptor createSampler(const VkSamplerCreateInfo& sampler_info);
 
@@ -101,6 +102,9 @@ class Device {
 
     PoolAllocator mesh_allocator;
     MeshRegistry mesh_registry;
+
+    PoolAllocator pipeline_allocator;
+    PipelineRegistry pipeline_registry;
 
     DescriptorLayout descriptor_layout;
     DeviceProperties properties;
