@@ -6,10 +6,17 @@
 
 namespace Graphics {
 
-struct GraphicsPipeline {
+// struct GraphicsPipeline {
+//     VkPipeline pipeline;
+//     VkPipelineLayout layout;
+//     BufferHandle descriptors;
+// };
+
+class GraphicsPipeline {
+   public:
+   private:
     VkPipeline pipeline;
     VkPipelineLayout layout;
-    BufferHandle descriptors;
 };
 
 }  // namespace Graphics

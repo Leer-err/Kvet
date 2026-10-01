@@ -35,6 +35,17 @@ class GraphicsPipelineBuilder {
         Device& device, const std::string& filename,
         const std::string& entrypoint, VkShaderStageFlagBits stage);
 
+    static VkPipelineColorBlendStateCreateInfo blendingSettings(
+        bool alpha_blend_enable);
+    static VkPipelineMultisampleStateCreateInfo multisamplingSettings();
+    static VkPipelineDepthStencilStateCreateInfo depthSettings(bool test,
+                                                               bool write);
+    static VkPipelineRenderingCreateInfo renderingSettings(
+        const DeviceProperties& properties, VkFormat render_target_format);
+    static VkPipelineDynamicStateCreateInfo dynamicStateSettings();
+    static VkPipelineViewportStateCreateInfo viewportSettings();
+    static VkPipelineInputAssemblyStateCreateInfo inputAssemblySettings();
+
     std::span<const uint8_t> shader_bytecode;
 
     bool depth_write = false;

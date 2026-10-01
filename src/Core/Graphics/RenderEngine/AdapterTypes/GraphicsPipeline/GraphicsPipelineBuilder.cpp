@@ -6,6 +6,7 @@
 
 #include <array>
 
+#include "DeviceProperties.h"
 #include "GraphicsPipeline.h"
 #include "Rasterizer.h"
 #include "Shader.h"
@@ -84,48 +85,44 @@ GraphicsPipelineBuilder::create(Device& device) {
     std::array shader_stages = {
         getStageInfo(shader, "mesh_main", VK_SHADER_STAGE_MESH_BIT_EXT),
         getStageInfo(shader, "pixel_main", VK_SHADER_STAGE_FRAGMENT_BIT)};
-    VkPipelineInputAssemblyStateCreateInfo input_assembly_state = {};
-    input_assembly_state.sType =
-        VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
-    input_assembly_state.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
 
-    VkPipelineVertexInputStateCreateInfo vertex_input_state = {};
-    vertex_input_state.sType =
-        VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+    auto blending_state = blendingSettings(true);
+    auto rendering = renderingSettings(device_properties, render_target_format);
+    auto input_assembly_state = inputAssemblySettings();
+    auto viewport_state = viewportSettings();
+    auto multisampling_state = multisamplingSettings();
+    auto depth_stencil_state = depthSettings(depth_enabled, depth_write);
+    auto dynamic_state = dynamicStateSettings();
 
-    VkPipelineViewportStateCreateInfo viewport_state = {};
-    viewport_state.sType =
-        VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
-    viewport_state.viewportCount = 1;
-    viewport_state.scissorCount = 1;
+    auto constants_size = pushConstantsSize(shader_bytecode);
+    if (constants_size.isError()) return constants_size.getError();
+    VkGraphicsPipelineCreateInfo pipeline_info = {};
+    pipeline_info.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+    pipeline_info.pNext = &rendering;
+    pipeline_info.stageCount = shader_stages.size();
+    pipeline_info.pStages = shader_stages.data();
+    pipeline_info.pVertexInputState = nullptr;
+    pipeline_info.pInputAssemblyState = &input_assembly_state;
+    pipeline_info.pViewportState = &viewport_state;
+    pipeline_info.pMultisampleState = &multisampling_state;
+    pipeline_info.pDepthStencilState = &depth_stencil_state;
+    pipeline_info.pRasterizationState = &rasterization_state;
+    pipeline_info.pColorBlendState = &blending_state;
+    pipeline_info.pDynamicState = &dynamic_state;
+    pipeline_info.layout =
+        device.createPipelineLayout(constants_size.getResult());
+    pipeline_info.flags = VK_PIPELINE_CREATE_DESCRIPTOR_BUFFER_BIT_EXT;
 
-    std::array dynamic_states = {VK_DYNAMIC_STATE_VIEWPORT,
-                                 VK_DYNAMIC_STATE_SCISSOR};
+    return device.createGraphicsPipeline(pipeline_info);
+}
 
-    VkPipelineDynamicStateCreateInfo dynamic_state = {};
-    dynamic_state.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
-    dynamic_state.dynamicStateCount = dynamic_states.size();
-    dynamic_state.pDynamicStates = dynamic_states.data();
-
-    VkPipelineDepthStencilStateCreateInfo depth_stencil_state = {};
-    depth_stencil_state.sType =
-        VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
-    depth_stencil_state.depthTestEnable = depth_enabled;
-    depth_stencil_state.depthWriteEnable = depth_write;
-    depth_stencil_state.depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL;
-
-    VkPipelineRenderingCreateInfo rendering = {};
-    rendering.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO;
-    rendering.depthAttachmentFormat = device_properties.depth_format;
-    rendering.stencilAttachmentFormat = device_properties.depth_format;
-    rendering.colorAttachmentCount = 1;
-    rendering.pColorAttachmentFormats = &render_target_format;
-
+VkPipelineColorBlendStateCreateInfo GraphicsPipelineBuilder::blendingSettings(
+    bool alpha_blend_enable) {
     VkPipelineColorBlendAttachmentState blendAttachment = {};
     blendAttachment.colorWriteMask =
         VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT |
         VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
-    blendAttachment.blendEnable = true;
+    blendAttachment.blendEnable = alpha_blend_enable;
     blendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
     blendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
     blendAttachment.colorBlendOp = VK_BLEND_OP_ADD;
@@ -141,31 +138,74 @@ GraphicsPipelineBuilder::create(Device& device) {
     color_blend_state.attachmentCount = 1;
     color_blend_state.pAttachments = &blendAttachment;
 
+    return color_blend_state;
+}
+
+VkPipelineMultisampleStateCreateInfo
+GraphicsPipelineBuilder::multisamplingSettings() {
     VkPipelineMultisampleStateCreateInfo multisampling_state = {};
     multisampling_state.sType =
         VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
     multisampling_state.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
 
-    auto constants_size = pushConstantsSize(shader_bytecode);
-    if (constants_size.isError()) return constants_size.getError();
-    VkGraphicsPipelineCreateInfo pipeline_info = {};
-    pipeline_info.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-    pipeline_info.pNext = &rendering;
-    pipeline_info.stageCount = shader_stages.size();
-    pipeline_info.pStages = shader_stages.data();
-    pipeline_info.pVertexInputState = nullptr;
-    pipeline_info.pInputAssemblyState = &input_assembly_state;
-    pipeline_info.pViewportState = &viewport_state;
-    pipeline_info.pMultisampleState = &multisampling_state;
-    pipeline_info.pDepthStencilState = &depth_stencil_state;
-    pipeline_info.pRasterizationState = &rasterization_state;
-    pipeline_info.pColorBlendState = &color_blend_state;
-    pipeline_info.pDynamicState = &dynamic_state;
-    pipeline_info.layout =
-        device.createPipelineLayout(constants_size.getResult());
-    pipeline_info.flags = VK_PIPELINE_CREATE_DESCRIPTOR_BUFFER_BIT_EXT;
+    return multisampling_state;
+}
 
-    return device.createGraphicsPipeline(pipeline_info);
+VkPipelineDepthStencilStateCreateInfo GraphicsPipelineBuilder::depthSettings(
+    bool test, bool write) {
+    VkPipelineDepthStencilStateCreateInfo depth_stencil_state = {};
+    depth_stencil_state.sType =
+        VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
+    depth_stencil_state.depthTestEnable = test;
+    depth_stencil_state.depthWriteEnable = write;
+    depth_stencil_state.depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL;
+
+    return depth_stencil_state;
+}
+
+VkPipelineRenderingCreateInfo GraphicsPipelineBuilder::renderingSettings(
+    const DeviceProperties& properties, VkFormat render_target_format) {
+    VkPipelineRenderingCreateInfo rendering = {};
+    rendering.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO;
+    rendering.depthAttachmentFormat = properties.depth_format;
+    rendering.stencilAttachmentFormat = properties.depth_format;
+    rendering.colorAttachmentCount = 1;
+    rendering.pColorAttachmentFormats = &render_target_format;
+
+    return rendering;
+}
+
+VkPipelineDynamicStateCreateInfo
+GraphicsPipelineBuilder::dynamicStateSettings() {
+    constexpr std::array dynamic_states = {VK_DYNAMIC_STATE_VIEWPORT,
+                                           VK_DYNAMIC_STATE_SCISSOR};
+
+    VkPipelineDynamicStateCreateInfo dynamic_state = {};
+    dynamic_state.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
+    dynamic_state.dynamicStateCount = dynamic_states.size();
+    dynamic_state.pDynamicStates = dynamic_states.data();
+
+    return dynamic_state;
+}
+
+VkPipelineViewportStateCreateInfo GraphicsPipelineBuilder::viewportSettings() {
+    VkPipelineViewportStateCreateInfo viewport_state = {};
+    viewport_state.sType =
+        VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
+    viewport_state.viewportCount = 1;
+    viewport_state.scissorCount = 1;
+
+    return viewport_state;
+}
+
+VkPipelineInputAssemblyStateCreateInfo
+GraphicsPipelineBuilder::inputAssemblySettings() {
+    VkPipelineInputAssemblyStateCreateInfo input_assembly_state = {};
+    input_assembly_state.sType =
+        VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
+    input_assembly_state.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+
+    return input_assembly_state;
 }
 
 }  // namespace Graphics

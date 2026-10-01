@@ -15,6 +15,7 @@ class Texture;
 
 using TextureIndex = ResourceIndex<Texture>;
 using MeshIndex = ResourceIndex<Mesh>;
+using PipelineIndex = ResourceIndex<GraphicsPipeline>;
 
 class ResourceManager final : public IResourceManager {
    public:
@@ -30,6 +31,7 @@ class ResourceManager final : public IResourceManager {
    private:
     TextureIndex texture_index;
     MeshIndex mesh_index;
+    PipelineIndex pipeline_index;
 
     Device& device;
     StagingBuffer& staging_buffer;
