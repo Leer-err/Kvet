@@ -11,6 +11,7 @@ target_include_directories(tracy INTERFACE
 
 target_link_directories(tracy INTERFACE
 	${CMAKE_CURRENT_SOURCE_DIR}/tracy/build
+	${CMAKE_CURRENT_SOURCE_DIR}/tracy/build/${CMAKE_BUILD_TYPE}
 )
 
 target_link_libraries(tracy 
@@ -183,6 +184,7 @@ target_include_directories(sdl INTERFACE
 
 target_link_directories(sdl INTERFACE
 	${CMAKE_CURRENT_SOURCE_DIR}/sdl/build
+	${CMAKE_CURRENT_SOURCE_DIR}/sdl/build/${CMAKE_BUILD_TYPE}
 )
 
 target_link_libraries(sdl 
