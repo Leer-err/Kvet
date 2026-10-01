@@ -14,8 +14,7 @@ class MeshParticleRenderer {
 
     struct PushConstants {
         VkDeviceAddress camera_data;
-        VkDeviceAddress particles_data;
-        ParticleHandle particle_index;
+        VkDeviceAddress particle_data;
     };
 
    public:

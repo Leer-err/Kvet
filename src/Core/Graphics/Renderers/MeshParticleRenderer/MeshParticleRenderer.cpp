@@ -40,7 +40,7 @@ void MeshParticleRenderer::render(FrameGraph& frame_graph,
         auto pass =
             GraphicsPass("MeshParticles", pipeline,
                          [this, particle, i](GraphicsPassExecution& execution) {
-                             push_constants.particles_data =
+                             push_constants.particle_data =
                                  particle_buffer->getDeviceAddress() +
                                  i * sizeof(MeshParticle);
 

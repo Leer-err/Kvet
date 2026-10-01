@@ -28,7 +28,7 @@ class RenderWorld : public IRenderWorld {
     std::span<const RenderObjectData> getOpaqueObjects() const;
 
     void addEffect(const EffectDescription& description) override;
-    void addMeshEffect(const MeshEffectDescription& description);
+    void addMeshEffect(const MeshEffectDescription& description) override;
 
     void update();
 

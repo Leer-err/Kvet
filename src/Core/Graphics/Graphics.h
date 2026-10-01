@@ -71,6 +71,7 @@ class IRenderWorld {
     virtual void addRenderObject(const RenderObjectData& data) = 0;
 
     virtual void addEffect(const EffectDescription& data) = 0;
+    virtual void addMeshEffect(const MeshEffectDescription& data) = 0;
 };
 
 class IRenderEngine {

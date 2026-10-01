@@ -29,11 +29,10 @@ Result<Graphics::MeshHandle, Error> Manager::getMesh(std::string_view name) {
     auto mesh_result = File::Filesystem::getMesh(name);
     // if (texture_result.isError()) return texture_result.getError();
 
-    auto texture_load_result =
-        resource_manager->addMesh(mesh_result.getResult());
+    auto mesh_load_result = resource_manager->addMesh(mesh_result.getResult());
     // if (texture_load_result.isError()) return texture_load_result.getError();
 
-    return texture_load_result.value();
+    return mesh_load_result.value();
 }
 
 Manager& Manager::get() {
