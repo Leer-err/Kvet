@@ -28,7 +28,7 @@ PostProcessingPass::PostProcessingPass(Device& device,
     auto shader = File::Filesystem::getShader(
                       "Shaders/Pipelines/PostProcess/PostProcessing")
                       .getResult();
-    pipeline = GraphicsPipelineBuilder(shader.data)
+    pipeline = GraphicsPipelineBuilder(shader)
                    .disableDepthTest()
                    .create(device)
                    .getResult();

@@ -20,7 +20,7 @@ MeshParticleRenderer::MeshParticleRenderer(Device& device,
         File::Filesystem::getShader("Shaders/Pipelines/Particles/MeshParticles")
             .getResult();
 
-    pipeline = GraphicsPipelineBuilder(shader.data).create(device).getResult();
+    pipeline = GraphicsPipelineBuilder(shader).create(device).getResult();
 }
 
 void MeshParticleRenderer::render(FrameGraph& frame_graph,

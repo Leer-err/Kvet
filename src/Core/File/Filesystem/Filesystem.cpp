@@ -10,6 +10,7 @@
 #include <filesystem>
 #include <fstream>
 #include <nlohmann/json.hpp>
+#include <string>
 #include <vector>
 
 #include "FileError.h"
@@ -301,7 +302,25 @@ Result<std::vector<uint8_t>, Error> Filesystem::getShader(
     return file_buffer;
 }
 
-Result<Pipeline, Error> Filesystem::getPipeline(std::string_view path) {}
+Result<Pipeline, Error> Filesystem::getPipeline(std::string_view path) {
+    auto full_path = get().base / path;
+    full_path.replace_extension("json");
+
+    auto file = std::ifstream(full_path);
+
+    auto data = json{};
+    file >> data;
+
+    file.close();
+
+    auto depth_test_enable = data["depth_test"].get<bool>();
+    auto depth_write_enable = data["depth_write"].get<bool>();
+    auto shader_file = data["shader"].get<std::string>();
+    auto shader_result = getShader(shader_file);
+
+    return Pipeline{std::string(path), shader_result.getResult(),
+                    depth_test_enable, depth_write_enable};
+}
 
 Filesystem& Filesystem::get() {
     static Filesystem instance;

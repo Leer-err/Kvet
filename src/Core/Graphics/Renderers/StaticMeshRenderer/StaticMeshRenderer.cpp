@@ -24,7 +24,7 @@ StaticMeshRenderer::StaticMeshRenderer(Device& device,
     auto shader =
         File::Filesystem::getShader("Shaders/Pipelines/StaticModel/StaticModel")
             .getResult();
-    pipeline = GraphicsPipelineBuilder(shader.data)
+    pipeline = GraphicsPipelineBuilder(shader)
                    .writesDepth()
                    .create(device)
                    .getResult();

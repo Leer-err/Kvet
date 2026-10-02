@@ -35,6 +35,19 @@ Result<Graphics::MeshHandle, Error> Manager::getMesh(std::string_view name) {
     return mesh_load_result.value();
 }
 
+Result<Graphics::GraphicsPipelineHandle, Error> Manager::getPipeline(
+    std::string_view name) {
+    auto resource_manager = Graphics::getRenderEngine()->getResourceManager();
+    auto handle_opt = resource_manager->getPipeline(name);
+    if (handle_opt.has_value()) return handle_opt.value();
+
+    auto pipeline_result = File::Filesystem::getPipeline(name);
+    auto pipeline_load_result =
+        resource_manager->addPipeline(pipeline_result.getResult());
+
+    return pipeline_load_result.value();
+}
+
 Manager& Manager::get() {
     static auto instance = Manager{};
 

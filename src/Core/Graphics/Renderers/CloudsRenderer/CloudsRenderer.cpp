@@ -115,9 +115,10 @@ Mesh CloudsRenderer::createScreenQuad(Device& device,
 
     constexpr std::array<uint32_t, 6> screen_quad_indices = {0, 1, 2, 1, 3, 2};
 
-    return MeshBuilder(&screen_quad_vertices[0], sizeof(screen_quad_vertices),
-                       &screen_quad_indices[0], sizeof(screen_quad_indices))
-        .create(device, engine_data.staging_buffer);
+    // return MeshBuilder(&screen_quad_vertices[0],
+    // sizeof(screen_quad_vertices),
+    //                    &screen_quad_indices[0], sizeof(screen_quad_indices))
+    //     .create(device, engine_data.staging_buffer);
 }
 
 Mesh CloudsRenderer::createCloudPlane(Device& device,
@@ -130,10 +131,11 @@ Mesh CloudsRenderer::createCloudPlane(Device& device,
 
     constexpr std::array<uint32_t, 6> screen_quad_indices = {0, 1, 2, 1, 3, 2};
 
-    return MeshBuilder(cloud_plane_vertex_data.data(),
-                       sizeof(cloud_plane_vertex_data),
-                       screen_quad_indices.data(), sizeof(screen_quad_indices))
-        .create(device, engine_data.staging_buffer);
+    // return MeshBuilder(cloud_plane_vertex_data.data(),
+    //                    sizeof(cloud_plane_vertex_data),
+    //                    screen_quad_indices.data(),
+    //                    sizeof(screen_quad_indices))
+    //     .create(device, engine_data.staging_buffer);
 }
 
 }  // namespace Graphics

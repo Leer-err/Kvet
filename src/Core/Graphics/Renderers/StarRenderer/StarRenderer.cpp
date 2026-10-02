@@ -25,9 +25,8 @@ StarRenderer::StarRenderer(Device& device, const EngineData& engine_data)
     : engine_data(engine_data),
       quad(createSkyMesh(engine_data)),
       stars_data_buffer(createStarsBuffer(device)) {
-    auto shader = File::Filesystem::getShader("Shaders/Pipelines/Stars/Stars")
-                      .getResult();
-    pipeline = GraphicsPipelineBuilder(shader.data).create(device).getResult();
+    pipeline = engine_data.resource_manager.getPipeline("Shaders/StarPipeline")
+                   .value();
 }
 
 void StarRenderer::render(FrameGraph& frame_graph, const RenderWorld& world) {

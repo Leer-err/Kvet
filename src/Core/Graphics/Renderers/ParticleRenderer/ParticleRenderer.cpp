@@ -23,7 +23,7 @@ ParticleRenderer::ParticleRenderer(Device& device,
     auto shader = File::Filesystem::getShader(
                       "Shaders/Pipelines/Particles/SpriteParticles")
                       .getResult();
-    pipeline = GraphicsPipelineBuilder(shader.data).create(device).getResult();
+    pipeline = GraphicsPipelineBuilder(shader).create(device).getResult();
 }
 
 void ParticleRenderer::render(FrameGraph& frame_graph,
