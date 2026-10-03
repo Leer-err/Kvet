@@ -3,18 +3,25 @@
 #include <span>
 #include <vector>
 
-#include "CameraData.h"
-#include "CloudsData.h"
 #include "EffectDescription.h"
 #include "Graphics.h"
-#include "PostProcessingData.h"
+#include "Handles.h"
+#include "Matrix.h"
+#include "PoolAllocator.h"
 #include "RenderObjectData.h"
-#include "StarsData.h"
+#include "ResourceRegistry.h"
 #include "VFXWorld.h"
 
 namespace Graphics {
 
-using OpaqueObjectHandle = uint32_t;
+struct CustomRenderObjectData {
+    CustomRenderObjectData(const CustomRenderObjectCreateData& data)
+        : model(data.model), pipeline(data.pipeline), mesh(data.mesh) {}
+
+    Matrix model;
+    GraphicsPipelineHandle pipeline;
+    MeshHandle mesh;
+};
 
 class RenderWorld : public IRenderWorld {
    public:
@@ -24,8 +31,10 @@ class RenderWorld : public IRenderWorld {
     const RenderData& renderData() const override;
 
     void addRenderObject(const RenderObjectData& data) override;
-    RenderObjectData& getOpaqueObject(const OpaqueObjectHandle& handle);
     std::span<const RenderObjectData> getOpaqueObjects() const;
+    CustomRenderObject addCustomRenderObject(
+        const CustomRenderObjectCreateData& data) override;
+    std::vector<Handle<CustomRenderObjectData>> getCustomRenderObjects();
 
     void addEffect(const EffectDescription& description) override;
     void addMeshEffect(const MeshEffectDescription& description) override;
@@ -37,7 +46,9 @@ class RenderWorld : public IRenderWorld {
 
    private:
     std::vector<RenderObjectData> opaque_objects;
-    OpaqueObjectHandle next_handle;
+
+    PoolAllocator custom_ro_allocator;
+    ResourceRegistry<CustomRenderObjectData> custom_ro_registry;
 
     VFXWorld vfx_world;
 

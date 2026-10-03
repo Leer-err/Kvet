@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Buffer.h"
+#include "CustomRenderer.h"
 #include "Device.h"
 #include "FrameData.h"
 #include "FrameGraph.h"
@@ -21,7 +22,7 @@ class RenderPass {
     RenderPass(Device& device, const EngineData& engine_data);
 
     TextureHandle render(const FrameData& frame_data, FrameGraph& frame_graph,
-                         const RenderWorld& world);
+                         RenderWorld& world);
 
    private:
     void postProcessing(FrameGraph& frame_graph, const RenderWorld& world);
@@ -42,6 +43,7 @@ class RenderPass {
     ParticleRenderer particle_renderer;
     MeshParticleRenderer mesh_particle_renderer;
     OverlayRenderer overlay_renderer;
+    CustomRenderer custom_renderer;
 
     PostProcessingPass post_processing_pass;
 

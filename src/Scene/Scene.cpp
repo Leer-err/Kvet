@@ -9,12 +9,15 @@
 
 #include "AssetManager/AssetManager.h"
 #include "Camera.h"
+#include "CustomRenderObject.h"
 #include "EffectDescription.h"
 #include "Entity.h"
 #include "Filesystem/Filesystem.h"
 #include "GameInputContext.h"
 #include "Graphics.h"
+#include "Handle.h"
 #include "LookScript.h"
+#include "Matrix.h"
 #include "MoveScript.h"
 #include "PhysicalInput.h"
 #include "Property.h"
@@ -33,14 +36,24 @@ Scene::Scene() {
 
     parseScene(scene.getResult());
 
-    auto mesh_effect = Graphics::MeshEffectDescription{};
-    mesh_effect.center = {0, 0, 1};
-    mesh_effect.extents = {0, 0, 0};
-    mesh_effect.spawn_rate = 1;
-    mesh_effect.particle_lifetime = 1;
-    mesh_effect.mesh = Asset::Manager::getMesh("Base/Sphere").getResult();
-    mesh_effect.texture = Asset::Manager::getTexture("star_06").getResult();
-    Graphics::getRenderEngine()->getRenderWorld()->addMeshEffect(mesh_effect);
+    // auto mesh_effect = Graphics::MeshEffectDescription{};
+    // mesh_effect.center = {0, 0, 1};
+    // mesh_effect.extents = {0, 0, 0};
+    // mesh_effect.spawn_rate = 1;
+    // mesh_effect.particle_lifetime = 1;
+    // mesh_effect.mesh = Asset::Manager::getMesh("Base/Sphere").getResult();
+    // mesh_effect.texture = Asset::Manager::getTexture("star_06").getResult();
+    // Graphics::getRenderEngine()->getRenderWorld()->addMeshEffect(mesh_effect);
+
+    auto custom_ro = Graphics::CustomRenderObjectCreateData{};
+    custom_ro.mesh = Asset::Manager::getMesh("Base/Sphere").getResult();
+    custom_ro.pipeline =
+        Asset::Manager::getPipeline("Shaders/TestPipeline").getResult();
+    custom_ro.model = Matrix::translation(Vector3{0, 0, 5});
+
+    static auto handle =
+        Graphics::getRenderEngine()->getRenderWorld()->addCustomRenderObject(
+            custom_ro);
 
     auto input = std::make_shared<Input::GameInputContext>();
     input->addBinding(Input::GameAxes::LookYaw, Input::Axis::MOUSE_X);

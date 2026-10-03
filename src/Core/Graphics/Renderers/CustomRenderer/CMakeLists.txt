@@ -1,5 +1,5 @@
 target_sources(Graphics PRIVATE
-    RenderWorld.cpp
+    CustomRenderer.cpp
 )
 
 target_include_directories(Graphics PRIVATE

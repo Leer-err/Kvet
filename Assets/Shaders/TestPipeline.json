@@ -1,0 +1,5 @@
+{
+    "shader": "Shaders/Pipelines/Stars/Test",
+    "depth_write": true,
+    "depth_test": true
+}

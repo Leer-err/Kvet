@@ -5,8 +5,8 @@
 #include "Camera.h"
 #include "Entity.h"
 #include "GameInputContext.h"
+#include "Graphics.h"
 #include "IScript.h"
-#include "RenderWorld.h"
 
 class LookScript final : public IScript {
    public:

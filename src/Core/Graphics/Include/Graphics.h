@@ -7,9 +7,11 @@
 #include <string_view>
 #include <vector>
 
+#include "CustomRenderObject.h"
 #include "EffectDescription.h"
 #include "Filesystem.h"
 #include "Handle.h"
+#include "Handles.h"
 #include "Matrix.h"
 #include "RenderObjectData.h"
 #include "Vector3.h"
@@ -18,6 +20,7 @@ namespace Graphics {
 
 class Texture;
 class Mesh;
+class CustomRenderObjectData;
 
 using TextureHandle = Handle<Texture>;
 using MeshHandle = Handle<Mesh>;
@@ -59,30 +62,6 @@ struct RenderData {
     PostProcessing post_processing;
 };
 
-struct CustomRenderObjectData {};
-
-class CustomRenderObject {
-    static constexpr size_t MAX_TEXTURES_PER_MATERIAL = 8;
-
-   public:
-    void updateData(const uint8_t* data, size_t size);
-    void updateModelMatrix(const Matrix& model);
-
-    std::span<TextureHandle> getTextures() const;
-    std::span<uint8_t> getData() const;
-    MeshHandle getMesh() const;
-    Matrix getModelMatrix() const;
-    GraphicsPipelineHandle getPipeline() const;
-
-   private:
-    Matrix model;
-    GraphicsPipelineHandle pipeline;
-    MeshHandle mesh;
-
-    std::array<TextureHandle, MAX_TEXTURES_PER_MATERIAL> textures;
-    std::vector<uint8_t> data;
-};
-
 class IResourceManager {
    public:
     virtual std::optional<TextureHandle> addTexture(
@@ -98,14 +77,22 @@ class IResourceManager {
         std::string_view name) = 0;
 };
 
+struct CustomRenderObjectCreateData {
+    static constexpr size_t MAX_TEXTURES_PER_MATERIAL = 1;
+
+    Matrix model;
+    GraphicsPipelineHandle pipeline;
+    MeshHandle mesh;
+};
+
 class IRenderWorld {
    public:
     virtual RenderData& renderData() = 0;
     virtual const RenderData& renderData() const = 0;
 
     virtual void addRenderObject(const RenderObjectData& data) = 0;
-    virtual Handle<CustomRenderObject> addCustomRenderObject(
-        MeshHandle mesh, GraphicsPipelineHandle handle, size_t data_size) = 0;
+    virtual CustomRenderObject addCustomRenderObject(
+        const CustomRenderObjectCreateData& data) = 0;
 
     virtual void addEffect(const EffectDescription& data) = 0;
     virtual void addMeshEffect(const MeshEffectDescription& data) = 0;

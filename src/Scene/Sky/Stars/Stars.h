@@ -2,7 +2,8 @@
 
 // #include "Mesh.h"
 
-#include "RenderWorld.h"
+#include "Graphics.h"
+
 class Stars {
    public:
     Stars();

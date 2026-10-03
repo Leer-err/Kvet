@@ -19,7 +19,7 @@ class ResourceRegistryBase {
         auto it = ref_counters.find(ptr);
         assert(it != ref_counters.end());
 
-        it->second.fetch_sub(1);
+        it->second.fetch_add(1);
     }
 
     void release(uint8_t* ptr) {

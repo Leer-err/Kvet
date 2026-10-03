@@ -2,6 +2,7 @@ add_library(Graphics STATIC)
 
 target_sources(Graphics PRIVATE
     Graphics.cpp
+    CustomRenderObject.cpp
 )
 
 target_include_directories(Graphics PUBLIC
@@ -34,3 +35,4 @@ add_subdirectory(RenderData)
 add_subdirectory(VFX)
 add_subdirectory(FrameGraph)
 add_subdirectory(GraphicsResourceManager)
+add_subdirectory(Include)

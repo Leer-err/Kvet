@@ -7,7 +7,11 @@
 
 namespace Graphics {
 
-RenderWorld::RenderWorld() : next_handle(0), vfx_world(10000) {}
+RenderWorld::RenderWorld()
+    : custom_ro_allocator(1000, sizeof(CustomRenderObjectData),
+                          alignof(CustomRenderObjectData)),
+      custom_ro_registry(custom_ro_allocator),
+      vfx_world(10000) {}
 
 RenderData& RenderWorld::renderData() { return render_data; }
 
@@ -15,11 +19,6 @@ const RenderData& RenderWorld::renderData() const { return render_data; }
 
 void RenderWorld::addRenderObject(const RenderObjectData& data) {
     opaque_objects.emplace_back(data);
-}
-
-RenderObjectData& RenderWorld::getOpaqueObject(
-    const OpaqueObjectHandle& handle) {
-    return opaque_objects.at(handle);
 }
 
 std::span<const RenderObjectData> RenderWorld::getOpaqueObjects() const {
@@ -40,6 +39,16 @@ VFXWorld::ParticleBatch RenderWorld::getParticles() const {
 
 VFXWorld::MeshParticleBatch RenderWorld::getMeshParticles() const {
     return vfx_world.getMeshParticles();
+}
+
+CustomRenderObject RenderWorld::addCustomRenderObject(
+    const CustomRenderObjectCreateData& data) {
+    return CustomRenderObject(custom_ro_registry.create(data));
+}
+
+std::vector<Handle<CustomRenderObjectData>>
+RenderWorld::getCustomRenderObjects() {
+    return custom_ro_registry.getAllocatedObjects();
 }
 
 void RenderWorld::update() { vfx_world.update(render_data.delta_time); }

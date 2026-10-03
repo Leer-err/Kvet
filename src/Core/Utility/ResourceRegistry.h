@@ -9,6 +9,7 @@
 #include <string_view>
 #include <unordered_map>
 #include <utility>
+#include <vector>
 
 #include "Handle.h"
 #include "PoolAllocator.h"
@@ -38,6 +39,19 @@ class ResourceRegistry final : public ResourceRegistryBase {
         if (memory == nullptr) return Handle<T>();
 
         return Handle(new (memory) T(std::forward<ARGS>(args)...), this);
+    }
+
+    std::vector<Handle<T>> getAllocatedObjects() {
+        auto objects = std::vector<Handle<T>>(ref_counters.size());
+
+        int index = 0;
+        for (auto& [key, value] : ref_counters) {
+            objects[index] = Handle(std::bit_cast<T*>(key), this);
+            value.fetch_add(1);
+            index++;
+        }
+
+        return objects;
     }
 
    private:
