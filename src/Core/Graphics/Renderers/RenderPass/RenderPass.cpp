@@ -7,11 +7,11 @@
 
 #include "AppConfig.h"
 #include "BufferBuilder.h"
-#include "CameraData.h"
 // #include "CloudsRenderer.h"
 #include "Device.h"
 #include "EngineData.h"
 #include "FrameGraph.h"
+#include "Graphics.h"
 #include "OverlayRenderer.h"
 #include "PostProcessingPass.h"
 #include "RenderEnviroment.h"
@@ -109,7 +109,7 @@ void RenderPass::postProcessing(FrameGraph& frame_graph,
 }
 
 BufferHandle RenderPass::createCameraBuffer(Device& device) {
-    auto builder = BufferBuilder(sizeof(CameraData))
+    auto builder = BufferBuilder(sizeof(RenderData::Camera))
                        .isConstantBuffer()
                        .isDeviceAddressable()
                        .isCPUWritable(true)

@@ -6,11 +6,6 @@ struct VertexOutput{
     float3 position;
 };
 
-struct VertexInput{
-    float3 position;
-    float2 uv;
-};
-
 struct StarsData
 {
     float time;
@@ -20,7 +15,7 @@ struct StarsData
 };
 
 struct PushConstants{
-    Mesh<VertexInput> mesh;
+    Mesh<Vertex> mesh;
 
     CameraData* camera_data;
     StarsData* stars_data;
@@ -47,7 +42,7 @@ void mesh_main(
     float4x4 vp = constants.camera_data->view_projection_no_camera_position;
 
     for(int i = group_tid.x; i < meshlet.vertex_count; i += GROUP_SIZE){
-        VertexInput vertex = constants.mesh.getVertex(meshlet_index, i);
+        let vertex = constants.mesh.getVertex(meshlet_index, i);
 
         float4 vertex_position = float4(vertex.position, 1);
 

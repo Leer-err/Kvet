@@ -15,11 +15,6 @@ struct VertexOutput{
     uint32_t texture_index : MATERIAL;
 };
 
-struct VertexInput{
-    float3 position;
-    float2 uv;
-};
-
 struct MeshParticle{
     float3 position;
     float4 orientation;
@@ -30,7 +25,7 @@ struct MeshParticle{
 }
 
 struct PushConstants{
-    Mesh<VertexInput> mesh;
+    Mesh<Vertex> mesh;
 
     CameraData* camera_data;
     MeshParticle* particles_data;
@@ -63,7 +58,7 @@ void mesh_main(
     MeshParticle particle = *constants.particles_data;
 
     for(int i = group_tid.x; i < meshlet.vertex_count; i += GROUP_SIZE){
-        VertexInput vertex = constants.mesh.getVertex(meshlet_index, i);
+        let vertex = constants.mesh.getVertex(meshlet_index, i);
 
         vertices[i].viewport_position = mul(constants.camera_data.view_projection, float4(vertex.position, 1));
         vertices[i].uv = vertex.uv;

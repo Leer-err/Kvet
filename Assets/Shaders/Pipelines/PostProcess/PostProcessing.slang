@@ -51,11 +51,6 @@ struct VertexOutput {
     float2 uv : TEXCOORD;
 };
 
-struct VertexInput {
-    float3 position;
-    float2 uv;
-};
-
 struct PostProcessingData {
     int2 camera_dimensions;
     uint32_t texture_index;
@@ -73,7 +68,7 @@ struct PostProcessingData {
 };
 
 struct PushConstants{
-    Mesh<VertexInput> mesh;
+    Mesh<Vertex> mesh;
 
     PostProcessingData* parameters;
 };
@@ -97,7 +92,7 @@ void mesh_main(
     SetMeshOutputCounts(meshlet.vertex_count, meshlet.triangle_count);
 
     for(int i = group_tid.x; i < meshlet.vertex_count; i += GROUP_SIZE){
-        VertexInput vertex = constants.mesh.getVertex(meshlet_index, i);
+        let vertex = constants.mesh.getVertex(meshlet_index, i);
 
         float4 vertex_position = float4(vertex.position, 1);
 
@@ -125,7 +120,6 @@ float4 pixel_main(in VertexOutput data)
     int2 pixel_coordinates = data.uv * constants.parameters->camera_dimensions;
 
     float3 color = textures[constants.parameters->texture_index].Sample(samplers[0], data.uv).rgb;
-    return float4(color, 1);
 
     color = dithering8x8(color, constants.parameters->spread, pixel_coordinates);
 

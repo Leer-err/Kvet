@@ -12,6 +12,7 @@
 #include "FrameGraph.h"
 #include "Graphics.h"
 #include "MeshBuilder.h"
+#include "RenderWorld.h"
 #include "StagingBuffer.h"
 #include "Texture.h"
 #include "TextureBuilder.h"
@@ -26,7 +27,8 @@ RenderEngine::RenderEngine(const vkb::Instance& instance,
     : backend(instance, device, graphics_queue, presentation_queue, allocator,
               surface),
       staging_buffer(this->backend.getDevice()),
-      resource_manager(this->backend.getDevice(), staging_buffer) {}
+      resource_manager(this->backend.getDevice(), staging_buffer),
+      world(this->backend.getDevice()) {}
 
 void RenderEngine::render() {
     ZoneScoped;

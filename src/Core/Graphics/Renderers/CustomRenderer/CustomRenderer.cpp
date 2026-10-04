@@ -17,7 +17,7 @@ void CustomRenderer::render(FrameGraph& frame_graph, RenderWorld& world) {
             "", object->pipeline,
             [this, &world, object](GraphicsPassExecution& execution) {
                 execution.appendData(camera_buffer->getDeviceAddress());
-                execution.appendData(camera_buffer->getDeviceAddress());
+                execution.appendData(object->buffer->getDeviceAddress());
                 execution.appendData(object->model);
 
                 execution.draw(object->mesh);

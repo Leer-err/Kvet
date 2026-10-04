@@ -14,13 +14,8 @@ struct VertexOutput{
     float2 uv : TEXCOORD;
 };
 
-struct VertexInput{
-    float3 position;
-    float2 uv;
-};
-
 struct PushConstants{
-    Mesh<VertexInput> mesh;
+    Mesh<Vertex> mesh;
 
     CameraData* camera_data;
     StaticModelData* model_data;
@@ -47,7 +42,7 @@ void mesh_main(
     float4x4 mvp = mul(constants.camera_data->view_projection, constants.model_data->model);
 
     for(int i = group_tid.x; i < meshlet.vertex_count; i += GROUP_SIZE){
-        VertexInput vertex = constants.mesh.getVertex(meshlet_index, i);
+        let vertex = constants.mesh.getVertex(meshlet_index, i);
 
         float4 vertex_position = float4(vertex.position, 1);
 

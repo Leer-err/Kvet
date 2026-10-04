@@ -32,6 +32,7 @@ struct RenderData {
         Matrix view_projection_camera_centered;
         Vector3 up;
         Vector3 right;
+        Vector3 position;
     };
 
     struct Stars {
@@ -78,11 +79,11 @@ class IResourceManager {
 };
 
 struct CustomRenderObjectCreateData {
-    static constexpr size_t MAX_TEXTURES_PER_MATERIAL = 1;
-
     Matrix model;
     GraphicsPipelineHandle pipeline;
     MeshHandle mesh;
+
+    size_t buffer_size;
 };
 
 class IRenderWorld {

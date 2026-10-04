@@ -2,16 +2,19 @@
 
 #include <span>
 
+#include "BufferBuilder.h"
+#include "Device.h"
 #include "Texture.h"
 #include "VFXWorld.h"
 
 namespace Graphics {
 
-RenderWorld::RenderWorld()
+RenderWorld::RenderWorld(Device& device)
     : custom_ro_allocator(1000, sizeof(CustomRenderObjectData),
                           alignof(CustomRenderObjectData)),
       custom_ro_registry(custom_ro_allocator),
-      vfx_world(10000) {}
+      vfx_world(10000),
+      device(device) {}
 
 RenderData& RenderWorld::renderData() { return render_data; }
 
@@ -43,7 +46,15 @@ VFXWorld::MeshParticleBatch RenderWorld::getMeshParticles() const {
 
 CustomRenderObject RenderWorld::addCustomRenderObject(
     const CustomRenderObjectCreateData& data) {
-    return CustomRenderObject(custom_ro_registry.create(data));
+    auto buffer = BufferBuilder(data.buffer_size)
+                      .isConstantBuffer()
+                      .isChained()
+                      .isCPUWritable(true, true)
+                      .create(device)
+                      .getResult();
+
+    return CustomRenderObject(custom_ro_registry.create(
+        data.model, data.pipeline, data.mesh, buffer));
 }
 
 std::vector<Handle<CustomRenderObjectData>>

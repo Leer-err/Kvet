@@ -1,59 +1,67 @@
 import Camera;
 import Mesh;
+import Effects;
 
-struct VertexOutput{
-    float4 viewport_position : SV_POSITION;
-    float3 position;
-};
-
-struct VertexInput{
-    float3 position;
-    float2 uv;
+struct Data{
+    float time;
 };
 
 struct PushConstants{
-    Mesh<VertexInput> mesh;
+    Mesh<Vertex> mesh;
 
     CameraData* camera_data;
+    Data* data;
     float4x4 model;
+};
+
+struct VertexTransform: IVertexTransform {
+    typealias VertexIn = Vertex; 
+    typealias VertexOut = PixelVertex; 
+
+    float4x4 mvp;
+
+    __init() { mvp = mul(constants.camera_data->view_projection, constants.model); }
+
+    VertexOut transform(VertexIn vertex){
+
+        VertexOut out;
+
+        float4 vertex_position = float4(vertex.position, 1);
+
+        out.viewport_position = mul(mvp, vertex_position);
+        out.world_position = mul(constants.model, vertex_position).xyz;
+        out.normal = normalize(mul(float3x3(constants.model), vertex.normal));
+        out.position = vertex_position.xyz;
+
+        return out;
+    }
 };
 
 [vk::push_constant]
 PushConstants constants;
 
-static const uint GROUP_SIZE = 32;
-
 [shader("mesh")]
 [outputtopology("triangle")]
-[numthreads(32, 1, 1)]
+[numthreads(GROUP_SIZE, 1, 1)]
 void mesh_main(
     in uint3 group_tid : SV_GroupThreadID,
     in uint3 group_index : SV_GroupID,
-    out vertices VertexOutput vertices[64],
+    out vertices PixelVertex vertices[64],
     out indices uint3 triangles[96])
 {
-    let meshlet_index = group_index.x;
-    Meshlet meshlet = constants.mesh.meshlets[meshlet_index];
-    SetMeshOutputCounts(meshlet.vertex_count, meshlet.triangle_count);
+    let transformer = VertexTransform();
 
-    float4x4 mvp =  mul(constants.camera_data->view_projection, constants.model);
-
-    for(int i = group_tid.x; i < meshlet.vertex_count; i += GROUP_SIZE){
-        VertexInput vertex = constants.mesh.getVertex(meshlet_index, i);
-
-        float4 vertex_position = float4(vertex.position, 1);
-
-        vertices[i].viewport_position = mul(mvp, vertex_position);
-        vertices[i].position = vertex_position.xyz;
-    }
-
-    for(int i = group_tid.x; i < meshlet.triangle_count; i += GROUP_SIZE){
-        triangles[i] = constants.mesh.getTriangle(meshlet_index, i);
-    }
+    mesh_transform<VertexTransform>(constants.mesh, group_index.x, group_tid.x, transformer, vertices, triangles);
 }
 
+static const float bias = 0;
+static const float strength = 0.4;
+static const float size = 0.4;
+
 [shader("pixel")]
-float4 pixel_main(in VertexOutput data)
+float4 pixel_main(in PixelVertex data)
 {
-    return float4(1,0,0,1);
+    float fresnel_factor = fresnel(constants.camera_data.position, data.world_position, data.normal, 0.5 * sin(constants.data.time) + 1, strength, bias);
+
+    return lerp(float4(0,0,0,1), float4(0.063, 0.007, 0.305, 1), fresnel_factor);
 }

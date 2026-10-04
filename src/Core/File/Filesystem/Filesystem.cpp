@@ -109,11 +109,14 @@ static std::vector<Vertex> readVertices(const aiMesh* mesh) {
     for (int i = 0; i < mesh->mNumVertices; i++) {
         Vertex vertex;
 
-        aiVector3D position = mesh->mVertices[i];
+        auto& position = mesh->mVertices[i];
         vertex.position = Vector3(position.x, position.y, position.z);
 
-        aiVector3D tex_coords = mesh->mTextureCoords[0][i];
+        auto& tex_coords = mesh->mTextureCoords[0][i];
         vertex.uv = Vector2(tex_coords.x, tex_coords.y);
+
+        auto& normal = mesh->mNormals[i];
+        vertex.normal = Vector3(normal.x, normal.y, normal.z);
 
         vertices.push_back(vertex);
     }
@@ -152,7 +155,6 @@ Result<Mesh, Error> Filesystem::getMesh(std::string_view path) {
     const aiScene* scene =
         importer.ReadFile(full_path.string().c_str(),
                           aiProcess_CalcTangentSpace | aiProcess_Triangulate |
-                              aiProcess_JoinIdenticalVertices |
                               aiProcess_MakeLeftHanded | aiProcess_FlipUVs |
                               aiProcess_OptimizeGraph | aiProcess_SortByPType);
 

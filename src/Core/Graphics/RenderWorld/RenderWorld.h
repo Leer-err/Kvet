@@ -3,6 +3,7 @@
 #include <span>
 #include <vector>
 
+#include "Device.h"
 #include "EffectDescription.h"
 #include "Graphics.h"
 #include "Handles.h"
@@ -15,17 +16,21 @@
 namespace Graphics {
 
 struct CustomRenderObjectData {
-    CustomRenderObjectData(const CustomRenderObjectCreateData& data)
-        : model(data.model), pipeline(data.pipeline), mesh(data.mesh) {}
+    CustomRenderObjectData(const Matrix& model,
+                           const GraphicsPipelineHandle& pipeline,
+                           const MeshHandle& mesh, const BufferHandle& buffer)
+        : model(model), pipeline(pipeline), mesh(mesh), buffer(buffer) {}
 
     Matrix model;
     GraphicsPipelineHandle pipeline;
     MeshHandle mesh;
+
+    BufferHandle buffer;
 };
 
 class RenderWorld : public IRenderWorld {
    public:
-    RenderWorld();
+    RenderWorld(Device& device);
 
     RenderData& renderData() override;
     const RenderData& renderData() const override;
@@ -53,6 +58,8 @@ class RenderWorld : public IRenderWorld {
     VFXWorld vfx_world;
 
     RenderData render_data;
+
+    Device& device;
 };
 
 }  // namespace Graphics

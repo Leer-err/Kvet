@@ -2,7 +2,6 @@
 
 #include <numbers>
 
-#include "CameraData.h"
 #include "GameInputContext.h"
 #include "Graphics.h"
 #include "Transform.h"
@@ -69,4 +68,5 @@ void LookScript::preRender() {
     data.view_projection_camera_centered = projection * view_camera_centered;
     data.right = right;
     data.up = up;
+    data.position = position;
 }

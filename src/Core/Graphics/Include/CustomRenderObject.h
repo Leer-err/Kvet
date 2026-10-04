@@ -9,6 +9,7 @@ class CustomRenderObjectData;
 
 class CustomRenderObject {
    public:
+    CustomRenderObject() = default;
     explicit CustomRenderObject(const Handle<CustomRenderObjectData>& handle)
         : handle(handle) {}
 

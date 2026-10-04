@@ -1,5 +1,6 @@
 #include "Scene.h"
 
+#include <cstddef>
 #include <fstream>
 #include <memory>
 #include <nlohmann/json.hpp>
@@ -27,6 +28,8 @@
 #include "TransformSystem.h"
 #include "Vector3.h"
 
+static Graphics::CustomRenderObject handle;
+
 Scene::Scene() {
     setupSystems();
 
@@ -50,8 +53,9 @@ Scene::Scene() {
     custom_ro.pipeline =
         Asset::Manager::getPipeline("Shaders/TestPipeline").getResult();
     custom_ro.model = Matrix::translation(Vector3{0, 0, 5});
+    custom_ro.buffer_size = 4;
 
-    static auto handle =
+    handle =
         Graphics::getRenderEngine()->getRenderWorld()->addCustomRenderObject(
             custom_ro);
 
@@ -90,6 +94,8 @@ void Scene::update(float delta_time) {
     auto& render_data = renderer->getRenderWorld()->renderData();
     render_data.time += delta_time;
     render_data.delta_time = delta_time;
+
+    handle.updateData((uint8_t*)&render_data.time, sizeof(delta_time));
 }
 
 void Scene::setupSystems() {

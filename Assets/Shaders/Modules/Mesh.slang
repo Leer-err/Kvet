@@ -1,6 +1,6 @@
 module Mesh;
 
-public typedef uint32_t MeshletIndex;
+public typedef uint MeshletIndex;
 
 typedef uint32_t VertexIndex;
 typedef uint8_t TriangleIndex;
@@ -16,6 +16,14 @@ public struct Meshlet{
 public struct Vertex{
     public float3 position;
     public float2 uv;
+    public float3 normal;
+};
+
+public struct PixelVertex{
+    public float4 viewport_position : SV_POSITION;
+    public float3 position;
+    public float3 world_position;
+    public float3 normal;
 };
 
 public struct Mesh<T>{
@@ -43,3 +51,34 @@ public struct Mesh<T>{
         return triangle;
     }
 };
+
+public interface IVertexTransform {
+    public associatedtype VertexIn;
+    public associatedtype VertexOut;
+
+    public VertexOut transform(VertexIn vertex);
+};
+
+public static const uint GROUP_SIZE = 32;
+
+public void mesh_transform<Transformer: IVertexTransform>(
+    in Mesh<Transformer.VertexIn> mesh,
+    in uint meshlet_index,
+    in uint invocation_index,
+    in Transformer transformer, 
+    out vertices Transformer.VertexOut vertices[64],
+    out indices uint3 triangles[96])
+{
+    Meshlet meshlet = mesh.meshlets[meshlet_index];
+    SetMeshOutputCounts(meshlet.vertex_count, meshlet.triangle_count);
+
+    for(uint i = invocation_index; i < meshlet.vertex_count; i += GROUP_SIZE){
+        let vertex = mesh.getVertex(meshlet_index, i);
+
+        vertices[i] = transformer.transform(vertex);
+    }
+
+    for(uint i = invocation_index; i < meshlet.triangle_count; i += GROUP_SIZE){
+        triangles[i] = mesh.getTriangle(meshlet_index, i);
+    }
+}
