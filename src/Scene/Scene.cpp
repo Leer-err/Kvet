@@ -8,12 +8,12 @@
 #include <tracy/Tracy.hpp>
 #include <vector>
 
-#include "AssetManager/AssetManager.h"
+#include "AssetManager.h"
 #include "Camera.h"
 #include "CustomRenderObject.h"
 #include "EffectDescription.h"
 #include "Entity.h"
-#include "Filesystem/Filesystem.h"
+#include "Filesystem.h"
 #include "GameInputContext.h"
 #include "Graphics.h"
 #include "Handle.h"
@@ -24,6 +24,7 @@
 #include "Property.h"
 #include "RenderObjectData.h"
 #include "ScriptSystem.h"
+#include "StarsScript.h"
 #include "Transform.h"
 #include "TransformSystem.h"
 #include "Vector3.h"
@@ -82,6 +83,9 @@ Scene::Scene() {
     player.set<Transform>({});
     player.addScript(std::make_unique<LookScript>(head, player, camera, input));
     player.addScript(std::make_unique<MoveScript>(player, input));
+
+    Entity stars = world.createEntity();
+    stars.addScript(std::make_unique<StarsScript>());
 }
 
 void Scene::update(float delta_time) {
