@@ -28,8 +28,9 @@ class StarsScript : public IScript {
         sphere.updateData(std::bit_cast<uint8_t*>(&data), sizeof(StarsData));
     }
 
-    void preRender(float delta_time) {
-        data.time += delta_time;
+    void update(float delta_time) override { data.time += delta_time; }
+
+    void preRender() override {
         sphere.updateData(std::bit_cast<uint8_t*>(&data), sizeof(StarsData));
     }
 

@@ -48,7 +48,7 @@ TextureHandle RenderPass::render(const FrameData& frame_data,
 
     updateCameraBuffer(world);
 
-    star_renderer.render(frame_graph, world);
+    // star_renderer.render(frame_graph, world);
     static_mesh_renderer.render(frame_graph, world);
     // clouds_renderer.render(frame_graph, world);
     particle_renderer.render(frame_graph, world);

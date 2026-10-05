@@ -17,6 +17,7 @@
 #include "GameInputContext.h"
 #include "Graphics.h"
 #include "Handle.h"
+#include "LookAtScript.h"
 #include "LookScript.h"
 #include "Matrix.h"
 #include "MoveScript.h"
@@ -53,7 +54,7 @@ Scene::Scene() {
     custom_ro.mesh = Asset::Manager::getMesh("Base/Sphere").getResult();
     custom_ro.pipeline =
         Asset::Manager::getPipeline("Shaders/TestPipeline").getResult();
-    custom_ro.model = Matrix::translation(Vector3{0, 0, 5});
+    custom_ro.model = Matrix::translation(Vector3{0, 0, 0});
     custom_ro.buffer_size = 4;
 
     handle =
@@ -81,8 +82,10 @@ Scene::Scene() {
     head.set<Transform>({});
     player.addChild(head);
     player.set<Transform>({});
-    player.addScript(std::make_unique<LookScript>(head, player, camera, input));
-    player.addScript(std::make_unique<MoveScript>(player, input));
+    // player.addScript(
+    //     std::make_unique<LookAtScript>(head, player, camera, input));
+    player.addScript(std::make_unique<LookAtScript>(player, camera, input));
+    // player.addScript(std::make_unique<MoveScript>(player, input));
 
     Entity stars = world.createEntity();
     stars.addScript(std::make_unique<StarsScript>());

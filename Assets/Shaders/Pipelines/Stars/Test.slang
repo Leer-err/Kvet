@@ -1,6 +1,7 @@
 import Camera;
 import Mesh;
 import Effects;
+import Noise;
 
 struct Data{
     float time;
@@ -31,6 +32,7 @@ struct VertexTransform: IVertexTransform {
         out.viewport_position = mul(mvp, vertex_position);
         out.world_position = mul(constants.model, vertex_position).xyz;
         out.normal = normalize(mul(float3x3(constants.model), vertex.normal));
+        out.texcoord = vertex.uv;
 
         return out;
     }
@@ -60,7 +62,15 @@ static const float size = 0.4;
 [shader("pixel")]
 float4 pixel_main(in PixelVertex data)
 {
-    float fresnel_factor = fresnel(constants.camera_data.position, data.world_position, data.normal, 0.5 * sin(constants.data.time) + 1, strength, bias);
+    let noise_coords_x = float3(0, data.texcoord) * 8 ;
+    let noise_coords_y = float3(data.texcoord.x, constants.data.time, data.texcoord.y) * 8 ;
+    let noise_coords_z = float3(data.texcoord, constants.data.time) * 8 + float3(0, constants.data.time * 0.5, constants.data.time * 0.5) * 0.1;
+
+    let noise_vector = pow((float3(fbm(noise_coords_x, 4), fbm(noise_coords_y, 4), fbm(noise_coords_z, 4)) + 1) / 2, 4);
+    // return float4(noise_vector, 1);
+
+    let new_normal = normalize(data.normal + noise_vector);
+    float fresnel_factor = fresnel(constants.camera_data.position, data.world_position, new_normal, size, strength, bias);
 
     return lerp(float4(0,0,0,1), float4(0.063, 0.007, 0.305, 1), fresnel_factor);
 }

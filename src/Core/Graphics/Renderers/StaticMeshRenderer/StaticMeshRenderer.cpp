@@ -62,8 +62,13 @@ void StaticMeshRenderer::render(FrameGraph& frame_graph,
 
         pass.reads(model.albedo, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
     }
-    pass.addColorAttachment(*engine_data.resource_manager.getTexture("Color"));
-    pass.setDepthAttachment(*engine_data.resource_manager.getTexture("Depth"));
+
+    auto color_attachment = engine_data.resource_manager.getTexture("Color");
+    pass.addColorAttachment(color_attachment.value(), {});
+    auto depth_attachment = engine_data.resource_manager.getTexture("Depth");
+    pass.setDepthAttachment(
+        depth_attachment.value(),
+        VkClearValue{.depthStencil = {.depth = 1, .stencil = 0}});
 
     frame_graph.addGraphicsPass(pass);
 }

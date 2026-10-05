@@ -39,6 +39,7 @@ struct VertexTransform: IVertexTransform {
         float4 vertex_position = float4(vertex.position, 1);
 
         out.viewport_position = mul(vp, vertex_position);
+        out.viewport_position.z = out.viewport_position.w;
         out.position = vertex_position.xyz;
 
         return out;

@@ -7,7 +7,7 @@ float3 hash(float3 p) {
     );
 }
 
-public float noise( in float3 x )
+public float noise3d( in float3 x )
 {
     // grid
     float3 i = floor(x);
@@ -57,7 +57,7 @@ public float fbm( in float3 x, in float H)
     float t = 0.0;
     for( int i=0; i<numOctaves; i++ )
     {
-        t += a*noise(f*x);
+        t += a*noise3d(f*x);
         f *= 2.0;
         a *= G;
     }
