@@ -24,7 +24,25 @@ struct PushConstants{
 [vk::push_constant]
 PushConstants constants;
 
-static const uint GROUP_SIZE = 32;
+struct VertexTransform: IVertexTransform {
+    typealias VertexIn = Vertex; 
+    typealias VertexOut = VertexOutput; 
+
+    float4x4 mvp;
+
+    __init() { mvp = mul(constants.camera_data->view_projection, constants.model_data->model); }
+
+    VertexOut transform(VertexIn vertex){
+        VertexOut out;
+
+        float4 vertex_position = float4(vertex.position, 1);
+
+        out.viewport_position = mul(mvp, vertex_position);
+        out.uv = vertex.uv;
+
+        return out;
+    }
+};
 
 [shader("mesh")]
 [outputtopology("triangle")]
@@ -35,24 +53,9 @@ void mesh_main(
     out vertices VertexOutput vertices[64],
     out indices uint3 triangles[96])
 {
-    let meshlet_index = group_index.x;
-    Meshlet meshlet = constants.mesh.meshlets[meshlet_index];
-    SetMeshOutputCounts(meshlet.vertex_count, meshlet.triangle_count);
+    let transformer = VertexTransform();
 
-    float4x4 mvp = mul(constants.camera_data->view_projection, constants.model_data->model);
-
-    for(int i = group_tid.x; i < meshlet.vertex_count; i += GROUP_SIZE){
-        let vertex = constants.mesh.getVertex(meshlet_index, i);
-
-        float4 vertex_position = float4(vertex.position, 1);
-
-        vertices[i].viewport_position = mul(mvp, vertex_position);
-        vertices[i].uv = vertex.uv;
-    }
-
-    for(int i = group_tid.x; i < meshlet.triangle_count; i += GROUP_SIZE){
-        triangles[i] = constants.mesh.getTriangle(meshlet_index, i);
-    }
+    mesh_transform(constants.mesh, group_index.x, group_tid.x, transformer, vertices, triangles);
 }
 
 [[vk::binding(0, 0)]]

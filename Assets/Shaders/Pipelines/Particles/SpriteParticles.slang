@@ -52,7 +52,27 @@ float4 transformPosition(in float3 local_position, in Particle particle){
     return float4(world_position, 1);
 }
 
-static const uint GROUP_SIZE = 32;
+struct VertexTransform: IVertexTransform {
+    typealias VertexIn = Vertex; 
+    typealias VertexOut = VertexOutput; 
+
+    Particle particle;
+
+    __init(uint particle_index) { particle = constants.particles_data[particle_index]; }
+
+    VertexOut transform(VertexIn vertex){
+        float4x4 vp = constants.camera_data->view_projection_no_camera_position;
+
+        VertexOut out;
+
+        out.viewport_position = mul(constants.camera_data.view_projection, transformPosition(vertex.position, particle));
+        out.uv = vertex.uv;
+        out.color = particle.color;
+        out.texture_index = particle.texture;
+
+        return out;
+    }
+};
 
 [shader("mesh")]
 [outputtopology("triangle")]
@@ -62,26 +82,12 @@ void mesh_main(
     in uint3 group_index : SV_GroupID,
     out vertices VertexOutput vertices[64],
     out indices uint3 triangles[96])
-{
-    let meshlet_index = group_index.x;
-    Meshlet meshlet = constants.mesh.meshlets[meshlet_index];
-    SetMeshOutputCounts(meshlet.vertex_count, meshlet.triangle_count);
+{   
 
     let particle_index = constants.live_particles_data[group_index.y];
-    Particle particle = constants.particles_data[particle_index];
+    let transformer = VertexTransform(particle_index);
 
-    for(int i = group_tid.x; i < meshlet.vertex_count; i += GROUP_SIZE){
-        let vertex = constants.mesh.getVertex(meshlet_index, i);
-
-        vertices[i].viewport_position = mul(constants.camera_data.view_projection, transformPosition(vertex.position, particle));
-        vertices[i].uv = vertex.uv;
-        vertices[i].color = particle.color;
-        vertices[i].texture_index = particle.texture;
-    }
-
-    for(int i = group_tid.x; i < meshlet.triangle_count; i += GROUP_SIZE){
-        triangles[i] = constants.mesh.getTriangle(meshlet_index, i);
-    }
+    mesh_transform<VertexTransform>(constants.mesh, group_index.x, group_tid.x, transformer, vertices, triangles);
 }
 
 [[vk::binding(0, 0)]]

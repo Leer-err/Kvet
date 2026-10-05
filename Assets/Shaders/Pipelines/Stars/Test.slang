@@ -31,7 +31,6 @@ struct VertexTransform: IVertexTransform {
         out.viewport_position = mul(mvp, vertex_position);
         out.world_position = mul(constants.model, vertex_position).xyz;
         out.normal = normalize(mul(float3x3(constants.model), vertex.normal));
-        out.position = vertex_position.xyz;
 
         return out;
     }
@@ -51,7 +50,7 @@ void mesh_main(
 {
     let transformer = VertexTransform();
 
-    mesh_transform<VertexTransform>(constants.mesh, group_index.x, group_tid.x, transformer, vertices, triangles);
+    mesh_transform(constants.mesh, group_index.x, group_tid.x, transformer, vertices, triangles);
 }
 
 static const float bias = 0;
