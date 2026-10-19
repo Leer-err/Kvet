@@ -310,6 +310,7 @@ Result<Pipeline, Error> Filesystem::getPipeline(std::string_view path) {
 
     auto file = std::ifstream(full_path);
 
+    if (file.is_open() == false) return Error::NotFound;
     auto data = json{};
     file >> data;
 

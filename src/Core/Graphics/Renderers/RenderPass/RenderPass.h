@@ -11,6 +11,7 @@
 #include "PostProcessingPass.h"
 #include "RenderEnviroment.h"
 #include "RenderWorld.h"
+#include "RibbonRenderer.h"
 #include "StarRenderer.h"
 #include "StaticMeshRenderer.h"
 #include "Texture.h"
@@ -44,6 +45,7 @@ class RenderPass {
     MeshParticleRenderer mesh_particle_renderer;
     OverlayRenderer overlay_renderer;
     CustomRenderer custom_renderer;
+    RibbonRenderer ribbon_renderer;
 
     PostProcessingPass post_processing_pass;
 

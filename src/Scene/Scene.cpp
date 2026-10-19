@@ -25,12 +25,11 @@
 #include "Property.h"
 #include "RenderObjectData.h"
 #include "ScriptSystem.h"
+#include "Scripts/ObjectManagerScript.h"
 #include "StarsScript.h"
 #include "Transform.h"
 #include "TransformSystem.h"
 #include "Vector3.h"
-
-static Graphics::CustomRenderObject handle;
 
 Scene::Scene() {
     setupSystems();
@@ -40,26 +39,6 @@ Scene::Scene() {
     auto scene = File::Filesystem::getScene("Scene");
 
     parseScene(scene.getResult());
-
-    // auto mesh_effect = Graphics::MeshEffectDescription{};
-    // mesh_effect.center = {0, 0, 1};
-    // mesh_effect.extents = {0, 0, 0};
-    // mesh_effect.spawn_rate = 1;
-    // mesh_effect.particle_lifetime = 1;
-    // mesh_effect.mesh = Asset::Manager::getMesh("Base/Sphere").getResult();
-    // mesh_effect.texture = Asset::Manager::getTexture("star_06").getResult();
-    // Graphics::getRenderEngine()->getRenderWorld()->addMeshEffect(mesh_effect);
-
-    auto custom_ro = Graphics::CustomRenderObjectCreateData{};
-    custom_ro.mesh = Asset::Manager::getMesh("Base/Sphere").getResult();
-    custom_ro.pipeline =
-        Asset::Manager::getPipeline("Shaders/TestPipeline").getResult();
-    custom_ro.model = Matrix::translation(Vector3{0, 0, 0});
-    custom_ro.buffer_size = 4;
-
-    handle =
-        Graphics::getRenderEngine()->getRenderWorld()->addCustomRenderObject(
-            custom_ro);
 
     auto input = std::make_shared<Input::GameInputContext>();
     input->addBinding(Input::GameAxes::LookYaw, Input::Axis::MOUSE_X);
@@ -87,6 +66,9 @@ Scene::Scene() {
     player.addScript(std::make_unique<LookAtScript>(player, camera, input));
     // player.addScript(std::make_unique<MoveScript>(player, input));
 
+    Entity object = world.createEntity();
+    object.addScript(std::make_unique<ObjectManagerScript>());
+
     Entity stars = world.createEntity();
     stars.addScript(std::make_unique<StarsScript>());
 }
@@ -101,8 +83,6 @@ void Scene::update(float delta_time) {
     auto& render_data = renderer->getRenderWorld()->renderData();
     render_data.time += delta_time;
     render_data.delta_time = delta_time;
-
-    handle.updateData((uint8_t*)&render_data.time, sizeof(delta_time));
 }
 
 void Scene::setupSystems() {

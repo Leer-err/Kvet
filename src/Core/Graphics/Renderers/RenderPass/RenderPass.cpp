@@ -31,6 +31,7 @@ RenderPass::RenderPass(Device& device, const EngineData& engine_data)
       mesh_particle_renderer(device, engine_data),
       overlay_renderer(),
       post_processing_pass(device, engine_data),
+      ribbon_renderer(device, engine_data, camera_data_buffer),
       custom_renderer(device, engine_data, camera_data_buffer) {
     createRenderEnviroment(device, engine_data);
 }
@@ -54,6 +55,7 @@ TextureHandle RenderPass::render(const FrameData& frame_data,
     particle_renderer.render(frame_graph, world);
     mesh_particle_renderer.render(frame_graph, world);
     custom_renderer.render(frame_graph, world);
+    ribbon_renderer.render(frame_graph, world);
 
     postProcessing(frame_graph, world);
 

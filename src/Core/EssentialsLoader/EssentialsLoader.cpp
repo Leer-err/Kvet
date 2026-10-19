@@ -13,7 +13,8 @@ namespace Essentials {
 constexpr auto TEXTURES_LIST = {""};
 constexpr auto MESHES_LIST = {"Base/Sphere", "Base/SkySphere", "Base/Quad",
                               "Base/ScreenQuad"};
-constexpr auto PIPELINES_LIST = {"Shaders/StarPipeline"};
+constexpr auto PIPELINES_LIST = {"Shaders/StarPipeline",
+                                 "Shaders/RibbonPipeline"};
 
 bool load() {
     auto logger = LoggerFactory::getLogger("EssentialsLoader");

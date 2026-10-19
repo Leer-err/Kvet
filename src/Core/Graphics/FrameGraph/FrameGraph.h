@@ -8,16 +8,14 @@
 #include <functional>
 #include <optional>
 #include <string_view>
+#include <variant>
 #include <vector>
 
 #include "CommandBuffer.h"
 #include "EngineData.h"
 #include "FrameData.h"
 #include "Graphics.h"
-#include "GraphicsMesh.h"
-#include "GraphicsPipeline.h"
 #include "Handles.h"
-#include "Texture.h"
 
 namespace Graphics {
 
@@ -103,7 +101,7 @@ class GraphicsPass : public Pass {
 class GeneralPass : public Pass {
    public:
     GeneralPass(std::string_view name,
-                std::function<void(const CommandBuffer&)> executor);
+                const std::function<void(const CommandBuffer&)>& executor);
 
     void execute(const CommandBuffer& command_buffer);
 
@@ -111,18 +109,21 @@ class GeneralPass : public Pass {
     std::function<void(const CommandBuffer&)> executor;
 };
 
+using AnyPass = std::variant<GeneralPass, GraphicsPass>;
+
 class FrameGraph {
    public:
     explicit FrameGraph(const EngineData& engine_data);
 
     void addGraphicsPass(const GraphicsPass& pass);
+    void addGeneralPass(const GeneralPass& pass);
 
     void execute(const FrameData& frame_data);
 
    private:
     EngineData engine_data;
 
-    std::vector<GraphicsPass> passes;
+    std::vector<AnyPass> passes;
 };
 
 }  // namespace Graphics

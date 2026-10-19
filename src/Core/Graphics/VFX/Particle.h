@@ -1,5 +1,8 @@
 #pragma once
 
+#include <cstdint>
+#include <vector>
+
 #include "Handles.h"
 #include "Quaternion.h"
 #include "Vector3.h"
@@ -25,6 +28,15 @@ struct MeshParticle {
     float age;
     uint32_t texture;
     MeshHandle mesh;
+};
+
+struct RibbonNode {
+    Vector3 position;
+};
+
+struct Ribbon {
+    GraphicsPipelineHandle pipeline;
+    std::vector<uint32_t> nodes;
 };
 
 }  // namespace Graphics

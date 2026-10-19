@@ -216,23 +216,46 @@ void GraphicsPassExecution::draw(const MeshHandle& mesh, size_t count) {
     current_push_constant_offset = sizeof(MeshBuffers);
 }
 
+GeneralPass::GeneralPass(
+    std::string_view name,
+    const std::function<void(const CommandBuffer&)>& executor)
+    : Pass(name), executor(executor) {}
+
+void GeneralPass::execute(const CommandBuffer& command_buffer) {
+    prepareTextures(command_buffer);
+
+    executor(command_buffer);
+}
+
 FrameGraph::FrameGraph(const EngineData& engine_data)
     : engine_data(engine_data) {}
 
 void FrameGraph::addGraphicsPass(const GraphicsPass& pass) {
-    passes.push_back(pass);
+    passes.emplace_back(pass);
 }
+
+void FrameGraph::addGeneralPass(const GeneralPass& pass) {
+    passes.emplace_back(pass);
+}
+
+template <class... Ts>
+struct overloaded : Ts... {
+    using Ts::operator()...;
+};
 
 void FrameGraph::execute(const FrameData& frame_data) {
     ZoneScoped;
 
     for (auto& pass : passes) {
-        auto pass_name = pass.getName().data();
+        auto pass_name_ptr = std::visit(
+            [](const auto& pass) { return pass.getName().data(); }, pass);
 
         TracyVkZoneTransient(frame_data.trace_ctx, __tracy_gpu_zone,
-                             frame_data.cmd.buffer, pass_name, true);
+                             frame_data.cmd.buffer, pass_name_ptr, true);
         ZoneTransientN(__tracy_cpu_zone, pass_name, true);
-        pass.execute(frame_data.cmd);
+
+        std::visit([frame_data](auto& pass) { pass.execute(frame_data.cmd); },
+                   pass);
     }
 }
 
