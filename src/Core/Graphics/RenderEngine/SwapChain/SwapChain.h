@@ -9,7 +9,7 @@
 #include "Device.h"
 #include "GraphicsConfig.h"
 #include "Queue.h"
-#include "Semaphore.h"
+#include "Resources.h"
 
 namespace Graphics {
 

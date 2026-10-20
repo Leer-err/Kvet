@@ -7,8 +7,6 @@
 #include <cstdint>
 #include <tracy/TracyVulkan.hpp>
 
-#include "DescriptorLayout.h"
-#include "Descriptors.h"
 #include "DeviceProperties.h"
 #include "GraphicsPipeline.h"
 #include "Handles.h"
@@ -16,13 +14,24 @@
 #include "PoolAllocator.h"
 #include "Queue.h"
 #include "Registries.h"
+#include "Resources.h"
 #include "Result.h"
-#include "Semaphore.h"
 #include "Shader.h"
 
 namespace Graphics {
 
 struct CommandBuffer;
+
+struct DescriptorLayout {
+    VkDescriptorSetLayout layout;
+
+    size_t layout_size;
+
+    size_t texture_descriptors_offset;
+    size_t texture_descriptors_count;
+    size_t sampler_descriptors_offset;
+    size_t sampler_descriptors_count;
+};
 
 class Device {
    public:

@@ -1,6 +1,6 @@
-#include "Semaphore.h"
+#include "Resources.h"
 
-#include <vulkan/vulkan.h>
+#include <vulkan/vulkan_core.h>
 
 namespace Graphics {
 

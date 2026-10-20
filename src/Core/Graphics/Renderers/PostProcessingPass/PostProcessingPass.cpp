@@ -13,7 +13,6 @@
 #include "GraphicsPipelineBuilder.h"
 #include "MeshBuilder.h"
 #include "Overlay.h"
-#include "PostProcessingData.h"
 #include "RenderWorld.h"
 #include "Sampler.h"
 #include "Vector3.h"
@@ -54,7 +53,7 @@ PostProcessingPass::PostProcessingPass(Device& device,
 void PostProcessingPass::render(TextureHandle input_image,
                                 FrameGraph& frame_graph,
                                 const RenderWorld& world) {
-    data.render_target_index = input_image->getDescriptor();
+    data.render_target = input_image->getDescriptor();
     dithering_data_buffer->update(data);
 
     auto pass = GraphicsPass(
@@ -77,7 +76,7 @@ MeshHandle PostProcessingPass::createSqreenQuad(Device& device,
 }
 
 BufferHandle PostProcessingPass::createDataBuffer(Device& device) {
-    return BufferBuilder(sizeof(PostProcessingData))
+    return BufferBuilder(sizeof(RenderData::PostProcessing))
         .isConstantBuffer()
         .isDeviceAddressable()
         .isChained()

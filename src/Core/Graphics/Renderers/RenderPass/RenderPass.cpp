@@ -24,15 +24,14 @@ namespace Graphics {
 RenderPass::RenderPass(Device& device, const EngineData& engine_data)
     : engine_data(engine_data),
       camera_data_buffer(createCameraBuffer(device)),
-      star_renderer(device, engine_data),
       static_mesh_renderer(device, engine_data),
       //   clouds_renderer(device, engine_data),
       particle_renderer(device, engine_data),
       mesh_particle_renderer(device, engine_data),
-      overlay_renderer(),
-      post_processing_pass(device, engine_data),
+      overlay_renderer(engine_data),
+      custom_renderer(device, engine_data, camera_data_buffer),
       ribbon_renderer(device, engine_data, camera_data_buffer),
-      custom_renderer(device, engine_data, camera_data_buffer) {
+      post_processing_pass(device, engine_data) {
     createRenderEnviroment(device, engine_data);
 }
 
@@ -42,14 +41,12 @@ TextureHandle RenderPass::render(const FrameData& frame_data,
 
     auto camera_data_address = camera_data_buffer->getDeviceAddress();
 
-    star_renderer.setCameraData(camera_data_address);
     static_mesh_renderer.setCameraData(camera_data_address);
     particle_renderer.setCameraData(camera_data_address);
     mesh_particle_renderer.setCameraData(camera_data_address);
 
     updateCameraBuffer(world);
 
-    // star_renderer.render(frame_graph, world);
     static_mesh_renderer.render(frame_graph, world);
     // clouds_renderer.render(frame_graph, world);
     particle_renderer.render(frame_graph, world);
@@ -108,6 +105,7 @@ void RenderPass::createRenderEnviroment(Device& device,
 void RenderPass::postProcessing(FrameGraph& frame_graph,
                                 const RenderWorld& world) {
     post_processing_pass.render(render_target_texture, frame_graph, world);
+    overlay_renderer.render(frame_graph);
 }
 
 BufferHandle RenderPass::createCameraBuffer(Device& device) {

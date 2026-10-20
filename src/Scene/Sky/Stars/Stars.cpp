@@ -4,7 +4,6 @@
 
 #include "Engine.h"
 #include "Graphics.h"
-#include "StarsData.h"
 
 Stars::Stars()
     : star_density(30),

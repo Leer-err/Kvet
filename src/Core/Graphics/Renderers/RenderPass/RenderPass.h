@@ -12,7 +12,6 @@
 #include "RenderEnviroment.h"
 #include "RenderWorld.h"
 #include "RibbonRenderer.h"
-#include "StarRenderer.h"
 #include "StaticMeshRenderer.h"
 #include "Texture.h"
 
@@ -38,7 +37,6 @@ class RenderPass {
 
     BufferHandle camera_data_buffer;
 
-    StarRenderer star_renderer;
     StaticMeshRenderer static_mesh_renderer;
     // CloudsRenderer clouds_renderer;
     ParticleRenderer particle_renderer;

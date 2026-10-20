@@ -183,7 +183,7 @@ size_t RibbonRenderer::generateMeshlets(const std::vector<Ribbon>& ribbons) {
 
             meshlets_ptr[current_meshlet] = RibbonMeshlet{
                 meshlet_first_index_offset,
-                static_cast<uint32_t>(meshlet_line_length + 2), ribbon_index};
+                static_cast<uint32_t>(meshlet_line_length), ribbon_index};
 
             current_meshlet++;
         }

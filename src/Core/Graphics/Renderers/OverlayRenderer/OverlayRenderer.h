@@ -8,11 +8,12 @@ namespace Graphics {
 
 class OverlayRenderer {
    public:
-    OverlayRenderer();
+    explicit OverlayRenderer(const EngineData& engine_data);
 
-    void render(const FrameData& frame_data);
+    void render(FrameGraph& frame_data);
 
    private:
+    EngineData engine_data;
 };
 
 }  // namespace Graphics

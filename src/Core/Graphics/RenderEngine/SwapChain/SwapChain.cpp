@@ -5,7 +5,7 @@
 #include <cstdint>
 
 #include "Queue.h"
-#include "Semaphore.h"
+#include "Resources.h"
 #include "VkBootstrap.h"
 
 namespace Graphics {

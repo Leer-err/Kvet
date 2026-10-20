@@ -41,23 +41,32 @@ void mesh_main(
     SetMeshOutputCounts(vertex_count, triangle_count);
 
     if(group_tid.x > meshlet.index_count) return;
-    let meshlet_node_index = meshlet.first_index + group_tid.x;
+    let meshlet_node_index = meshlet.first_index + group_tid.x + 1;
     let current_node_index = constants.meshlet_indices[meshlet_node_index];
     let current_node = constants.nodes[current_node_index];
-    let previous_node_index = constants.meshlet_indices[meshlet_node_index];
-    let previous_node = constants.nodes[current_node_index];
+    let previous_node_index = constants.meshlet_indices[meshlet_node_index - 1];
+    let previous_node = constants.nodes[previous_node_index];
+    let next_node_index = constants.meshlet_indices[meshlet_node_index + 1];
+    let next_node = constants.nodes[next_node_index];
 
-    let tangent = normalize(current_node.position - previous_node.position);
     let camera_vector = normalize(current_node.position - constants.camera.position);
-    let normal = normalize(cross(tangent, camera_vector));
+    let prev_tangent = normalize(current_node.position - previous_node.position);
+    let prev_normal = normalize(cross(prev_tangent, camera_vector));
+    let next_tangent = normalize(next_node.position - current_node.position);
+    let next_normal = normalize(cross(next_tangent, camera_vector));
+
+    float3 normal = float3(0,1,0);
+    if (current_node_index == previous_node_index) normal = next_normal;
+    else if (current_node_index == next_node_index) normal = prev_normal;
+    else normal = normalize(prev_normal + next_normal);
 
     let vertex_offset = normal * 0.1;
     vertices[group_tid.x * 2].viewport_position = mul(constants.camera.view_projection, float4(current_node.position + vertex_offset, 1));
     vertices[group_tid.x * 2 + 1].viewport_position = mul(constants.camera.view_projection, float4(current_node.position - vertex_offset, 1));
 
-    // if(group_tid.x == meshlet.index_count) return;
-    // triangles[group_tid.x] = uint3(group_tid.x * 2, group_tid.x * 2 + 1, group_tid.x * 2 + 2);
-    // triangles[group_tid.x + 1] = uint3(group_tid.x * 2 + 1, group_tid.x * 2 + 2, group_tid.x * 2 + 3);
+    if(group_tid.x == meshlet.index_count) return;
+    triangles[group_tid.x] = uint3(group_tid.x * 2, group_tid.x * 2 + 1, group_tid.x * 2 + 2);
+    triangles[group_tid.x + 1] = uint3(group_tid.x * 2 + 1, group_tid.x * 2 + 2, group_tid.x * 2 + 3);
 }
 
 [[vk::binding(0, 0)]]

@@ -1,5 +1,4 @@
 add_subdirectory(RenderPass)
-add_subdirectory(StarRenderer)
 # add_subdirectory(CloudsRenderer)
 add_subdirectory(OverlayRenderer)
 add_subdirectory(StaticMeshRenderer)

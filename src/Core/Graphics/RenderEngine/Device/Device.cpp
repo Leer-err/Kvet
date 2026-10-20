@@ -11,7 +11,6 @@
 #include "Buffer.h"
 #include "BufferBuilder.h"
 #include "CommandBuffer.h"
-#include "DescriptorLayout.h"
 #include "Descriptors.h"
 #include "DeviceProperties.h"
 #include "EngineConstants.h"

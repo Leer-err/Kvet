@@ -19,6 +19,8 @@ OverlayElements::Header::Header(const std::string& label) : label(label) {}
 
 void OverlayElements::Header::draw() {
     if (ImGui::CollapsingHeader(label.c_str())) {
+        ImGui::Indent();
+
         for (auto& child : elements) {
             std::visit([](auto& value) { value.draw(); }, child);
         }
@@ -26,6 +28,8 @@ void OverlayElements::Header::draw() {
         for (auto& [name, child] : headers) {
             child.draw();
         }
+
+        ImGui::Unindent();
     }
 }
 

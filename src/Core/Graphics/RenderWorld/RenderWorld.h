@@ -9,7 +9,6 @@
 #include "Handles.h"
 #include "Matrix.h"
 #include "PoolAllocator.h"
-#include "RenderObjectData.h"
 #include "ResourceRegistry.h"
 #include "VFXWorld.h"
 

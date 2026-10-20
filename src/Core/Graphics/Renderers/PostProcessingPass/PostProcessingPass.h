@@ -6,7 +6,6 @@
 #include "FrameData.h"
 #include "FrameGraph.h"
 #include "Graphics.h"
-#include "PostProcessingData.h"
 #include "RenderWorld.h"
 
 namespace Graphics {
@@ -40,7 +39,7 @@ class PostProcessingPass {
     MeshHandle quad;
 
     BufferHandle dithering_data_buffer;
-    PostProcessingData data;
+    PostProcessingShaderData data;
 };
 
 }  // namespace Graphics

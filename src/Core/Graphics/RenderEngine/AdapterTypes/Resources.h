@@ -4,6 +4,14 @@
 
 namespace Graphics {
 
+namespace Rasterizer {
+
+VkPipelineRasterizationStateCreateInfo wireframe();
+
+VkPipelineRasterizationStateCreateInfo fill();
+
+};  // namespace Rasterizer
+
 struct Semaphore {
     VkSemaphoreSubmitInfo submit() const;
 
