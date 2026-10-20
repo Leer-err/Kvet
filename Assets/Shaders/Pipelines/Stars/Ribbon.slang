@@ -36,11 +36,11 @@ void mesh_main(
     out indices uint3 triangles[96])
 {
     let meshlet = constants.meshlets[group_index.x];
-    let vertex_count = (meshlet.index_count - 2) * 2;
-    let triangle_count = (meshlet.index_count - 2) * 2 - 2;
+    let vertex_count = (meshlet.index_count) * 2;
+    let triangle_count = (meshlet.index_count) * 2 - 2;
     SetMeshOutputCounts(vertex_count, triangle_count);
 
-    if(group_tid.x > meshlet.index_count) return;
+    if(group_tid.x > meshlet.index_count - 1) return;
     let meshlet_node_index = meshlet.first_index + group_tid.x + 1;
     let current_node_index = constants.meshlet_indices[meshlet_node_index];
     let current_node = constants.nodes[current_node_index];
@@ -64,9 +64,9 @@ void mesh_main(
     vertices[group_tid.x * 2].viewport_position = mul(constants.camera.view_projection, float4(current_node.position + vertex_offset, 1));
     vertices[group_tid.x * 2 + 1].viewport_position = mul(constants.camera.view_projection, float4(current_node.position - vertex_offset, 1));
 
-    if(group_tid.x == meshlet.index_count) return;
-    triangles[group_tid.x] = uint3(group_tid.x * 2, group_tid.x * 2 + 1, group_tid.x * 2 + 2);
-    triangles[group_tid.x + 1] = uint3(group_tid.x * 2 + 1, group_tid.x * 2 + 2, group_tid.x * 2 + 3);
+    if(group_tid.x == meshlet.index_count - 1) return;
+    triangles[group_tid.x * 2] = uint3(group_tid.x * 2, group_tid.x * 2 + 2, group_tid.x * 2 + 1);
+    triangles[group_tid.x * 2 + 1] = uint3(group_tid.x * 2 + 1, group_tid.x * 2 + 2, group_tid.x * 2 + 3);
 }
 
 [[vk::binding(0, 0)]]
